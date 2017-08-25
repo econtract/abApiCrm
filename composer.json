@@ -1,0 +1,22 @@
+{
+  "name": "anb/abApiCrm",
+  "description": "Crm API package/plugin",
+  "keywords": ["API", "Aanbieders", "Crm"],
+  "homepage": "http://aanbieders.be",
+  "license": "proprietary",
+
+  "authors": [
+    {
+      "name": "Arslan Hameed",
+      "email": "arslan.hameed@zeropoint.it"
+    }
+  ],
+
+  "type": "wordpress-plugin",
+
+  "require": {
+    "php": ">=5.6",
+    "econtract/crm": "3.*"
+  }
+}
+
