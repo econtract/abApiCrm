@@ -128,7 +128,7 @@ class abApiCrm {
 			);
 		} else {
 			global $post;
-			$parentSlug = getSectorOnCats( $cats );
+			$parentSegment = getSectorOnCats( $cats );
 			$response   = file_get_contents( AB_CHK_AVL_URL . "?pid=$pid&zip=$zip&lang_mod=$lang&prt=$ptype&action=$action&rand=" . mt_rand() );
 			$jsonDecRes = json_decode( $response );
 			if ( $jsonDecRes->available === false ) {
@@ -139,11 +139,11 @@ class abApiCrm {
 				$urlParams             = "?$catUrlPart&zip=$zip&searchSubmit=&sg=$sg";
 				$urlParamsWithProvider = "$urlParams&pref_cs[]=$prvid";
 				$jsonDecRes->msg       = "Sorry! The product is not available in your area.";
-				$jsonDecRes->html      = $this->availabilityErrorHtml( $parentSlug, $urlParamsWithProvider, $prvname, $urlParams );
+				$jsonDecRes->html      = $this->availabilityErrorHtml( $parentSegment, $urlParamsWithProvider, $prvname, $urlParams );
 			}
 			if ( $jsonDecRes->available === true ) {
 				$this->initSessionForProduct( $zip, $pid, $pslug, $ptype, $lang, $prvid, $prvslug, $cats );
-				$html             = $this->availabilitySuccessHtml();
+				$html             = $this->availabilitySuccessHtml($parentSegment);
 				$jsonDecRes->msg  = 'Congratulations! The product is available in your area';//Ignore the API response message
 				$jsonDecRes->html = $html;
 			}
@@ -159,26 +159,28 @@ class abApiCrm {
 	}
 
 	/**
-	 * @param $parentSlug
+	 * @param $parentSegment
 	 * @param $urlParamsWithProvider
 	 * @param $prvname
 	 * @param $urlParams
 	 *
 	 * @return string
 	 */
-	private function availabilityErrorHtml( $parentSlug, $urlParamsWithProvider, $prvname, $urlParams ) {
+	private function availabilityErrorHtml( $parentSegment, $urlParamsWithProvider, $prvname, $urlParams ) {
 		return '<div class="content-error">
                         <p>' . pll__( 'We offer very similar deals in your area:' ) . '</p>
-                        <a href="/' . $parentSlug . '/' . pll__( 'results' ) . $urlParamsWithProvider . '" class="btn btn-primary">' . sprintf( pll__( 'Alternative deals from %s' ), $prvname ) . '</a>
-                        <a href="/' . $parentSlug . '/' . pll__( 'results' ) . $urlParams . '" class="btn btn-primary">' . pll__( 'Alternative deals from all providers' ) . '</a>
+                        <a href="/' . $parentSegment . '/' . pll__( 'results' ) . $urlParamsWithProvider . '" class="btn btn-primary">' . sprintf( pll__( 'Alternative deals from %s' ), $prvname ) . '</a>
+                        <a href="/' . $parentSegment . '/' . pll__( 'results' ) . $urlParams . '" class="btn btn-primary">' . pll__( 'Alternative deals from all providers' ) . '</a>
                         <a href="/' . pll__( 'contact' ) . '" class="modal-btm-link"><i class="fa fa-angle-right"></i> ' . pll__( 'Or contact us directly' ) . '</a>
                     </div>';
 	}
 
 	/**
+	 * @param $parentSegment
+	 *
 	 * @return string
 	 */
-	private function availabilitySuccessHtml() {
+	private function availabilitySuccessHtml($parentSegment) {
 		return '<div class="modal-list">
 	                        <p>' . pll__( 'Be sure to check your infrastructure:' ) . '</p>
 	                        <ul class="list-unstyled bullet-list">
@@ -195,7 +197,7 @@ class abApiCrm {
 	                                </div-->
 	                            </li>
 	                        </ul>
-	                        <a href="/' . pll__( 'telecom' ) . '/' . pll__( 'checkout' ) . '" class="btn btn-primary">' . pll__( 'All good! Proceed' ) . '</a>
+	                        <a href="/' . $parentSegment . '/' . pll__( 'checkout' ) . '" class="btn btn-primary">' . pll__( 'All good! Proceed' ) . '</a>
 	                    </div>';
 	}
 
