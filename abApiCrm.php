@@ -155,6 +155,7 @@ class abApiCrm {
 		}
 
 		echo $response;
+		wp_die();
 	}
 
 	/**
