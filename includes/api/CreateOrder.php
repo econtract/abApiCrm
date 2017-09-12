@@ -1,40 +1,49 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: imran
- * Date: 06/09/17
- * Time: 12:30
- */
 
 namespace abApiCrm\includes\api;
 
-
+/**
+ * Class CreateOrder
+ * @package abApiCrm\includes\api.
+ */
 class CreateOrder extends baseApi {
 
-    protected $parameters;
-    public $response;
+	/**
+	 * @var array
+	 */
+	protected $parameters;
 
-    public function __construct($parameters = [])
-    {
-        parent::__construct();
+	/**
+	 * @var
+	 */
+	public $response;
 
-        $this->parameters = $parameters;
-    }
+	public function __construct( $parameters = [] ) {
+		parent::__construct();
+
+		$this->parameters = $parameters;
+	}
 
 	/**
 	 * @param array $params
 	 *
 	 * @return $this
 	 */
-    public function send($params = []){
-    	if(!empty($params)) {
-		    $this->parameters = $params;
-	    }
-    	$this->response = $this->crmService->createOrder($this->parameters);
-    	return $this;
-    }
+	public function send( $params = [] ) {
+		if ( ! empty( $params ) ) {
+			$this->parameters = $params;
+		}
 
-    public function getResponse(){
-        return $this->response;
-    }
+		$this->response = $this->crmService->createOrder( $this->parameters );
+
+		return $this;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getResponse() {
+		return $this->response;
+	}
+
 }
