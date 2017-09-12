@@ -106,18 +106,17 @@ class abApiCrm {
 			define( 'AB_CHK_AVL_URL', 'https://www.aanbieders.be/rpc' );
 		}
 		//Expected Params: ?pid=279&prt=internet&lang_mod=nl&zip=3500&action=check_availability
-		$zip     = intval( $_GET['zip'] );
-		$pid     = intval( $_GET['pid'] );
-		$pslug   = $_GET['pslug'];
-		$ptype   = trim( sanitize_text_field( $_GET['prt'] ) );
-		$pname   = trim( sanitize_text_field( $_GET['pname'] ) );
-		$lang    = trim( sanitize_text_field( $_GET['lang'] ) );
-		$prvname = trim( sanitize_text_field( $_GET['prvname'] ) );
-		$prvslug = trim( sanitize_text_field( $_GET['prvslug'] ) );
-		$prvid   = intval( $_GET['prvid'] );
-		$sg      = trim( sanitize_text_field( $_GET['sg'] ) );
-		$cats    = $_GET['cat'];//TODO: From here
-		//TODO: Include product type as well 'prt'
+		$zip      = intval( $_GET['zip'] );
+		$pid      = intval( $_GET['pid'] );
+		$pslug    = $_GET['pslug'];
+		$ptype    = trim( sanitize_text_field( $_GET['prt'] ) );
+		$pname    = trim( sanitize_text_field( $_GET['pname'] ) );
+		$lang     = trim( sanitize_text_field( $_GET['lang'] ) );
+		$prvname  = trim( sanitize_text_field( $_GET['prvname'] ) );
+		$prvslug  = trim( sanitize_text_field( $_GET['prvslug'] ) );
+		$prvid    = intval( $_GET['prvid'] );
+		$sg       = trim( sanitize_text_field( $_GET['sg'] ) );
+		$cats     = $_GET['cat'];
 		$action   = 'check_availability';
 		$response = null;
 		if ( empty( $zip ) || empty( $pid ) || empty( $lang ) || empty( $ptype ) ) {
@@ -140,23 +139,46 @@ class abApiCrm {
 				$urlParams             = "?$catUrlPart&zip=$zip&searchSubmit=&sg=$sg";
 				$urlParamsWithProvider = "$urlParams&pref_cs[]=$prvid";
 				$jsonDecRes->msg       = "Sorry! The product is not available in your area.";
-				$jsonDecRes->html      = '<div class="content-error">
+				$jsonDecRes->html      = $this->availabilityErrorHtml( $parentSlug, $urlParamsWithProvider, $prvname, $urlParams );
+			}
+			if ( $jsonDecRes->available === true ) {
+				$this->initSessionForProduct( $zip, $pid, $pslug, $ptype, $lang, $prvid, $prvslug, $cats );
+				$html             = $this->availabilitySuccessHtml();
+				$jsonDecRes->msg  = 'Congratulations! The product is available in your area';//Ignore the API response message
+				$jsonDecRes->html = $html;
+			}
+			if ( isset( $_GET['debug'] ) ) {
+				$jsonDecRes->endpointUrl = AB_CHK_AVL_URL . "?pid=$pid&zip=$zip&lang_mod=$lang&action=$action&rand=" . mt_rand();
+			}
+
+			$response = json_encode( $jsonDecRes );
+		}
+
+		echo $response;
+	}
+
+	/**
+	 * @param $parentSlug
+	 * @param $urlParamsWithProvider
+	 * @param $prvname
+	 * @param $urlParams
+	 *
+	 * @return string
+	 */
+	private function availabilityErrorHtml( $parentSlug, $urlParamsWithProvider, $prvname, $urlParams ) {
+		return '<div class="content-error">
                         <p>' . pll__( 'We offer very similar deals in your area:' ) . '</p>
                         <a href="/' . $parentSlug . '/' . pll__( 'results' ) . $urlParamsWithProvider . '" class="btn btn-primary">' . sprintf( pll__( 'Alternative deals from %s' ), $prvname ) . '</a>
                         <a href="/' . $parentSlug . '/' . pll__( 'results' ) . $urlParams . '" class="btn btn-primary">' . pll__( 'Alternative deals from all providers' ) . '</a>
                         <a href="/' . pll__( 'contact' ) . '" class="modal-btm-link"><i class="fa fa-angle-right"></i> ' . pll__( 'Or contact us directly' ) . '</a>
                     </div>';
-			}
-			if ( $jsonDecRes->available === true ) {
-				$_SESSION['product']['zip']           = $zip;
-				$_SESSION['product']['id']            = $pid;
-				$_SESSION['product']['slug']          = $pslug;
-				$_SESSION['product']['type']          = $ptype;
-				$_SESSION['product']['lang']          = $lang;
-				$_SESSION['product']['provider_id']   = $prvid;
-				$_SESSION['product']['provider_slug'] = $prvslug;
-				$_SESSION['product']['cat']           = $cats;
-				$html                                 = '<div class="modal-list">
+	}
+
+	/**
+	 * @return string
+	 */
+	private function availabilitySuccessHtml() {
+		return '<div class="modal-list">
 	                        <p>' . pll__( 'Be sure to check your infrastructure:' ) . '</p>
 	                        <ul class="list-unstyled bullet-list">
 	                            <li>' . pll__( 'Check internet cable' ) . '
@@ -174,18 +196,27 @@ class abApiCrm {
 	                        </ul>
 	                        <a href="/' . pll__( 'telecom' ) . '/' . pll__( 'before-we-continue' ) . '" class="btn btn-primary">' . pll__( 'All good! Proceed' ) . '</a>
 	                    </div>';
-				$jsonDecRes->msg                      = 'Congratulations! The product is available in your area';//Ignore the API response message
-				$jsonDecRes->html                     = $html;
-			}
-			if ( isset( $_GET['debug'] ) ) {
-				$jsonDecRes->endpointUrl = AB_CHK_AVL_URL . "?pid=$pid&zip=$zip&lang_mod=$lang&action=$action&rand=" . mt_rand();
-			}
+	}
 
-			$response = json_encode( $jsonDecRes );
-		}
-
-		echo $response;
-		wp_die();
+	/**
+	 * @param $zip
+	 * @param $pid
+	 * @param $pslug
+	 * @param $ptype
+	 * @param $lang
+	 * @param $prvid
+	 * @param $prvslug
+	 * @param $cats
+	 */
+	private function initSessionForProduct( $zip, $pid, $pslug, $ptype, $lang, $prvid, $prvslug, $cats ) {
+		$_SESSION['product']['zip']           = $zip;
+		$_SESSION['product']['id']            = $pid;
+		$_SESSION['product']['slug']          = $pslug;
+		$_SESSION['product']['type']          = $ptype;
+		$_SESSION['product']['lang']          = $lang;
+		$_SESSION['product']['provider_id']   = $prvid;
+		$_SESSION['product']['provider_slug'] = $prvslug;
+		$_SESSION['product']['cat']           = $cats;
 	}
 
 }
