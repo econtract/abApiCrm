@@ -195,7 +195,7 @@ class abApiCrm {
 	                                </div-->
 	                            </li>
 	                        </ul>
-	                        <a href="/' . pll__( 'telecom' ) . '/' . pll__( 'before-we-continue' ) . '" class="btn btn-primary">' . pll__( 'All good! Proceed' ) . '</a>
+	                        <a href="/' . pll__( 'telecom' ) . '/' . pll__( 'checkout' ) . '" class="btn btn-primary">' . pll__( 'All good! Proceed' ) . '</a>
 	                    </div>';
 	}
 
