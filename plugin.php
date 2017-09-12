@@ -35,6 +35,8 @@ if ( ! defined( 'WPINC' ) ) {
 
 
 $result = wpal_create_instance(abApiCrm::class);
-
 add_action('wp_ajax_callMeBack', array($result, 'callMeBack'));
 add_action( 'wp_ajax_nopriv_callMeBack', array($result, 'callMeBack'));
+
+add_action('wp_ajax_checkAvailability', array($result, 'checkAvailability'));
+add_action( 'wp_ajax_nopriv_checkAvailability', array($result, 'checkAvailability'));
