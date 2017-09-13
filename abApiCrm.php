@@ -143,7 +143,7 @@ class abApiCrm {
 			}
 			if ( $jsonDecRes->available === true ) {
 				$this->initSessionForProduct( $zip, $pid, $pslug, $pname, $ptype, $lang, $prvid, $prvslug, $prvname, $cats );
-				$html             = $this->availabilitySuccessHtml();
+				$html             = $this->availabilitySuccessHtml($parentSegment);
 				$jsonDecRes->msg  = 'Congratulations! The product is available in your area';//Ignore the API response message
 				$jsonDecRes->html = $html;
 			}
