@@ -142,8 +142,8 @@ class abApiCrm {
 				$jsonDecRes->html      = $this->availabilityErrorHtml( $parentSegment, $urlParamsWithProvider, $prvname, $urlParams );
 			}
 			if ( $jsonDecRes->available === true ) {
-				$this->initSessionForProduct( $zip, $pid, $pslug, $ptype, $lang, $prvid, $prvslug, $cats );
-				$html             = $this->availabilitySuccessHtml($parentSegment);
+				$this->initSessionForProduct( $zip, $pid, $pslug, $pname, $ptype, $lang, $prvid, $prvslug, $prvname, $cats );
+				$html             = $this->availabilitySuccessHtml();
 				$jsonDecRes->msg  = 'Congratulations! The product is available in your area';//Ignore the API response message
 				$jsonDecRes->html = $html;
 			}
@@ -205,20 +205,24 @@ class abApiCrm {
 	 * @param $zip
 	 * @param $pid
 	 * @param $pslug
+	 * @param $pname
 	 * @param $ptype
 	 * @param $lang
 	 * @param $prvid
 	 * @param $prvslug
+	 * @param $prvname
 	 * @param $cats
 	 */
-	private function initSessionForProduct( $zip, $pid, $pslug, $ptype, $lang, $prvid, $prvslug, $cats ) {
+	private function initSessionForProduct( $zip, $pid, $pslug, $pname, $ptype, $lang, $prvid, $prvslug, $prvname, $cats ) {
 		$_SESSION['product']['zip']           = $zip;
 		$_SESSION['product']['id']            = $pid;
 		$_SESSION['product']['slug']          = $pslug;
+		$_SESSION['product']['name']          = $pname;
 		$_SESSION['product']['type']          = $ptype;
 		$_SESSION['product']['lang']          = $lang;
 		$_SESSION['product']['provider_id']   = $prvid;
 		$_SESSION['product']['provider_slug'] = $prvslug;
+		$_SESSION['product']['provider_name'] = $prvname;
 		$_SESSION['product']['cat']           = $cats;
 	}
 
