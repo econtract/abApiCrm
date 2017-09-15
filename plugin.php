@@ -40,3 +40,6 @@ add_action( 'wp_ajax_nopriv_callMeBack', array($result, 'callMeBack'));
 
 add_action('wp_ajax_checkAvailability', array($result, 'checkAvailability'));
 add_action( 'wp_ajax_nopriv_checkAvailability', array($result, 'checkAvailability'));
+
+add_action('wp_ajax_saveSimpleOrder', array($result, 'saveSimpleOrder'));
+add_action( 'wp_ajax_nopriv_saveSimpleOrder', array($result, 'saveSimpleOrder'));

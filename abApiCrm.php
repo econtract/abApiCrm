@@ -106,19 +106,20 @@ class abApiCrm {
 			define( 'AB_CHK_AVL_URL', 'https://www.aanbieders.be/rpc' );
 		}
 		//Expected Params: ?pid=279&prt=internet&lang_mod=nl&zip=3500&action=check_availability
-		$zip      = intval( $_GET['zip'] );
-		$pid      = intval( $_GET['pid'] );
-		$pslug    = $_GET['pslug'];
-		$ptype    = trim( sanitize_text_field( $_GET['prt'] ) );
-		$pname    = trim( sanitize_text_field( $_GET['pname'] ) );
-		$lang     = trim( sanitize_text_field( $_GET['lang'] ) );
-		$prvname  = trim( sanitize_text_field( $_GET['prvname'] ) );
-		$prvslug  = trim( sanitize_text_field( $_GET['prvslug'] ) );
-		$prvid    = intval( $_GET['prvid'] );
-		$sg       = trim( sanitize_text_field( $_GET['sg'] ) );
-		$cats     = $_GET['cat'];
-		$action   = 'check_availability';
-		$response = null;
+		$zip       = intval( $_GET['zip'] );
+		$pid       = intval( $_GET['pid'] );
+		$pslug     = $_GET['pslug'];
+		$ptype     = trim( sanitize_text_field( $_GET['prt'] ) );
+		$pname     = trim( sanitize_text_field( $_GET['pname'] ) );
+		$lang      = trim( sanitize_text_field( $_GET['lang'] ) );
+		$prvname   = trim( sanitize_text_field( $_GET['prvname'] ) );
+		$prvslug   = trim( sanitize_text_field( $_GET['prvslug'] ) );
+		$prvid     = intval( $_GET['prvid'] );
+		$sg        = trim( sanitize_text_field( $_GET['sg'] ) );
+		$cats      = $_GET['cat'];
+		$cproducts = $_GET['cat_products'];
+		$action    = 'check_availability';
+		$response  = null;
 		if ( empty( $zip ) || empty( $pid ) || empty( $lang ) || empty( $ptype ) ) {
 			$response = json_encode(
 				[
@@ -142,7 +143,7 @@ class abApiCrm {
 				$jsonDecRes->html      = $this->availabilityErrorHtml( $parentSegment, $urlParamsWithProvider, $prvname, $urlParams );
 			}
 			if ( $jsonDecRes->available === true ) {
-				$this->initSessionForProduct( $zip, $pid, $pslug, $pname, $ptype, $lang, $prvid, $prvslug, $prvname, $cats );
+				$this->initSessionForProduct( $zip, $pid, $pslug, $pname, $ptype, $lang, $prvid, $prvslug, $prvname, $cats, $sg, $cproducts );
 				$html             = $this->availabilitySuccessHtml($parentSegment);
 				$jsonDecRes->msg  = 'Congratulations! The product is available in your area';//Ignore the API response message
 				$jsonDecRes->html = $html;
@@ -212,8 +213,11 @@ class abApiCrm {
 	 * @param $prvslug
 	 * @param $prvname
 	 * @param $cats
+	 * @param $sg
+	 * @param $cproducts
 	 */
-	private function initSessionForProduct( $zip, $pid, $pslug, $pname, $ptype, $lang, $prvid, $prvslug, $prvname, $cats ) {
+	private function initSessionForProduct( $zip, $pid, $pslug, $pname, $ptype, $lang, $prvid, $prvslug, $prvname, $cats, $sg, $cproducts ) {
+		unset($_SESSION['order']);
 		$_SESSION['product']['zip']           = $zip;
 		$_SESSION['product']['id']            = $pid;
 		$_SESSION['product']['slug']          = $pslug;
@@ -224,6 +228,57 @@ class abApiCrm {
 		$_SESSION['product']['provider_slug'] = $prvslug;
 		$_SESSION['product']['provider_name'] = $prvname;
 		$_SESSION['product']['cat']           = $cats;
+		$_SESSION['product']['sg']            = $sg;
+		$_SESSION['product']['cat_products']  = $cproducts;
+
+		$this->initCookieForProduct();//preserve the session data for one hour
+	}
+
+	/**
+	 * @param int $timeInSecs
+	 */
+	private function initCookieForProduct( $timeInSecs = 3600 ) {
+		setcookie("product", json_encode($_SESSION['product']), time()+3600);
+	}
+
+	/**
+	 * Saves simple order form that, simple for are those using plain names in fields not arrays e.g. it'll be user_name but not user['name']
+	 */
+	public function saveSimpleOrder() {
+		//negate action from $_POST
+		unset($_POST['action']);
+
+		//separate order related data and loopable meta data
+		$data['order_title'] = $_POST['order_title'];
+		$data['order_slug'] = $_POST['order_slug'];
+		$data['parent_order_id'] = $_POST['parent_order_id'];
+		$data['order_id'] = $_POST['order_id'];
+		$data['order_status'] = $_POST['order_status'];
+
+		//Time to unset these variables from $_POST to keep only loopable data in $_POST
+		unset($_POST['order_title']);
+		unset($_POST['order_slug']);
+		unset($_POST['parent_order_id']);
+		unset($_POST['order_id']);
+		unset($_POST['order_status']);
+
+		//now $_POST will have only the parameters which are ready to be saved, make sure to use same names which are in advance custom fields
+		$saveOrder = saveAnbOrderInWp($data, $_POST);
+
+		$response = null;
+		if(is_wp_error($saveOrder)) {
+			//its an error so send response appropriatly
+			$response['success'] = false;
+			$response['errors'] = $saveOrder->get_error_messages();
+		}
+		elseif($saveOrder > 0) {
+			$response['success'] = true;
+		}
+		else {
+			$response['success'] = 'no-update';
+		}
+		echo json_encode($response);
+		wp_die();
 	}
 
 }
