@@ -255,15 +255,18 @@ class abApiCrm {
 		$data['order_id'] = $_POST['order_id'];
 		$data['order_status'] = $_POST['order_status'];
 
+		$metaData['seq_number'] = $_POST['seq_number'];
+
 		//Time to unset these variables from $_POST to keep only loopable data in $_POST
 		unset($_POST['order_title']);
 		unset($_POST['order_slug']);
 		unset($_POST['parent_order_id']);
 		unset($_POST['order_id']);
 		unset($_POST['order_status']);
+		unset($_POST['seq_number']);
 
 		//now $_POST will have only the parameters which are ready to be saved, make sure to use same names which are in advance custom fields
-		$saveOrder = saveAnbOrderInWp($data, $_POST);
+		$saveOrder = saveAnbOrderInWp($data, $_POST, $metaData);
 
 		$response = null;
 		if(is_wp_error($saveOrder)) {
