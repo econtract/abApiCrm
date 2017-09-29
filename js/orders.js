@@ -63,8 +63,9 @@ jQuery(document).ready(function ($) {
 
     //Order steps, for the forms that are without array called as simple forms,
     //this means that the input variables are not this way e.g. form_input[], or form_input['order'][] etc
-    $(".order-simple-form .btn-nxt a").on('click', function(e) {
+    $("body").on('click', '.order-simple-form .btn-nxt', function(e) {
         //e.preventDefault();
+        var self = $(this);
         var inputForm = $(this).parents('form.order-simple-form');
         var formInputs = $(inputForm).serialize()+'&action=saveSimpleOrder&'+$('#orderCommon').serialize();
         console.log(formInputs);
@@ -74,7 +75,51 @@ jQuery(document).ready(function ($) {
         var data = formInputs;
         $.post(site_obj.ajax_url, data, function (response) {
             console.log(response);
+            var jsonRes = JSON.parse(response);
+            console.log(jsonRes);
+            if(jsonRes.success == true || jsonRes.success.toString() == "no-update") {
+                //In case of mobile form trigger next button to open the next form
+                self.parents('.form-type.type-mobile-phone').find('.next-step-btn a').trigger('click');
+            }
         });
+    });
+
+    //on changing mobile product set other required variables
+    $("body").on('change', '.order-simple-form.mobile-form select[name=mobile_product_id]', function() {
+        /*console.log("Changed to ..." + $(this).find(":selected").val() + "| " + $(this).val());
+        console.log($(this).val(), $(this).find(":selected").val(), $(this).find(":selected"), $(this).find(":selected").text(), $(this).text());
+        console.log("+++");
+        console.log($(this).find(":selected").text());
+        console.log($(this).text());*/
+        var targetForm = $(this).parents('.order-simple-form');
+        var productName = $(this).find(":selected").text();
+        productNameArr = productName.split(" - ");
+        productName = productNameArr[0];
+        var productPrice = productNameArr[1];
+        //console.log("price**:", productPrice);
+        targetForm.find('input[name=product_id]').val($(this).find(":selected").val());
+        targetForm.find('input[name=product_name]').val(productName);
+        targetForm.find('input[name=mobile_product_name]').val(productName);
+        targetForm.find('.bundle-ind-price').text(productPrice);
+        var subOrderTitle = productName + " (Sub Order)";
+        //console.log("Sub order title:", subOrderTitle);
+        $('#orderCommon input[name=order_title]').val(subOrderTitle);
+        $('#orderCommon input[name=order_slug]').val("#");
+    });
+
+    //on changing mobile type to prepaid hide account number, whereas on postpaid show it
+    $("body").on('change', '.order-simple-form select[name=mobile_donor_type]', function() {
+        var targetForm = $(this).parents('.order-simple-form');
+        console.log(targetForm);
+        var selectedType = $(this).val();
+        console.log(selectedType);
+        if(parseInt(selectedType) === 1) {
+            targetForm.find('input[name=mobile_donor_client_nr]').removeAttr('disabled');
+        } else {
+            targetForm.find('input[name=mobile_donor_client_nr]').attr('disabled', 'true');
+            //reset its value to empty so that it may not get submitted
+            targetForm.find('#mobile_donor_client_nr').val("");
+        }
     });
 });
 
