@@ -1,3 +1,33 @@
+function requiredFieldsFilled(inputForm) {
+    var filled = true;
+    //check all required fields if they are filled submit the form
+    inputForm.find(':input[required]:not(:radio):not(:checkbox):not(:disabled):not([type=hidden]), ' +
+        ':input[required]:radio:checked:not(:disabled), :input[required]:checkbox:checked:not(:disabled), select[required]:not(:disabled), ' +
+        'select[required]:not(".hidden")').each(function(){
+        var reqField = jQuery(this);
+
+        if(reqField.prop("tagName").toLowerCase() == 'select') {
+            if(typeof reqField.attr('disabled') == 'undefined') {
+                reqField = reqField.find('option').filter(':selected');
+            } else {
+                return true;//don't consider disabled select
+            }
+        }
+
+        //if some field don't have name ignore it
+        if(_.isEmpty(reqField.attr('name'))) {
+            return true;
+        }
+
+        if(_.isEmpty(reqField.val())) {
+            console.log(reqField.text(), reqField.attr('name'), "====>", reqField.val());
+            filled = false;
+        }
+    });
+
+    return filled;
+}
+
 jQuery(document).ready(function ($) {
 
 
@@ -57,31 +87,76 @@ jQuery(document).ready(function ($) {
         var changedProviderTxt = $(changedProviderObj).text();
         var changedProviderVal = $(changedProviderObj).val();
 
-        console.log(changedProviderObj, changedProviderTxt, changedProviderVal);
-        $('span.selected_supplier').text(changedProviderTxt);
+        //console.log(changedProviderObj, changedProviderTxt, changedProviderVal);
+        //$('span.selected_supplier').text(changedProviderTxt);
     });
 
     //Order steps, for the forms that are without array called as simple forms,
     //this means that the input variables are not this way e.g. form_input[], or form_input['order'][] etc
-    $("body").on('click', '.order-simple-form .btn-nxt', function(e) {
-        //e.preventDefault();
+    $("body").on('submit', '.order-simple-form', function(e) {
+        e.preventDefault();
         var self = $(this);
-        var inputForm = $(this).parents('form.order-simple-form');
+        var inputForm = $(this);
         var formInputs = $(inputForm).serialize()+'&action=saveSimpleOrder&'+$('#orderCommon').serialize();
-        console.log(formInputs);
-        /*var data = {
-            'action': 'saveSimpleOrder',
-        };*/
+
+        var filled = requiredFieldsFilled(inputForm);
+
+        if(filled === false) {
+            return false; //don't allow sumbitting the form
+        }
+
         var data = formInputs;
+
         $.post(site_obj.ajax_url, data, function (response) {
             console.log(response);
             var jsonRes = JSON.parse(response);
             console.log(jsonRes);
             if(jsonRes.success == true || jsonRes.success.toString() == "no-update") {
                 //In case of mobile form trigger next button to open the next form
-                self.parents('.form-type.type-mobile-phone').find('.next-step-btn a').trigger('click');
+                console.log(self.parents('.form-type.type-mobile-phone'));
+                console.log("Triggering...", self.parents('.form-type').find('.next-step-btn a'));
+                self.parents('.form-type').find('.next-step-btn a').trigger('click');
             }
         });
+    });
+
+    //on chaning simple form values by ignoring hidden fields control the behavior of submit button
+    $("body").on('change', '.order-simple-form', function(e) {
+        var inputForm = $(this);
+        var filled = requiredFieldsFilled(inputForm);
+
+        if(filled === true) {
+            inputForm.find('input[type=submit]').removeClass('disabled');
+        }
+    });
+
+    //check all forms if everything required is filled enable delivery step
+    $('body').on('click', '.next-step-btn a', function(e) {
+        console.log("Trying to enable delivery btn...");
+        var error = false;
+        $('body').find('.order-simple-form').each(function() {
+            var inputForm = $(this);
+            if(requiredFieldsFilled(inputForm) === false) {
+                console.log("Error>>>>>");
+                console.log(inputForm);
+                error = true;
+            }
+        });
+
+        var deliveryBtn = $('.form-nextstep a.btn-default');
+        if(error === true) {
+            if(!deliveryBtn.hasClass("disabled")){
+                deliveryBtn.addClass("disabled");
+            }
+        }
+        else if(error === false) {
+            deliveryBtn.removeClass("disabled");
+        }
+        else {
+            if(!deliveryBtn.hasClass("disabled")){
+                deliveryBtn.addClass("disabled");
+            }
+        }
     });
 
     //on changing mobile product set other required variables
@@ -121,5 +196,26 @@ jQuery(document).ready(function ($) {
             targetForm.find('#mobile_donor_client_nr').val("");
         }
     });
-});
 
+    //control delivery form submit button
+    $("#delivery_form").on("change", function() {
+        var inputForm = $(this).parents('form');
+       // console.log(inputForm);
+        var filled = requiredFieldsFilled(inputForm);
+        //console.log("Filled", filled);
+        if(filled === true) {
+            $('.btn.btn-default.disabled').removeClass("disabled");
+        }
+    });
+
+    //control personal info form submit button
+    $("#personal_info_form").on("change", function() {
+        var inputForm = $(this);
+
+        var filled = requiredFieldsFilled(inputForm);
+        if(filled === true) {
+            inputForm.find('.btn.btn-default.disabled').removeClass("disabled");
+            inputForm.find('input[type=submit]').removeClass("disabled");
+        }
+    });
+});
