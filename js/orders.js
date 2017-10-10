@@ -218,4 +218,28 @@ jQuery(document).ready(function ($) {
             inputForm.find('input[type=submit]').removeClass("disabled");
         }
     });
+
+    //control account number field based on payment info selection
+    $("input[name=payment_method]").on('change', function() {
+        var selectedField = $(this);
+        var selectedVal = selectedField.val();
+
+        if(parseInt(selectedVal) === 2) {
+            $('#iban').parents('li').removeClass('hidden');
+            $('#iban').removeAttr('disabled');
+        }
+        else if(parseInt(selectedVal) === 1) {
+            if($('#iban').hasClass('with-vir')) {
+                $('#iban').parents('li').removeClass('hidden');
+                $('#iban').removeAttr('disabled');
+            } else {
+                $('#iban').parents('li').addClass('hidden');
+                $('#iban').attr('disabled', true);
+            }
+        }
+        else {
+            $('#iban').parents('li').addClass('hidden');
+            $('#iban').attr('disabled', true);
+        }
+    });
 });
