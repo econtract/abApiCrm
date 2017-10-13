@@ -50,7 +50,8 @@ class abApiCrm {
 				'contact_uri'      => "/" . pll__( 'contact' ),
 				'contact_trans'    => pll__( 'Or contact us directly' ),
 				'change_zip_trans' => pll__( 'Change zip code' ),
-				'api_resp_trans'   => pll__( 'Something went wrong as API is not responding!' )
+				'api_resp_trans'   => pll__( 'Something went wrong as API is not responding!' ),
+				'req_fields_filled' => pll__('Make sure all required fields are filled')
 			)
 		);
 	}
@@ -266,15 +267,15 @@ class abApiCrm {
 		unset($_POST['seq_number']);
 
 		//now $_POST will have only the parameters which are ready to be saved, make sure to use same names which are in advance custom fields
-		$saveOrder = saveAnbOrderInWp($data, $_POST, $metaData);
-
+		list($order, $wpError) = saveAnbOrderInWp($data, $_POST, $metaData);
+		$errors = $wpError->get_error_messages();
 		$response = null;
-		if(is_wp_error($saveOrder)) {
+		if(count($errors) > 0) {
 			//its an error so send response appropriatly
 			$response['success'] = false;
-			$response['errors'] = $saveOrder->get_error_messages();
+			$response['errors'] = $errors;
 		}
-		elseif($saveOrder > 0) {
+		elseif($order > 0) {
 			$response['success'] = true;
 		}
 		else {

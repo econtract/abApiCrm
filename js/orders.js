@@ -5,22 +5,24 @@ function requiredFieldsFilled(inputForm) {
         ':input[required]:radio:checked:not(:disabled), :input[required]:checkbox:checked:not(:disabled), select[required]:not(:disabled), ' +
         'select[required]:not(".hidden")').each(function(){
         var reqField = jQuery(this);
-
+        var isSelectOpt = false;
         if(reqField.prop("tagName").toLowerCase() == 'select') {
             if(typeof reqField.attr('disabled') == 'undefined') {
                 reqField = reqField.find('option').filter(':selected');
+                isSelectOpt = true;
             } else {
                 return true;//don't consider disabled select
             }
         }
 
-        //if some field don't have name ignore it
-        if(_.isEmpty(reqField.attr('name'))) {
+        //if some field don't have name ignore it, and is not a select option
+        if(_.isEmpty(reqField.attr('name')) && !isSelectOpt) {
+            //console.log("****", reqField.attr('name'), reqField.val());
             return true;
         }
 
         if(_.isEmpty(reqField.val())) {
-            console.log(reqField.text(), reqField.attr('name'), "====>", reqField.val());
+            //console.log(reqField.text(), reqField.attr('name'), "====>", reqField.val());
             filled = false;
         }
     });
@@ -116,6 +118,10 @@ jQuery(document).ready(function ($) {
                 console.log(self.parents('.form-type.type-mobile-phone'));
                 console.log("Triggering...", self.parents('.form-type').find('.next-step-btn a'));
                 self.parents('.form-type').find('.next-step-btn a').trigger('click');
+            } else {
+                self.append('<div class="alert alert-danger alert-dismissable">' +
+                    '<a href="#" class="close" data-dismiss="alert">×</a>' +
+                    site_obj.req_fields_filled+'</div>');
             }
         });
     });
@@ -127,6 +133,10 @@ jQuery(document).ready(function ($) {
 
         if(filled === true) {
             inputForm.find('input[type=submit]').removeClass('disabled');
+            inputForm.find('.next-step-btn a').removeClass('disabled');
+        } else {
+            inputForm.find('.next-step-btn a').addClass('disabled');
+            inputForm.find('input[type=submit]').addClass('disabled');
         }
     });
 
