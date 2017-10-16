@@ -40,18 +40,18 @@ class abApiCrm {
 	function enqueueScripts() {
 
 		wp_enqueue_script( 'crm-script-callMeBack', plugins_url( '/js/callMeBack.js', __FILE__ ), array( 'jquery' ) );
-		wp_enqueue_script( 'crm-script-orders', plugins_url( '/js/orders.js', __FILE__ ), array( 'jquery' ), '1.2' );
+		wp_enqueue_script( 'crm-script-orders', plugins_url( '/js/orders.js', __FILE__ ), array( 'jquery' ), '1.3' );
 
 		// in JavaScript, object properties are accessed as ajax_object.ajax_url, ajax_object.we_value
 		//The object will be created before including callMeBack.js so its sufficient for orders.js too, there is no need to include it again
 		wp_localize_script( 'crm-script-callMeBack', 'site_obj',
 			array(
-				'ajax_url'         => admin_url( 'admin-ajax.php' ),
-				'contact_uri'      => "/" . pll__( 'contact' ),
-				'contact_trans'    => pll__( 'Or contact us directly' ),
-				'change_zip_trans' => pll__( 'Change zip code' ),
-				'api_resp_trans'   => pll__( 'Something went wrong as API is not responding!' ),
-				'req_fields_filled' => pll__('Make sure all required fields are filled')
+				'ajax_url'          => admin_url( 'admin-ajax.php' ),
+				'contact_uri'       => "/" . pll__( 'contact' ),
+				'contact_trans'     => pll__( 'Or contact us directly' ),
+				'change_zip_trans'  => pll__( 'Change zip code' ),
+				'api_resp_trans'    => pll__( 'Something went wrong as API is not responding!' ),
+				'req_fields_filled' => pll__( 'Make sure all required fields are filled' )
 			)
 		);
 	}
@@ -131,8 +131,8 @@ class abApiCrm {
 		} else {
 			global $post;
 			$parentSegment = getSectorOnCats( $cats );
-			$response   = file_get_contents( AB_CHK_AVL_URL . "?pid=$pid&zip=$zip&lang_mod=$lang&prt=$ptype&action=$action&rand=" . mt_rand() );
-			$jsonDecRes = json_decode( $response );
+			$response      = file_get_contents( AB_CHK_AVL_URL . "?pid=$pid&zip=$zip&lang_mod=$lang&prt=$ptype&action=$action&rand=" . mt_rand() );
+			$jsonDecRes    = json_decode( $response );
 			if ( $jsonDecRes->available === false ) {
 				$catUrlPart = '';
 				foreach ( $cats as $cat ) {
@@ -145,7 +145,7 @@ class abApiCrm {
 			}
 			if ( $jsonDecRes->available === true ) {
 				$this->initSessionForProduct( $zip, $pid, $pslug, $pname, $ptype, $lang, $prvid, $prvslug, $prvname, $cats, $sg, $cproducts );
-				$html             = $this->availabilitySuccessHtml($parentSegment);
+				$html             = $this->availabilitySuccessHtml( $parentSegment );
 				$jsonDecRes->msg  = 'Congratulations! The product is available in your area';//Ignore the API response message
 				$jsonDecRes->html = $html;
 			}
@@ -182,7 +182,7 @@ class abApiCrm {
 	 *
 	 * @return string
 	 */
-	private function availabilitySuccessHtml($parentSegment) {
+	private function availabilitySuccessHtml( $parentSegment ) {
 		return '<div class="modal-list">
 	                        <p>' . pll__( 'Be sure to check your infrastructure:' ) . '</p>
 	                        <ul class="list-unstyled bullet-list">
@@ -218,7 +218,7 @@ class abApiCrm {
 	 * @param $cproducts
 	 */
 	private function initSessionForProduct( $zip, $pid, $pslug, $pname, $ptype, $lang, $prvid, $prvslug, $prvname, $cats, $sg, $cproducts ) {
-		unset($_SESSION['order']);
+		unset( $_SESSION['order'] );
 		$_SESSION['product']['zip']           = $zip;
 		$_SESSION['product']['id']            = $pid;
 		$_SESSION['product']['slug']          = $pslug;
@@ -239,7 +239,7 @@ class abApiCrm {
 	 * @param int $timeInSecs
 	 */
 	private function initCookieForProduct( $timeInSecs = 3600 ) {
-		setcookie("product", json_encode($_SESSION['product']), time()+3600);
+		setcookie( "product", json_encode( $_SESSION['product'] ), time() + 3600 );
 	}
 
 	/**
@@ -247,41 +247,39 @@ class abApiCrm {
 	 */
 	public function saveSimpleOrder() {
 		//negate action from $_POST
-		unset($_POST['action']);
+		unset( $_POST['action'] );
 
 		//separate order related data and loopable meta data
-		$data['order_title'] = $_POST['order_title'];
-		$data['order_slug'] = $_POST['order_slug'];
+		$data['order_title']     = $_POST['order_title'];
+		$data['order_slug']      = $_POST['order_slug'];
 		$data['parent_order_id'] = $_POST['parent_order_id'];
-		$data['order_id'] = $_POST['order_id'];
-		$data['order_status'] = $_POST['order_status'];
+		$data['order_id']        = $_POST['order_id'];
+		$data['order_status']    = $_POST['order_status'];
 
 		$metaData['seq_number'] = $_POST['seq_number'];
 
 		//Time to unset these variables from $_POST to keep only loopable data in $_POST
-		unset($_POST['order_title']);
-		unset($_POST['order_slug']);
-		unset($_POST['parent_order_id']);
-		unset($_POST['order_id']);
-		unset($_POST['order_status']);
-		unset($_POST['seq_number']);
+		unset( $_POST['order_title'] );
+		unset( $_POST['order_slug'] );
+		unset( $_POST['parent_order_id'] );
+		unset( $_POST['order_id'] );
+		unset( $_POST['order_status'] );
+		unset( $_POST['seq_number'] );
 
 		//now $_POST will have only the parameters which are ready to be saved, make sure to use same names which are in advance custom fields
-		list($order, $wpError) = saveAnbOrderInWp($data, $_POST, $metaData);
-		$errors = $wpError->get_error_messages();
+		list( $order, $wpError ) = saveAnbOrderInWp( $data, $_POST, $metaData );
+		$errors   = $wpError->get_error_messages();
 		$response = null;
-		if(count($errors) > 0) {
+		if ( count( $errors ) > 0 ) {
 			//its an error so send response appropriatly
 			$response['success'] = false;
-			$response['errors'] = $errors;
-		}
-		elseif($order > 0) {
+			$response['errors']  = $errors;
+		} elseif ( $order > 0 ) {
 			$response['success'] = true;
-		}
-		else {
+		} else {
 			$response['success'] = 'no-update';
 		}
-		echo json_encode($response);
+		echo json_encode( $response );
 		wp_die();
 	}
 
