@@ -3,11 +3,11 @@ function requiredFieldsFilled(inputForm) {
     //check all required fields if they are filled submit the form
     inputForm.find(':input[required]:not(:radio):not(:checkbox):not(:disabled):not([type=hidden]), ' +
         ':input[required]:radio:checked:not(:disabled), :input[required]:checkbox:checked:not(:disabled), select[required]:not(:disabled), ' +
-        'select[required]:not(".hidden")').each(function(){
+        'select[required]:not(".hidden")').each(function () {
         var reqField = jQuery(this);
         var isSelectOpt = false;
-        if(reqField.prop("tagName").toLowerCase() == 'select') {
-            if(typeof reqField.attr('disabled') == 'undefined') {
+        if (reqField.prop("tagName").toLowerCase() == 'select') {
+            if (typeof reqField.attr('disabled') == 'undefined') {
                 reqField = reqField.find('option').filter(':selected');
                 isSelectOpt = true;
             } else {
@@ -16,12 +16,11 @@ function requiredFieldsFilled(inputForm) {
         }
 
         //if some field don't have name ignore it, and is not a select option
-        if(_.isEmpty(reqField.attr('name')) && !isSelectOpt) {
-            //console.log("****", reqField.attr('name'), reqField.val());
+        if (_.isEmpty(reqField.attr('name')) && !isSelectOpt) {
             return true;
         }
 
-        if(_.isEmpty(reqField.val())) {
+        if (_.isEmpty(reqField.val())) {
             //console.log(reqField.text(), reqField.attr('name'), "====>", reqField.val());
             filled = false;
         }
@@ -88,22 +87,19 @@ jQuery(document).ready(function ($) {
         var changedProviderObj = $(this).find('option:selected');
         var changedProviderTxt = $(changedProviderObj).text();
         var changedProviderVal = $(changedProviderObj).val();
-
-        //console.log(changedProviderObj, changedProviderTxt, changedProviderVal);
-        //$('span.selected_supplier').text(changedProviderTxt);
     });
 
     //Order steps, for the forms that are without array called as simple forms,
     //this means that the input variables are not this way e.g. form_input[], or form_input['order'][] etc
-    $("body").on('submit', '.order-simple-form', function(e) {
+    $("body").on('submit', '.order-simple-form', function (e) {
         e.preventDefault();
         var self = $(this);
         var inputForm = $(this);
-        var formInputs = $(inputForm).serialize()+'&action=saveSimpleOrder&'+$('#orderCommon').serialize();
+        var formInputs = $(inputForm).serialize() + '&action=saveSimpleOrder&' + $('#orderCommon').serialize();
 
         var filled = requiredFieldsFilled(inputForm);
 
-        if(filled === false) {
+        if (filled === false) {
             return false; //don't allow sumbitting the form
         }
 
@@ -113,7 +109,7 @@ jQuery(document).ready(function ($) {
             console.log(response);
             var jsonRes = JSON.parse(response);
             console.log(jsonRes);
-            if(jsonRes.success == true || jsonRes.success.toString() == "no-update") {
+            if (jsonRes.success == true || jsonRes.success.toString() == "no-update") {
                 //In case of mobile form trigger next button to open the next form
                 console.log(self.parents('.form-type.type-mobile-phone'));
                 console.log("Triggering...", self.parents('.form-type').find('.next-step-btn a'));
@@ -121,17 +117,17 @@ jQuery(document).ready(function ($) {
             } else {
                 self.append('<div class="alert alert-danger alert-dismissable">' +
                     '<a href="#" class="close" data-dismiss="alert">×</a>' +
-                    site_obj.req_fields_filled+'</div>');
+                    site_obj.req_fields_filled + '</div>');
             }
         });
     });
 
     //on chaning simple form values by ignoring hidden fields control the behavior of submit button
-    $("body").on('change', '.order-simple-form', function(e) {
+    $("body").on('change', '.order-simple-form', function (e) {
         var inputForm = $(this);
         var filled = requiredFieldsFilled(inputForm);
 
-        if(filled === true) {
+        if (filled === true) {
             inputForm.find('input[type=submit]').removeClass('disabled');
             inputForm.find('.next-step-btn a').removeClass('disabled');
         } else {
@@ -141,64 +137,54 @@ jQuery(document).ready(function ($) {
     });
 
     //check all forms if everything required is filled enable delivery step
-    $('body').on('click', '.next-step-btn a', function(e) {
-        console.log("Trying to enable delivery btn...");
+    $('body').on('click', '.next-step-btn a', function (e) {
         var error = false;
-        $('body').find('.order-simple-form').each(function() {
+        $('body').find('.order-simple-form').each(function () {
             var inputForm = $(this);
-            if(requiredFieldsFilled(inputForm) === false) {
-                console.log("Error>>>>>");
-                console.log(inputForm);
+            if (requiredFieldsFilled(inputForm) === false) {
                 error = true;
             }
         });
 
         var deliveryBtn = $('.form-nextstep a.btn-default');
-        if(error === true) {
-            if(!deliveryBtn.hasClass("disabled")){
+        if (error === true) {
+            if (!deliveryBtn.hasClass("disabled")) {
                 deliveryBtn.addClass("disabled");
             }
         }
-        else if(error === false) {
+        else if (error === false) {
             deliveryBtn.removeClass("disabled");
         }
         else {
-            if(!deliveryBtn.hasClass("disabled")){
+            if (!deliveryBtn.hasClass("disabled")) {
                 deliveryBtn.addClass("disabled");
             }
         }
     });
 
     //on changing mobile product set other required variables
-    $("body").on('change', '.order-simple-form.mobile-form select[name=mobile_product_id]', function() {
-        /*console.log("Changed to ..." + $(this).find(":selected").val() + "| " + $(this).val());
-        console.log($(this).val(), $(this).find(":selected").val(), $(this).find(":selected"), $(this).find(":selected").text(), $(this).text());
-        console.log("+++");
-        console.log($(this).find(":selected").text());
-        console.log($(this).text());*/
+    $("body").on('change', '.order-simple-form.mobile-form select[name=mobile_product_id]', function () {
         var targetForm = $(this).parents('.order-simple-form');
         var productName = $(this).find(":selected").text();
         productNameArr = productName.split(" - ");
         productName = productNameArr[0];
         var productPrice = productNameArr[1];
-        //console.log("price**:", productPrice);
         targetForm.find('input[name=product_id]').val($(this).find(":selected").val());
         targetForm.find('input[name=product_name]').val(productName);
         targetForm.find('input[name=mobile_product_name]').val(productName);
         targetForm.find('.bundle-ind-price').text(productPrice);
         var subOrderTitle = productName + " (Sub Order)";
-        //console.log("Sub order title:", subOrderTitle);
         $('#orderCommon input[name=order_title]').val(subOrderTitle);
         $('#orderCommon input[name=order_slug]').val("#");
     });
 
     //on changing mobile type to prepaid hide account number, whereas on postpaid show it
-    $("body").on('change', '.order-simple-form select[name=mobile_donor_type]', function() {
+    $("body").on('change', '.order-simple-form select[name=mobile_donor_type]', function () {
         var targetForm = $(this).parents('.order-simple-form');
         console.log(targetForm);
         var selectedType = $(this).val();
         console.log(selectedType);
-        if(parseInt(selectedType) === 1) {
+        if (parseInt(selectedType) === 1) {
             targetForm.find('input[name=mobile_donor_client_nr]').removeAttr('disabled');
         } else {
             targetForm.find('input[name=mobile_donor_client_nr]').attr('disabled', 'true');
@@ -208,38 +194,38 @@ jQuery(document).ready(function ($) {
     });
 
     //control delivery form submit button
-    $("#delivery_form").on("change", function() {
+    $("#delivery_form").on("change", function () {
         var inputForm = $(this).parents('form');
-       // console.log(inputForm);
+        // console.log(inputForm);
         var filled = requiredFieldsFilled(inputForm);
         //console.log("Filled", filled);
-        if(filled === true) {
+        if (filled === true) {
             $('.btn.btn-default.disabled').removeClass("disabled");
         }
     });
 
     //control personal info form submit button
-    $("#personal_info_form").on("change", function() {
+    $("#personal_info_form").on("change", function () {
         var inputForm = $(this);
 
         var filled = requiredFieldsFilled(inputForm);
-        if(filled === true) {
+        if (filled === true) {
             inputForm.find('.btn.btn-default.disabled').removeClass("disabled");
             inputForm.find('input[type=submit]').removeClass("disabled");
         }
     });
 
     //control account number field based on payment info selection
-    $("input[name=payment_method]").on('change', function() {
+    $("input[name=payment_method]").on('change', function () {
         var selectedField = $(this);
         var selectedVal = selectedField.val();
 
-        if(parseInt(selectedVal) === 2) {
+        if (parseInt(selectedVal) === 2) {
             $('#iban').parents('li').removeClass('hidden');
             $('#iban').removeAttr('disabled');
         }
-        else if(parseInt(selectedVal) === 1) {
-            if($('#iban').hasClass('with-vir')) {
+        else if (parseInt(selectedVal) === 1) {
+            if ($('#iban').hasClass('with-vir')) {
                 $('#iban').parents('li').removeClass('hidden');
                 $('#iban').removeAttr('disabled');
             } else {
