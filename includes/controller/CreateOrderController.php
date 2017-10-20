@@ -20,6 +20,10 @@ class CreateOrderController
 
     /**
      * @var array
+     *
+     * Values are just markup, they wont effect any order values
+     *
+     * these values are just an example (i-e to have that kind of data set)
      */
     protected static $default_fields = [
 
@@ -31,7 +35,7 @@ class CreateOrderController
         'client_birthdate'           => '1956-12-25',
         'client_birthplace'          => 'Hasselt',
         'client_nationality'         => 'BE',
-        'client_idnr'                => 5,
+        'client_idnr'                => 55555, // ID card Number
         'client_cellphone'           => '012457898',
         'client_landline'            => '',
         'client_fax'                 => '',
@@ -39,7 +43,6 @@ class CreateOrderController
         'client_language'            => 'nl',
         'client_iban'                => '',
         'client_family_size'         => 3,
-        'idnr'                       => 3, // ID card Number
 
         // Address data
         'address_street'             => 'Street 02',
@@ -65,6 +68,7 @@ class CreateOrderController
         'supplier_id'                => 5,
         'payment_method'             => 1,
         'producttype'                => 'internet',
+        'order_nr'                   => 'redesign-anb-222',
 
         // internet fields
         'internet_new_connection'    => 45688954,
@@ -76,7 +80,7 @@ class CreateOrderController
         'mobile_product_name'       => 'Fix fast for this customer',
         'mobile_product_id'         => 12,
         'sim_type'                  => 5,
-        'keep_number'               => 1,
+        'mobile_mnp'                => 1,
         'internet_donor_phone_nr'   => 'internet', // verify this fields exists under mobile
         'mobile_donor_operator'     => 45688954,
         'mobile_donor_type'         => 50,
@@ -87,6 +91,7 @@ class CreateOrderController
         'telephony_phone_nr'        => 'internet', // verify this fields exists under mobile
         'telephony_donor_operator'  => 45688954,
         'telephony_donor_client_nr' => 50,
+        'telephony_port_in'         => 1,
 
         // Other Fields
         'install_type'              => 50,
@@ -124,22 +129,50 @@ class CreateOrderController
         }
 
         $this->data['ip_address'] = $_SERVER['REMOTE_ADDR'];
-        $this->data['affiliate_id'] = 1;
+        $this->data['affiliate_id'] = $this->params['client_language'] == 'nl' ? 1 : 4;
         $this->data['sales_channel_id'] = 1;
         $this->data['send_confirmation_mail'] = true;
-
-
-        $this->data['client_birthdate'] = date('Y-m-d', strtotime($this->params['client_birthdate']));
-        $this->data['client_nationality'] = 'BE';
-
-        $this->data['client_family_size'] = !empty($this->params['client_family_size']) ? $this->params['client_family_size'] : 0;
         $this->data['comparison_id'] = !empty($this->params['comparison_id']) ? $this->params['comparison_id'] : 0;
 
+        // Format client data fields
+        if (array_key_exists('client_birthdate', $this->data)) {
+            $this->data['client_birthdate'] = date('Y-m-d', strtotime($this->params['client_birthdate']));
+        }
 
+        if (array_key_exists('client_nationality', $this->data)) {
+            $this->data['client_nationality'] = ($this->params['client_nationality'] == 'BE') ? $this->params['client_nationality'] : '';
+        }
+
+        if (array_key_exists('client_family_size', $this->data)) {
+            $this->data['client_family_size'] = !empty($this->params['client_family_size']) ? $this->params['client_family_size'] : 0;
+        }
+
+        $this->extractOptions();
+
+    }
+
+    public function send()
+    {
+        $this->order->send();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getResponse()
+    {
+        return $this->order->getResponse();
+    }
+
+    /**
+     * @return array
+     */
+    private function extractOptions()
+    {
         if (isset($this->params['telephone_option_json']) || isset($this->params['idtv_option_json'])) {
             $telOptions = $idtvOptions = [];
-            $telephone = json_decode($this->params['telephone_option_json'], true);
-            $idtv = json_decode($this->params['idtv_option_json'], true);
+            $telephone = (!empty($this->params['telephone_option_json'])) ? json_decode($this->params['telephone_option_json'], true) : null;
+            $idtv = (!empty($this->params['idtv_option_json'])) ? json_decode($this->params['idtv_option_json'], true) : null;
 
             if ($telephone && !is_null($telephone['options'])) {
                 $telOptions = $telephone['options'];
@@ -150,22 +183,10 @@ class CreateOrderController
             }
 
             if ($telOptions && $idtvOptions) {
-                $this->data['options'] = array_merge($telOptions, $idtvOptions);
+                return $this->data['options'] = array_merge($telOptions, $idtvOptions);
             }
 
         }
-
-       // var_dump($this->data); die;
-    }
-
-    public function send()
-    {
-        $this->order->send();
-    }
-
-    public function getResponse()
-    {
-        return $this->order->getResponse();
     }
 
 }

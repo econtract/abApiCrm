@@ -67,7 +67,9 @@ class abApiCrm {
 		);
 	}
 
-
+    /**
+     * @return bool
+     */
 	public function callMeBack() {
 		$params = $this->prepareParametersCallMeBack( $_REQUEST['userInput'] );
 
@@ -83,7 +85,10 @@ class abApiCrm {
 		return false;
 	}
 
-
+    /**
+     * @param $data
+     * @return mixed
+     */
 	public function createFullOrder($data) {
 
         $this->createFullOrderObj = new CreateOrderController($data);
