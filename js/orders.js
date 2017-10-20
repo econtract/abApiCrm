@@ -29,6 +29,31 @@ function requiredFieldsFilled(inputForm) {
     return filled;
 }
 
+function enableDisableFormNextStep(targetStep) {
+    var $ = jQuery;
+    var error = false;
+    $('body').find('.order-simple-form').each(function () {
+        var inputForm = $(this);
+        if (requiredFieldsFilled(inputForm) === false) {
+            error = true;
+        }
+    });
+
+    if (error === true) {
+        if (!targetStep.hasClass("disabled")) {
+            targetStep.addClass("disabled");
+        }
+    }
+    else if (error === false) {
+        targetStep.removeClass("disabled");
+    }
+    else {
+        if (!targetStep.hasClass("disabled")) {
+            targetStep.addClass("disabled");
+        }
+    }
+}
+
 jQuery(document).ready(function ($) {
 
 
@@ -115,9 +140,11 @@ jQuery(document).ready(function ($) {
                 console.log("Triggering...", self.parents('.form-type').find('.next-step-btn a'));
                 self.parents('.form-type').find('.next-step-btn a').trigger('click');
             } else {
-                self.append('<div class="alert alert-danger alert-dismissable">' +
-                    '<a href="#" class="close" data-dismiss="alert">×</a>' +
-                    site_obj.req_fields_filled + '</div>');
+                $.each(jsonRes.errors, function(key, val) {
+                    self.append('<div class="alert alert-danger alert-dismissable">' +
+                        '<a href="#" class="close" data-dismiss="alert">×</a>' +
+                        val + '</div>');
+                });
             }
         });
     });
@@ -138,28 +165,11 @@ jQuery(document).ready(function ($) {
 
     //check all forms if everything required is filled enable delivery step
     $('body').on('click', '.next-step-btn a', function (e) {
-        var error = false;
-        $('body').find('.order-simple-form').each(function () {
-            var inputForm = $(this);
-            if (requiredFieldsFilled(inputForm) === false) {
-                error = true;
-            }
-        });
+        enableDisableFormNextStep($('.form-nextstep a.btn-default'));
+    });
 
-        var deliveryBtn = $('.form-nextstep a.btn-default');
-        if (error === true) {
-            if (!deliveryBtn.hasClass("disabled")) {
-                deliveryBtn.addClass("disabled");
-            }
-        }
-        else if (error === false) {
-            deliveryBtn.removeClass("disabled");
-        }
-        else {
-            if (!deliveryBtn.hasClass("disabled")) {
-                deliveryBtn.addClass("disabled");
-            }
-        }
+    $('.form-nextstep a.btn-default').on('mouseover', function(e) {
+        enableDisableFormNextStep($(this));
     });
 
     //on changing mobile product set other required variables
