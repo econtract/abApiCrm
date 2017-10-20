@@ -10,6 +10,7 @@
 namespace abApiCrm;
 
 use abApiCrm\includes\controller\callMeBackLeadController;
+use abApiCrm\includes\controller\CreateOrderController;
 
 if ( ! defined( 'AP_ABI_CRM_DIR' ) ) {
 	define( 'AP_ABI_CRM_DIR', ABSPATH . '../../' );
@@ -26,6 +27,16 @@ class abApiCrm {
 	 * @var
 	 */
 	protected $callMeBackResponse;
+
+    /**
+     * @var
+     */
+    protected $createFullOrderObj;
+
+    /**
+     * @var
+     */
+    protected $createFullOrderResponse;
 
 
 	public function __construct() {
@@ -56,7 +67,9 @@ class abApiCrm {
 		);
 	}
 
-
+    /**
+     * @return bool
+     */
 	public function callMeBack() {
 		$params = $this->prepareParametersCallMeBack( $_REQUEST['userInput'] );
 
@@ -71,6 +84,20 @@ class abApiCrm {
 
 		return false;
 	}
+
+    /**
+     * @param $data
+     * @return mixed
+     */
+	public function createFullOrder($data) {
+
+        $this->createFullOrderObj = new CreateOrderController($data);
+
+        $this->createFullOrderObj->send();
+        $this->createFullOrderResponse = $this->createFullOrderObj->getResponse();
+
+        return $this->createFullOrderResponse;
+    }
 
 	/**
 	 * @param $data
