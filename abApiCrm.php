@@ -310,4 +310,33 @@ class abApiCrm {
 		wp_die();
 	}
 
+	public function removeSubOrder() {
+		$res = ['success' => false, 'msg' => pll__("The order was not removed, please try again.")];
+
+		if(!empty($_POST['parent_order_id']) && !empty($_POST['seq_number'])) {
+			//get appropriate child order
+			$args = [
+				'post_parent' => (int)$_POST['parent_order_id'],
+				'post_type'   => 'anb_order',
+				'orderby'     => 'ID',
+				'order'       => 'ASC',
+				'meta_key'    => 'seq_number',
+				'meta_value'  => (int)$_POST['seq_number']
+			];
+			$subOrder = get_posts( $args )[0];
+			$res['debug'] = print_r($subOrder, true);
+			$res['imp_data'] = [$_SESSION['order']['wp_order_id'], $subOrder->post_parent, $subOrder->ID];
+			if($subOrder->post_parent == $_SESSION['order']['wp_order_id']) {//Making sure that the person who initiated the order is deleting
+				$delPost = wp_delete_post($subOrder->ID);
+				$res['debug_del_post'] = print_r($delPost, true);
+				if($delPost) {
+					$res['success'] = true;
+				}
+			}
+		}
+
+		echo json_encode($res);
+		wp_die();
+	}
+
 }

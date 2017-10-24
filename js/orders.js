@@ -131,14 +131,11 @@ jQuery(document).ready(function ($) {
         var data = formInputs;
 
         $.post(site_obj.ajax_url, data, function (response) {
-            console.log(response);
             var jsonRes = JSON.parse(response);
-            console.log(jsonRes);
             if (jsonRes.success == true || jsonRes.success.toString() == "no-update") {
                 //In case of mobile form trigger next button to open the next form
-                console.log(self.parents('.form-type.type-mobile-phone'));
-                console.log("Triggering...", self.parents('.form-type').find('.next-step-btn a'));
                 self.parents('.form-type').find('.next-step-btn a').trigger('click');
+                self.parents('.form-type').addClass('order-saved');
             } else {
                 $.each(jsonRes.errors, function(key, val) {
                     self.append('<div class="alert alert-danger alert-dismissable">' +
@@ -153,7 +150,6 @@ jQuery(document).ready(function ($) {
     $("body").on('change', '.order-simple-form', function (e) {
         var inputForm = $(this);
         var filled = requiredFieldsFilled(inputForm);
-
         if (filled === true) {
             inputForm.find('input[type=submit]').removeClass('disabled');
             inputForm.find('.next-step-btn a').removeClass('disabled');
@@ -169,7 +165,6 @@ jQuery(document).ready(function ($) {
     });
 
     $('.form-nextstep .btn-default').on('mouseover', function(e) {
-        console.log("Triggering....");
         enableDisableFormNextStep($(this));
     });
 
@@ -192,9 +187,8 @@ jQuery(document).ready(function ($) {
     //on changing mobile type to prepaid hide account number, whereas on postpaid show it
     $("body").on('change', '.order-simple-form select[name=mobile_donor_type]', function () {
         var targetForm = $(this).parents('.order-simple-form');
-        console.log(targetForm);
         var selectedType = $(this).val();
-        console.log(selectedType);
+
         if (parseInt(selectedType) === 1) {
             targetForm.find('input[name=mobile_donor_client_nr]').removeAttr('disabled');
         } else {
@@ -276,13 +270,5 @@ jQuery(document).ready(function ($) {
             $('#client_rrnr').removeAttr('disabled', true);
             $('#client_rrnr').attr('required', true);
         }
-    });
-
-    //Remove sub-order
-    $('body').on('click', 'a.remove-data', function() {
-        var removeSec = $(this);
-
-        var seqNumber = removeSec.parents('.form-type').find('form input[name=seq_number]').val();
-        //TODO Continue from here for implementing remove sub-order feature
     });
 });
