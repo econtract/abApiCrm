@@ -32,7 +32,7 @@ function requiredFieldsFilled(inputForm) {
 function enableDisableFormNextStep(targetStep) {
     var $ = jQuery;
     var error = false;
-    $('body').find('.order-simple-form').each(function () {
+    $('body').find('form').each(function () {
         var inputForm = $(this);
         if (requiredFieldsFilled(inputForm) === false) {
             error = true;
@@ -168,7 +168,8 @@ jQuery(document).ready(function ($) {
         enableDisableFormNextStep($('.form-nextstep a.btn-default'));
     });
 
-    $('.form-nextstep a.btn-default').on('mouseover', function(e) {
+    $('.form-nextstep .btn-default').on('mouseover', function(e) {
+        console.log("Triggering....");
         enableDisableFormNextStep($(this));
     });
 
@@ -238,14 +239,50 @@ jQuery(document).ready(function ($) {
             if ($('#iban').hasClass('with-vir')) {
                 $('#iban').parents('li').removeClass('hidden');
                 $('#iban').removeAttr('disabled');
+                $('#iban').attr('required', true);
             } else {
                 $('#iban').parents('li').addClass('hidden');
                 $('#iban').attr('disabled', true);
+                $('#iban').removeAttr('required');
             }
         }
         else {
             $('#iban').parents('li').addClass('hidden');
             $('#iban').attr('disabled', true);
         }
+    });
+
+    $("input[name=iban]").on('change', function () {
+        $(this).attr('required', true);
+    });
+
+    $("input[name=client_nationality]").on('change', function() {
+        var nat = $(this).val();
+
+        if(nat == 'BE') {
+            $('#client_idnr').parents('li').removeClass('hidden');
+            $('#client_idnr').removeAttr('disabled');
+            $('#client_idnr').attr('required', true);
+
+            $('#client_rrnr').parents('li').addClass('hidden');
+            $('#client_rrnr').attr('disabled', true);
+            $('#client_rrnr').removeAttr('required');
+        } else {
+            $('#client_idnr').parents('li').addClass('hidden');
+            $('#client_idnr').attr('disabled', true);
+            $('#client_idnr').removeAttr('required');
+
+            $('#client_rrnr').parents('li').removeClass('hidden');
+            $('#client_rrnr').removeAttr('disabled', true);
+            $('#client_rrnr').attr('required', true);
+        }
+    });
+
+    //Remove sub-order
+    $('body').on('click', 'a.remove-data', function() {
+        var removeSec = $(this);
+
+        var seqNumber = removeSec.parents('.form-type').find('form input[name=seq_number]').val();
+        //TODO Continue from here for implementing remove sub-order feature
     });
 });
