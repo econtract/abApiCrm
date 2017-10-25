@@ -167,13 +167,13 @@ class abApiCrm {
 				}
 				$urlParams             = "?$catUrlPart&zip=$zip&searchSubmit=&sg=$sg";
 				$urlParamsWithProvider = "$urlParams&pref_cs[]=$prvid";
-				$jsonDecRes->msg       = "Sorry! The product is not available in your area.";
+				$jsonDecRes->msg       = pll__("Sorry! The product is not available in your area.");
 				$jsonDecRes->html      = $this->availabilityErrorHtml( $parentSegment, $urlParamsWithProvider, $prvname, $urlParams );
 			}
 			if ( $jsonDecRes->available === true ) {
 				$this->initSessionForProduct( $zip, $pid, $pslug, $pname, $ptype, $lang, $prvid, $prvslug, $prvname, $cats, $sg, $cproducts );
 				$html             = $this->availabilitySuccessHtml( $parentSegment );
-				$jsonDecRes->msg  = 'Congratulations! The product is available in your area';//Ignore the API response message
+				$jsonDecRes->msg  = pll__('Congratulations! The product is available in your area');//Ignore the API response message
 				$jsonDecRes->html = $html;
 			}
 			if ( isset( $_GET['debug'] ) ) {
@@ -244,7 +244,7 @@ class abApiCrm {
 	 * @param $sg
 	 * @param $cproducts
 	 */
-	private function initSessionForProduct( $zip, $pid, $pslug, $pname, $ptype, $lang, $prvid, $prvslug, $prvname, $cats, $sg, $cproducts ) {
+	public function initSessionForProduct( $zip, $pid, $pslug, $pname, $ptype, $lang, $prvid, $prvslug, $prvname, $cats, $sg, $cproducts ) {
 		unset( $_SESSION['order'] );
 		$_SESSION['product']['zip']           = $zip;
 		$_SESSION['product']['id']            = $pid;
@@ -258,6 +258,7 @@ class abApiCrm {
 		$_SESSION['product']['cat']           = $cats;
 		$_SESSION['product']['sg']            = $sg;
 		$_SESSION['product']['cat_products']  = $cproducts;
+		$_SESSION['product']['into_cart'] = true;
 
 		$this->initCookieForProduct();//preserve the session data for one hour
 	}
@@ -265,7 +266,7 @@ class abApiCrm {
 	/**
 	 * @param int $timeInSecs
 	 */
-	private function initCookieForProduct( $timeInSecs = 3600 ) {
+	public function initCookieForProduct( $timeInSecs = 3600 ) {
 		setcookie( "product", json_encode( $_SESSION['product'] ), time() + 3600 );
 	}
 
