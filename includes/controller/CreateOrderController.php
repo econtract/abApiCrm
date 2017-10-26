@@ -36,6 +36,7 @@ class CreateOrderController
         'client_birthplace'          => 'Hasselt',
         'client_nationality'         => 'BE',
         'client_idnr'                => 55555, // ID card Number
+        'client_rrnr'                => 55555, // Registry  Number
         'client_cellphone'           => '012457898',
         'client_landline'            => '',
         'client_fax'                 => '',
@@ -97,6 +98,8 @@ class CreateOrderController
         'install_type'              => 50,
         'iban'                      => 50,
         'sub_order'                 => '',
+        'accepted_terms'            => '',
+        'mnp'                       => '',
 
         // Invoice data
         'invoice_address_is'        => '',
