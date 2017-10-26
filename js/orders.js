@@ -21,7 +21,7 @@ function requiredFieldsFilled(inputForm) {
         }
 
         if (_.isEmpty(reqField.val())) {
-            //console.log(reqField.text(), reqField.attr('name'), "====>", reqField.val());
+            console.log(reqField.text(), reqField.attr('name'), "====>", reqField.val());
             filled = false;
         }
     });
