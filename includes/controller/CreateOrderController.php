@@ -97,6 +97,8 @@ class CreateOrderController
         'install_type'              => 50,
         'iban'                      => 50,
         'sub_order'                 => '',
+        'accepted_terms'            => '',
+        'mnp'                       => '',
 
         // Invoice data
         'invoice_address_is'        => '',
