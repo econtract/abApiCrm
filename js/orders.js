@@ -104,6 +104,7 @@ jQuery(document).ready(function ($) {
                     '<p>' + jsonRes.api_resp_trans + '</p>' +
                     '</div>';
             }
+            hideAlertMessages();
             $('#ModalCheckAvailability .modal-body').append(html);
         });
     });
@@ -142,6 +143,7 @@ jQuery(document).ready(function ($) {
                         '<a href="#" class="close" data-dismiss="alert">×</a>' +
                         val + '</div>');
                 });
+                hideAlertMessages();
             }
         });
     });
