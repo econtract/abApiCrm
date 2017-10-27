@@ -51,7 +51,7 @@ class abApiCrm {
 	function enqueueScripts() {
 
 		wp_enqueue_script( 'crm-script-callMeBack', plugins_url( '/js/callMeBack.js', __FILE__ ), array( 'jquery' ) );
-		wp_enqueue_script( 'crm-script-orders', plugins_url( '/js/orders.js', __FILE__ ), array( 'jquery' ), '1.7.0' );
+		wp_enqueue_script( 'crm-script-orders', plugins_url( '/js/orders.js', __FILE__ ), array( 'jquery' ), '1.7.1' );
 
 		// in JavaScript, object properties are accessed as ajax_object.ajax_url, ajax_object.we_value
 		//The object will be created before including callMeBack.js so its sufficient for orders.js too, there is no need to include it again
@@ -250,7 +250,7 @@ class abApiCrm {
 		$_SESSION['product']['id']            = $pid;
 		$_SESSION['product']['slug']          = $pslug;
 		$_SESSION['product']['name']          = $pname;
-		$_SESSION['product']['type']          = $ptype;
+		$_SESSION['product']['type']          = empty($ptype) ? 'internet' : $ptype;
 		$_SESSION['product']['lang']          = $lang;
 		$_SESSION['product']['provider_id']   = $prvid;
 		$_SESSION['product']['provider_slug'] = $prvslug;
