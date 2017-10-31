@@ -150,8 +150,11 @@ class CreateOrderController
             $this->data['client_family_size'] = !empty($this->params['client_family_size']) ? $this->params['client_family_size'] : 0;
         }
 
-        $this->extractOptions();
+        if (array_key_exists('accepted_terms', $this->data)) {
+            $this->data['accepted_terms'] = !empty($this->params['accepted_terms']) ? $this->params['accepted_terms'] : 0;
+        }
 
+        $this->extractOptions();
     }
 
     public function send()
