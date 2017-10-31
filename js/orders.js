@@ -290,7 +290,7 @@ jQuery(document).ready(function ($) {
                 return false;
             }*/
             console.log("current***", current);
-            var ajaxUrl = site_obj.ajax_url + '?action=ajaxQueryToolboxAPi&query_method=' + current.attr('query_method') +
+            var ajaxUrl = site_obj.ajax_url + '?action=ajaxQueryToolboxApi&query_method=' + current.attr('query_method') +
                 "&query_params[" + current.attr('query_key') + "]=" + query;
 
             //check if there are any parent params to be included
