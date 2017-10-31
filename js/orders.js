@@ -274,4 +274,102 @@ jQuery(document).ready(function ($) {
             $('#client_rrnr').attr('required', true);
         }
     });
+
+    //autocomplete
+
+    $('.typeahead').typeahead({
+        name: 'id',
+        display: 'name',
+        delay: 750,//will ensure that the request goes after 750 ms delay so that there are no multipe ajax calls while user is typing
+        source: function (query, process) {
+            //console.log("Another ajax***");
+            var current = $(document.activeElement);
+
+            /*if(current.val() == query) {//if field value and new query have same input don't send ajax request
+                console.log("Blocking new request*****");
+                return false;
+            }*/
+            console.log("current***", current);
+            var ajaxUrl = site_obj.ajax_url + '?action=ajaxQueryToolboxAPi&query_method=' + current.attr('query_method') +
+                "&query_params[" + current.attr('query_key') + "]=" + query;
+
+            //check if there are any parent params to be included
+            var extraQueryParams = '';
+            if(!_.isEmpty(current.attr('parent_query_key1'))) {
+                extraQueryParams += '&query_params[' + current.attr('parent_query_key1') + ']=' +
+                    $('#' + current.attr('parent_query_key1_id')).val();
+            }
+
+            if(!_.isEmpty(current.attr('parent_query_key2'))) {
+                extraQueryParams += '&query_params[' + current.attr('parent_query_key2') + ']=' +
+                    $('#' + current.attr('parent_query_key2_id')).val();
+            }
+
+            ajaxUrl += extraQueryParams;
+
+            return $.get(ajaxUrl, function (data) {
+                var jsonData = JSON.parse(data);
+
+                /**
+                 * Preparing data in following format
+                 * [
+                 {id: "5400", name: "5400 Text"},
+                 {id: "3500", name: "3500 Text"},
+                 {id: "4500", name: "4500 Text"}
+                 ]
+                 */
+
+                var prepareData = [];
+                for (var prop in jsonData) {
+                    var propVal = jsonData[prop][current.attr('query_key')];
+                    var queryKeyExist = false;
+                    if (!_.isEmpty(jsonData[prop][current.attr('query_name_key1')])) {
+                        queryKeyExist = true;
+                        propVal += " - " + jsonData[prop][current.attr('query_name_key1')];
+                    }
+
+                    if (!_.isEmpty(jsonData[prop][current.attr('query_name_key2')])) {
+                        queryKeyExist = true;
+                        propVal += " (" + jsonData[prop][current.attr('query_name_key2')] + ")";
+                    }
+
+                    if (!queryKeyExist) {
+                        propVal += " - " + jsonData[prop]['name'];
+                    }
+
+                    //propVal += (!_.isEmpty(jsonData[prop]['name'])) ? jsonData[prop]['name'] : jsonData[prop][current.attr('query_name_key1')];
+                    //propVal = jsonData[prop][current.attr('query_key')] + " - " + propVal;
+                    //console.log("***propVal", propVal);
+                    prepareData.push({
+                        id: jsonData[prop][current.attr('query_key')],
+                        name: jsonData[prop][current.attr('query_key')],
+                        value: propVal
+                    });
+                }
+                //console.log("prepData***", prepareData);
+                return process(prepareData);
+            });
+        },
+        displayText: function(item) {
+            //console.log("****label:", item);
+            //console.log("***elem:", this.$element);
+            return item.value;
+        },
+        afterSelect: function(selectedItem) {
+            //this.$element[0].value = item.value
+            this.$element[0].value = selectedItem.id;
+            //console.log("***selectedItem", selectedItem);
+        }
+    });
+    /*$('.typeahead').change(function (activeObj) {
+        console.log("Changed***");
+        var current = $('.typeahead').typeahead("getActive");
+        var active_input = $(activeObj.target);
+        console.log("curr***", current);
+        if (current) {
+            active_input.val(current.id);
+        }
+        //$('.typeahead').typeahead('close');
+    });*/
+    //autocomplete ends here
 });
