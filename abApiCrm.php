@@ -51,7 +51,11 @@ class abApiCrm {
 	function enqueueScripts() {
 
 		wp_enqueue_script( 'crm-script-callMeBack', plugins_url( '/js/callMeBack.js', __FILE__ ), array( 'jquery' ) );
-		wp_enqueue_script( 'crm-script-orders', plugins_url( '/js/orders.js', __FILE__ ), array( 'jquery' ), '1.7.2' );
+		wp_enqueue_script( 'crm-script-orders', plugins_url( '/js/orders.js', __FILE__ ), array(
+			'jquery',
+			'jquery-bootstrap-typeahead',
+			'aanbieder_default_script'
+		), '1.7.3' );
 
 		// in JavaScript, object properties are accessed as ajax_object.ajax_url, ajax_object.we_value
 		//The object will be created before including callMeBack.js so its sufficient for orders.js too, there is no need to include it again
@@ -271,6 +275,7 @@ class abApiCrm {
 	}
 
 	/**
+	 * Ajax method
 	 * Saves simple order form that, simple for are those using plain names in fields not arrays e.g. it'll be user_name but not user['name']
 	 */
 	public function saveSimpleOrder() {
@@ -311,6 +316,9 @@ class abApiCrm {
 		wp_die();
 	}
 
+	/**
+	 * Ajax method
+	 */
 	public function removeSubOrder() {
 		$res = ['success' => false, 'msg' => pll__("The order was not removed, please try again.")];
 
@@ -339,5 +347,4 @@ class abApiCrm {
 		echo json_encode($res);
 		wp_die();
 	}
-
 }
