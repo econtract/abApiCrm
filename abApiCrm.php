@@ -55,7 +55,7 @@ class abApiCrm {
 			'jquery',
 			'jquery-bootstrap-typeahead',
 			'aanbieder_default_script'
-		), '1.7.3', true );
+		), '1.7.4', true );
 
 		// in JavaScript, object properties are accessed as ajax_object.ajax_url, ajax_object.we_value
 		//The object will be created before including callMeBack.js so its sufficient for orders.js too, there is no need to include it again
@@ -66,7 +66,8 @@ class abApiCrm {
 				'contact_trans'     => pll__( 'Or contact us directly' ),
 				'change_zip_trans'  => pll__( 'Change zip code' ),
 				'api_resp_trans'    => pll__( 'Something went wrong as API is not responding!' ),
-				'req_fields_filled' => pll__( 'Make sure all required fields are filled' )
+				'req_fields_filled' => pll__( 'Make sure all required fields are filled' ),
+				'idcard_error'      => pll__('Please enter your ID card number'),
 			)
 		);
 	}

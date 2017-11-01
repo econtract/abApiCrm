@@ -255,24 +255,30 @@ jQuery(document).ready(function ($) {
 
     $("input[name=client_nationality]").on('change', function() {
         var nat = $(this).val();
+        var natParent = $('#client_idnr').parents('div.form-group');
+        var prevIdnrVal = $('#client_idnr').val();
 
         if(nat == 'BE') {
-            $('#client_idnr').parents('li').removeClass('hidden');
-            $('#client_idnr').removeAttr('disabled');
-            $('#client_idnr').attr('required', true);
-
-            $('#client_rrnr').parents('li').addClass('hidden');
-            $('#client_rrnr').attr('disabled', true);
-            $('#client_rrnr').removeAttr('required');
+            $('#client_idnr').addClass('hasMask');
+            //$('#client_idnr').attr('data-mask', '999-9999999-99');
+            $('#client_idnr').mask("999-9999999-99");
         } else {
-            $('#client_idnr').parents('li').addClass('hidden');
-            $('#client_idnr').attr('disabled', true);
-            $('#client_idnr').removeAttr('required');
+            $('#client_idnr').remove();//Removing because unmask doesn't work well, as all of unmasking methods don't work reliably
+            /*$('#client_idnr').removeClass('hasMask');
+            $('#client_idnr').removeAttr('data-mask');
+            $('#client_idnr').mask();
+            $('#client_idnr').unmask("999-9999999-99");
+            $('#client_idnr').unmask();
+            $('#client_idnr').trigger("unmask");
 
-            $('#client_rrnr').parents('li').removeClass('hidden');
-            $('#client_rrnr').removeAttr('disabled', true);
-            $('#client_rrnr').attr('required', true);
+            $('#client_idnr').trigger('unmask.bs.inputmask');*/
+
+            natParent.prepend('<input type="text" class="form-control" ' +
+                'id="client_idnr" name="client_idnr" placeholder="591-0123456-78" ' +
+                'value="' + prevIdnrVal + '" data-error="' + site_obj.idcard_error + '" required>');
+            //console.log(natParent);
         }
+        $(this).parents('form').validator('update');
     });
 
     //autocomplete
