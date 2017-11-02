@@ -266,7 +266,7 @@ class abApiCrm {
 		$_SESSION['product']['cat_products']  = $cproducts;
 		$_SESSION['product']['into_cart'] = true;
 
-		$this->initCookieForProduct();//preserve the session data for one hour
+		//$this->initCookieForProduct();//preserve the session data for one hour
 	}
 
 	/**
@@ -274,6 +274,13 @@ class abApiCrm {
 	 */
 	public function initCookieForProduct( $timeInSecs = 3600 ) {
 		setcookie( "product", json_encode( $_SESSION['product'] ), time() + 3600 );
+	}
+
+	/**
+	 * Will store information of the active product in the checkout process
+	 */
+	public function checkoutActiveProduct($orderId, $productData) {
+		update_post_meta($orderId, 'checkout_active_product', json_encode($productData));
 	}
 
 	/**
