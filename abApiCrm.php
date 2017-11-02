@@ -251,6 +251,7 @@ class abApiCrm {
 	 */
 	public function initSessionForProduct( $zip, $pid, $pslug, $pname, $ptype, $lang, $prvid, $prvslug, $prvname, $cats, $sg, $cproducts ) {
 		unset( $_SESSION['order'] );
+		unset( $_SESSION['product'] );
 		$_SESSION['product']['zip']           = $zip;
 		$_SESSION['product']['id']            = $pid;
 		$_SESSION['product']['slug']          = $pslug;
