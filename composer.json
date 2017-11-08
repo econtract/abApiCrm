@@ -16,7 +16,7 @@
 
   "require": {
     "php": ">=5.6",
-    "econtract/crm": "3.*"
+    "econtract/crm": "4.*"
   }
 }
 
