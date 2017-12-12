@@ -283,7 +283,7 @@ jQuery(document).ready(function ($) {
 
     //autocomplete
 
-    $('.typeahead').typeahead({
+    $('#personal_info_form .typeahead').typeahead({
         name: 'id',
         display: 'name',
         delay: 300,//will ensure that the request goes after 300 ms delay so that there are no multipe ajax calls while user is typing
