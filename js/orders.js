@@ -286,7 +286,7 @@ jQuery(document).ready(function ($) {
     $('.typeahead').typeahead({
         name: 'id',
         display: 'name',
-        delay: 450,//will ensure that the request goes after 750 ms delay so that there are no multipe ajax calls while user is typing
+        delay: 300,//will ensure that the request goes after 300 ms delay so that there are no multipe ajax calls while user is typing
         source: function (query, process) {
             //console.log("Another ajax***");
             var current = $(document.activeElement);
