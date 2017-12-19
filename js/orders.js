@@ -200,6 +200,14 @@ jQuery(document).ready(function ($) {
         }
     });
 
+    //trigger save options button automatically on clicking delivery button
+    $("body").on('click', '#order-delivery-btn', function(e) {
+        e.preventDefault();//stop click to follow href
+        $('#btn-save-options').trigger('click');
+        //now when the data is saved it's time to initiate redirect to the next page
+        window.location = $(this).attr('href');
+    });
+
     //control delivery form submit button
     $("#delivery_form").on("change", function () {
         var inputForm = $(this).parents('form');
