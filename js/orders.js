@@ -310,8 +310,12 @@ jQuery(document).ready(function ($) {
             //check if there are any parent params to be included
             var extraQueryParams = '';
             if(!_.isEmpty(current.attr('parent_query_key1'))) {
-                extraQueryParams += '&query_params[' + current.attr('parent_query_key1') + ']=' +
-                    $('#' + current.attr('parent_query_key1_id')).val();
+                var extraFirstVal = $('#' + current.attr('parent_query_key1_id')).val();
+                //Zipcode can be with city name like "3500 - Hasselt"
+                if(extraFirstVal.indexOf(" - ") !== -1) {
+                    extraFirstVal = extraFirstVal.split(" - ")[0];
+                }
+                extraQueryParams += '&query_params[' + current.attr('parent_query_key1') + ']=' + extraFirstVal;
             }
 
             if(!_.isEmpty(current.attr('parent_query_key2'))) {
@@ -371,7 +375,14 @@ jQuery(document).ready(function ($) {
         },
         afterSelect: function(selectedItem) {
             //this.$element[0].value = item.value
-            this.$element[0].value = selectedItem.id;
+            var keepVal = selectedItem.id;
+
+            //keep value if it has " - " pattern in it otherwise id
+            if(selectedItem.value.indexOf(" - ") !== -1) {
+                keepVal = selectedItem.value;
+            }
+
+            this.$element[0].value = keepVal;
             //console.log("***selectedItem", selectedItem);
         }
     });
