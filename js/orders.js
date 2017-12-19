@@ -279,7 +279,7 @@ jQuery(document).ready(function ($) {
             $('#client_idnr').unmask();
             $('#client_idnr').trigger("unmask");
 
-            $('#client_idnr').trigger('unmask.bs.inputmask');*!/
+            $('#client_idnr').trigger('unmask.bs.inputmask');*/
 
             natParent.prepend('<input type="text" class="form-control" ' +
                 'id="client_idnr" name="client_idnr" placeholder="591-0123456-78" ' +
@@ -287,7 +287,7 @@ jQuery(document).ready(function ($) {
             //console.log(natParent);
         }
         $(this).parents('form').validator('update');
-    });*/
+    });
 
     //autocomplete
 
