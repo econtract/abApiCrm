@@ -50,7 +50,7 @@ class abApiCrm {
 	 */
 	function enqueueScripts() {
 
-		wp_enqueue_script( 'crm-script-callMeBack', plugins_url( '/js/callMeBack.js', __FILE__ ), array( 'jquery' ), '1.0.0', true );
+		wp_enqueue_script( 'crm-script-callMeBack', plugins_url( '/js/callMeBack.js', __FILE__ ), array( 'jquery' ), '1.0.1', true );
 		wp_enqueue_script( 'crm-script-orders', plugins_url( '/js/orders.js', __FILE__ ), array(
 			'jquery',
 			'jquery-bootstrap-typeahead',
