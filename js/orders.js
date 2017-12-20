@@ -193,11 +193,15 @@ jQuery(document).ready(function ($) {
 
         if (parseInt(selectedType) === 1) {
             targetForm.find('input[name=mobile_donor_client_nr]').removeAttr('disabled');
+            targetForm.find('input[name=mobile_donor_client_nr]').attr('required', 'required');
         } else {
+            targetForm.find('#mobile_donor_client_nr').val("");
+            targetForm.find('input[name=mobile_donor_client_nr]').removeAttr('required');
             targetForm.find('input[name=mobile_donor_client_nr]').attr('disabled', 'true');
             //reset its value to empty so that it may not get submitted
-            targetForm.find('#mobile_donor_client_nr').val("");
         }
+
+        targetForm.validator('validate');
     });
 
     //trigger save options button automatically on clicking delivery button
