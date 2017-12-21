@@ -189,15 +189,15 @@ jQuery(document).ready(function ($) {
     //on changing mobile type to prepaid hide account number, whereas on postpaid show it
     $("body").on('change', '.order-simple-form select[name=mobile_donor_type]', function () {
         var targetForm = $(this).parents('.order-simple-form');
-        var mobileDonor_nr =targetForm.find('input[name=mobile_donor_client_nr]')
+        var mobileDonorNr =targetForm.find('input[name=mobile_donor_client_nr]')
         var selectedType = $(this).val();
 
         if (parseInt(selectedType) === 1) {
-            mobileDonor_nr
+            mobileDonorNr
                 .removeAttr('disabled')
                 .attr('required', 'required');
         } else {
-            mobileDonor_nr
+            mobileDonorNr
                 .val("")
                 .removeAttr('required')
                 .attr('disabled', 'true');
@@ -205,7 +205,7 @@ jQuery(document).ready(function ($) {
         }
 
         targetForm.validator('update');
-        mobileDonor_nr.trigger('input');
+        mobileDonorNr.trigger('input');
     });
 
     //trigger save options button automatically on clicking delivery button
