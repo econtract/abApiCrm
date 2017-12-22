@@ -262,7 +262,7 @@ jQuery(document).ready(function ($) {
             $('#iban').parents('li').addClass('hidden');
             $('#iban').attr('disabled', true);
         }
-        selectedField.parents('form').validator('validate');
+        selectedField.parents('form').validator('update');
     });
 
     $("input[name=iban]").on('change', function () {
