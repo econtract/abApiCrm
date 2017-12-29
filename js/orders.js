@@ -398,6 +398,20 @@ jQuery(document).ready(function ($) {
             //console.log("***selectedItem", selectedItem);
         }
     });
+
+    $("body").on('change', '.update-price', function () {
+        var currAttr = $(this);
+        var attrName = currAttr.attr("name");
+        var attrVal = currAttr.val();
+        var pbsKey = currAttr.attr("extra_pid");
+
+        if(pbsKey == 'extra_pid[]') {//this means we need to combine two values like mobile|213
+            attrVal = 'mobile|' + attrVal;
+        }
+
+        //TODO: Now its time to get all the existing params for PBS except from empty ones then append the Above values to that.
+    });
+
     /*$('.typeahead').change(function (activeObj) {
         console.log("Changed***");
         var current = $('.typeahead').typeahead("getActive");
