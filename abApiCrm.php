@@ -68,6 +68,7 @@ class abApiCrm {
 				'api_resp_trans'    => pll__( 'Something went wrong as API is not responding!' ),
 				'req_fields_filled' => pll__( 'Make sure all required fields are filled' ),
 				'idcard_error'      => pll__('Please enter your ID card number'),
+				'template_uri'      => get_template_directory_uri()
 			)
 		);
 	}

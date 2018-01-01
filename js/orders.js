@@ -399,17 +399,45 @@ jQuery(document).ready(function ($) {
         }
     });
 
+    //code to update cart
     $("body").on('change', '.update-price', function () {
-        var currAttr = $(this);
-        var attrName = currAttr.attr("name");
-        var attrVal = currAttr.val();
-        var pbsKey = currAttr.attr("extra_pid");
+        var allAttrs = '';
+        $('.CostWrap').html('<div class="ajaxIconWrapper"><div class="ajaxIcon"><img src="'+site_obj.template_uri+'/images/common/icons/ajaxloader.png" alt="Loading..."></div></div>');
+        //getting all applicable variable's values to update the cart
+        $('.update-price:not(.hidden):not(:radio):not(:checkbox):not(:disabled), ' +
+            '.update-price:input:radio:checked:not(:disabled), ' +
+            '.update-price:input:checkbox:checked:not(:disabled)').each(function(idx, val){
+            if(allAttrs.length >= 1) {
+                allAttrs += '&';
+            }
+            var currAttr = $(val);
+            var attrVal = currAttr.val();
+            var pbsKey = currAttr.attr("pbs_key");
+            var attrName = currAttr.attr("name");
 
-        if(pbsKey == 'extra_pid[]') {//this means we need to combine two values like mobile|213
-            attrVal = 'mobile|' + attrVal;
-        }
+            if(pbsKey == 'extra_pid[]') {//this means we need to combine two values like mobile|213
+                attrVal = 'mobile|' + attrVal;
+                attrName = 'extra_pid[]';
+            }
+            else if(pbsKey.length >= 1) {//use the name as pbsKey
+                attrName = pbsKey;
+            }
 
-        //TODO: Now its time to get all the existing params for PBS except from empty ones then append the Above values to that.
+            allAttrs += attrName + '=' + attrVal;
+        });
+
+        //appending remaining variables which are required to grab the updated cart
+        allAttrs += '&prt=' + $('#prt').val();
+        allAttrs += '&pid=' + $('#pid').val();
+        allAttrs += '&action=ajaxProductPriceBreakdownHtml';
+
+        console.log("Url:", allAttrs);
+
+        //data is now ready time to send an AJAX request
+        $.post(site_obj.ajax_url, allAttrs, function (response) {
+            console.log(response);
+            $('.CostWrap').replaceWith(response);
+        });
     });
 
     /*$('.typeahead').change(function (activeObj) {
