@@ -431,11 +431,8 @@ jQuery(document).ready(function ($) {
         allAttrs += '&pid=' + $('#pid').val();
         allAttrs += '&action=ajaxProductPriceBreakdownHtml';
 
-        console.log("Url:", allAttrs);
-
         //data is now ready time to send an AJAX request
         $.post(site_obj.ajax_url, allAttrs, function (response) {
-            console.log(response);
             $('.CostWrap').replaceWith(response);
         });
     });
