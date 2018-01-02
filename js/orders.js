@@ -211,9 +211,12 @@ jQuery(document).ready(function ($) {
     //trigger save options button automatically on clicking delivery button
     $("body").on('click', '#order-delivery-btn', function(e) {
         e.preventDefault();//stop click to follow href
+        var currAttr = $(this);
         $('#btn-save-options').trigger('click');
         //now when the data is saved it's time to initiate redirect to the next page
-        window.location = $(this).attr('href');
+        setTimeout(function() {
+            window.location = currAttr.attr('href');
+        }, 1000);
     });
 
     //control delivery form submit button
