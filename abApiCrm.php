@@ -267,6 +267,9 @@ class abApiCrm {
 		$_SESSION['product']['cat_products']  = $cproducts;
 		$_SESSION['product']['into_cart'] = true;
 
+		//create a refferer link
+		$_SESSION['HTTP_REFERER'] = isset($_SERVER['HTTP_REFERER']) || !empty($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
+
 		//$this->initCookieForProduct();//preserve the session data for one hour
 	}
 
