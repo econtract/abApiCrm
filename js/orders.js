@@ -415,10 +415,21 @@ jQuery(document).ready(function ($) {
             var currAttr = $(val);
             var attrVal = currAttr.val();
             var pbsKey = currAttr.attr("pbs_key");
+            var pbsVal = '';
+
+            if(this.hasAttribute("pbs_val")) {
+                pbsVal = currAttr.attr("pbs_val");
+                if(pbsVal.length >= 1) {
+                    attrVal = pbsVal;
+                }
+            }
+
             var attrName = currAttr.attr("name");
 
             if(pbsKey == 'extra_pid[]') {//this means we need to combine two values like mobile|213
-                attrVal = 'mobile|' + attrVal;
+                if(attrVal.indexOf('mobile') === -1) {//only append when this text is not already in there
+                    attrVal = 'mobile|' + attrVal;
+                }
                 attrName = 'extra_pid[]';
             }
             else if(pbsKey.length >= 1) {//use the name as pbsKey
