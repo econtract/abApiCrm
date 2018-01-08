@@ -409,11 +409,14 @@ jQuery(document).ready(function ($) {
         $('.update-price:not(.hidden):not(:radio):not(:checkbox):not(:disabled), ' +
             '.update-price:input:radio:checked:not(:disabled), ' +
             '.update-price:input:checkbox:checked:not(:disabled)').each(function(idx, val){
+            var currAttr = $(val);
+            var attrVal = currAttr.val();
+            if(attrVal == '') {//in case of empty value move on
+                return;
+            }
             if(allAttrs.length >= 1) {
                 allAttrs += '&';
             }
-            var currAttr = $(val);
-            var attrVal = currAttr.val();
             var pbsKey = currAttr.attr("pbs_key");
             var pbsVal = '';
 
