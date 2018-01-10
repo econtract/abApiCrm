@@ -216,7 +216,7 @@ jQuery(document).ready(function ($) {
         //now when the data is saved it's time to initiate redirect to the next page
         setTimeout(function() {
             window.location = currAttr.attr('href');
-        }, 1000);
+        }, 1500);
     });
 
     //control delivery form submit button
