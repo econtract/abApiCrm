@@ -453,6 +453,23 @@ jQuery(document).ready(function ($) {
         });
     });
 
+    $('body').on('change', 'input[name="install_type"]', function(){
+
+        var _self = $(this);
+        var option = parseInt(_self.val());
+
+        if(option === 1){ //DIY
+            _self.parents('form').find('.packageInstallation').removeClass('show');
+            _self.parents('form').find('.packageInstallation.package_DIY').addClass('show');
+        }
+
+        else if(option === 2){ //DAI
+            _self.parents('form').find('.packageInstallation').removeClass('show');
+            _self.parents('form').find('.packageInstallation.package_DAI').addClass('show');
+        }
+
+    });
+
     /*$('.typeahead').change(function (activeObj) {
         console.log("Changed***");
         var current = $('.typeahead').typeahead("getActive");
