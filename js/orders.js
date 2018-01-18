@@ -21,7 +21,7 @@ function requiredFieldsFilled(inputForm) {
         }
 
         if (_.isEmpty(reqField.val())) {
-            console.log(reqField.text(), reqField.attr('name'), "====>", reqField.val());
+            /*console.log(reqField.text(), reqField.attr('name'), "====>", reqField.val());*/
             filled = false;
         }
     });
@@ -189,23 +189,28 @@ jQuery(document).ready(function ($) {
     //on changing mobile type to prepaid hide account number, whereas on postpaid show it
     $("body").on('change', '.order-simple-form select[name=mobile_donor_type]', function () {
         var targetForm = $(this).parents('.order-simple-form');
-        var mobileDonorNr =targetForm.find('input[name=mobile_donor_client_nr]')
+        var mobileDonorNr =targetForm.find('input[name=mobile_donor_client_nr]');
+        var compulsoryStar = mobileDonorNr.siblings('.form-control-feedback');
         var selectedType = $(this).val();
 
         if (parseInt(selectedType) === 1) {
             mobileDonorNr
                 .removeAttr('disabled')
                 .attr('required', 'required');
+
+            compulsoryStar.addClass('staricicon');
         } else {
             mobileDonorNr
                 .val("")
                 .removeAttr('required')
                 .attr('disabled', 'true');
+
+            compulsoryStar.removeClass('staricicon');
             //reset its value to empty so that it may not get submitted
         }
 
         targetForm.validator('update');
-        mobileDonorNr.trigger('input');
+        /*mobileDonorNr.trigger('input');*/
     });
 
     //trigger save options button automatically on clicking delivery button
