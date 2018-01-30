@@ -25,7 +25,7 @@ class CreateOrderController
      *
      * these values are just an example (i-e to have that kind of data set)
      */
-    protected static $default_fields = [
+    /*protected static $default_fields = [
 
         // Client data
         'client_gender'              => 1,
@@ -105,11 +105,8 @@ class CreateOrderController
         'invoice_address_is'        => '',
 
         // IDTV data
-        /**
-         * Todo : IDTV data will be under options
-         */
 
-    ];
+    ];*/
 
 
     public function __construct($params, $user_id = null, $address_id = null, $address_invoice_id = null)
@@ -127,9 +124,11 @@ class CreateOrderController
     protected function prepareParameters()
     {
 
-        foreach( self::$default_fields as $key => $paraKey ){
+        /*foreach( self::$default_fields as $key => $paraKey ){
             $this->data[$key] = ( isset( $this->params[$key]) ) ? $this->params[$key] : '';
-        }
+        }*/
+
+	    $this->data = $this->params;//TODO params can be cleaned at this point
 
         $this->data['ip_address'] = $_SERVER['REMOTE_ADDR'];
         $this->data['affiliate_id'] = $this->params['client_language'] == 'nl' ? 1 : 4;
