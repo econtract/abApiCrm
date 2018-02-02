@@ -54,8 +54,30 @@ function enableDisableFormNextStep(targetStep) {
     }
 }
 
-jQuery(document).ready(function ($) {
+function submitValidFormValues(form) {
+    var $ = jQuery;
+    var formElements = form.serializeArray();
 
+    var formCleanElements = formElements.filter(function(elem) {
+        //console.log("9999999**", $('[name='+elem.name+']').parents('.has-feedback'));
+        if(!_.isEmpty(elem.value)) {
+            if(!$('[name='+elem.name+']').parents('.has-feedback').hasClass('has-error')) {
+                return elem;
+            }
+        }
+    });
+
+    $.post(site_obj.ajax_url, formElements, function (response) {
+        var jsonRes = JSON.parse(response);
+        if (jsonRes.success == true || jsonRes.success.toString() == "no-update") {
+            //nothing to do at the moment...
+        }
+    });
+}
+
+jQuery(document).ready(function ($) {
+    var activeLink = location.pathname;
+    var activeLinkHash = activeLink.split('/').join('-')+'-last-active-form-id';
 
     $("#ModalCheckAvailability form").submit(function (e) {
 
@@ -149,8 +171,10 @@ jQuery(document).ready(function ($) {
     });
 
     //on chaning simple form values by ignoring hidden fields control the behavior of submit button
+    //At this place also save the changed values, to preserve them
     $("body").on('change', '.order-simple-form', function (e) {
         var inputForm = $(this);
+        submitValidFormValues(inputForm);
         var filled = requiredFieldsFilled(inputForm);
         if (filled === true) {
             inputForm.find('input[type=submit]').removeClass('disabled');
@@ -159,7 +183,26 @@ jQuery(document).ready(function ($) {
             inputForm.find('.next-step-btn a').addClass('disabled');
             inputForm.find('input[type=submit]').addClass('disabled');
         }
+        //console.log("URL String***", window.location.search, location.search);
+        //console.log("***", window.location.search);
+        //saving cookie for one hour so user can be resumed from same form which he was filling
+        wpCookies.set(activeLinkHash, inputForm.attr('id'), 600);//preserving the last edit form for 10 minutes
     });
+
+    $("body").on('click', '.order-simple-form', function (e) {//changing last active form on click
+        var inputForm = $(this);
+        //saving cookie for one hour so user can be resumed from same form which he was filling
+        wpCookies.set(activeLinkHash, inputForm.attr('id'), 600);//preserving the last edit form for 10 minutes
+    });
+
+    //getting cookie values to activate any previously focused form
+    var savedCookieFormId = wpCookies.get(activeLinkHash);
+    if(savedCookieFormId) {
+        //check if there are multiple forms in that case active and inactive will be applicable as if there is only one form it'll always be active :)
+        if(jQuery('form').length >= 2) {
+            $('#'+savedCookieFormId).parents('.form-type').removeClass('filled').addClass('active');
+        }
+    }
 
     //check all forms if everything required is filled enable delivery step
     $('body').on('click', '.next-step-btn a', function (e) {
