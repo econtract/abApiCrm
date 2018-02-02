@@ -199,7 +199,7 @@ jQuery(document).ready(function ($) {
     var savedCookieFormId = wpCookies.get(activeLinkHash);
     if(savedCookieFormId) {
         //check if there are multiple forms in that case active and inactive will be applicable as if there is only one form it'll always be active :)
-        if(jQuery('form').length >= 2) {
+        if(jQuery('form:not(.hidden)').length >= 2) {
             $('#'+savedCookieFormId).parents('.form-type').removeClass('filled').addClass('active');
         }
     }
