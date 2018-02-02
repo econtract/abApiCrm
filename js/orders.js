@@ -261,6 +261,10 @@ jQuery(document).ready(function ($) {
         e.preventDefault();//stop click to follow href
         var currAttr = $(this);
         $('#btn-save-options').trigger('click');
+
+        //now we are going to 3rd step that is delivery till now all the forms should be filled that's why now expire the last edit form cookie
+        wpCookies.set(activeLinkHash, '', 0);
+
         //now when the data is saved it's time to initiate redirect to the next page
         setTimeout(function() {
             window.location = currAttr.attr('href');
