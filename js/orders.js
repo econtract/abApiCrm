@@ -75,6 +75,22 @@ function submitValidFormValues(form) {
     });
 }
 
+function submitValidValuesWrapper(inputForm, activeLinkHash) {
+    submitValidFormValues(inputForm);
+    var filled = requiredFieldsFilled(inputForm);
+    if (filled === true) {
+        inputForm.find('input[type=submit]').removeClass('disabled');
+        inputForm.find('.next-step-btn a').removeClass('disabled');
+    } else {
+        inputForm.find('.next-step-btn a').addClass('disabled');
+        inputForm.find('input[type=submit]').addClass('disabled');
+    }
+    //console.log("URL String***", window.location.search, location.search);
+    //console.log("***", window.location.search);
+    //saving cookie for one hour so user can be resumed from same form which he was filling
+    wpCookies.set(activeLinkHash, inputForm.attr('id'), 600);//preserving the last edit form for 10 minutes
+}
+
 jQuery(document).ready(function ($) {
     var activeLink = location.pathname;
     var activeLinkHash = activeLink.split('/').join('-')+'-last-active-form-id';
@@ -174,19 +190,12 @@ jQuery(document).ready(function ($) {
     //At this place also save the changed values, to preserve them
     $("body").on('change', '.order-simple-form', function (e) {
         var inputForm = $(this);
-        submitValidFormValues(inputForm);
-        var filled = requiredFieldsFilled(inputForm);
-        if (filled === true) {
-            inputForm.find('input[type=submit]').removeClass('disabled');
-            inputForm.find('.next-step-btn a').removeClass('disabled');
-        } else {
-            inputForm.find('.next-step-btn a').addClass('disabled');
-            inputForm.find('input[type=submit]').addClass('disabled');
-        }
-        //console.log("URL String***", window.location.search, location.search);
-        //console.log("***", window.location.search);
-        //saving cookie for one hour so user can be resumed from same form which he was filling
-        wpCookies.set(activeLinkHash, inputForm.attr('id'), 600);//preserving the last edit form for 10 minutes
+        submitValidValuesWrapper(inputForm, activeLinkHash);
+    });
+
+    $("body").on('change', '.order-simple-form-nonajax', function (e) {
+        var inputForm = $(this);
+        submitValidValuesWrapper(inputForm, activeLinkHash);
     });
 
     $("body").on('click', '.order-simple-form', function (e) {//changing last active form on click
