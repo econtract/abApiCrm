@@ -181,16 +181,19 @@ class CreateOrderController
 
             if ($telephone && !is_null($telephone['options'])) {
                 $telOptions = $telephone['options'];
+                if(isset($telephone['groups'])) {
+	                $telOptions = array_merge($telOptions, $telephone['groups']);
+                }
             }
 
             if ($idtv && !is_null($idtv['options'])) {
                 $idtvOptions = $idtv['options'];
+	            if(isset($idtv['groups'])) {
+		            $idtvOptions = array_merge($idtvOptions, $idtv['groups']);
+	            }
             }
 
-            if ($telOptions && $idtvOptions) {
-                return $this->data['options'] = array_merge($telOptions, $idtvOptions);
-            }
-
+            return $this->data['options'] = array_merge($telOptions, $idtvOptions);
         }
     }
 
