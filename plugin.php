@@ -26,7 +26,7 @@
 
 namespace abApiCrm;
 
-include_once(WP_PLUGIN_DIR . "/wp-autoload/wpal-autoload.php" );
+include_once(WP_PLUGIN_DIR . "/wpal-autoload/wpal-autoload.php" );
 
 // If this file is accessed directory, then abort.
 if ( ! defined( 'WPINC' ) ) {
