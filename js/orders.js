@@ -88,7 +88,25 @@ function submitValidValuesWrapper(inputForm, activeLinkHash) {
     //console.log("URL String***", window.location.search, location.search);
     //console.log("***", window.location.search);
     //saving cookie for one hour so user can be resumed from same form which he was filling
-    wpCookies.set(activeLinkHash, inputForm.attr('id'), 600);//preserving the last edit form for 10 minutes
+    if(triggerSectionEdit() === false) {//if section edit not requested
+        wpCookies.set(activeLinkHash, inputForm.attr('id'), 600);//preserving the last edit form for 10 minutes
+    }
+}
+
+//The following code will make sure if someone comes back from confirmation step for editing data he see that portion in edit mode instead of summary
+function triggerSectionEdit() {
+    var url = window.location.href;
+    var urlArr = url.split('#');
+    if(urlArr.length === 2) {
+        var editSection = urlArr[1];
+        var targetEditLink = jQuery('#'+editSection).find('a.edit-data');
+        if(targetEditLink) {
+            targetEditLink.trigger('click');
+            return true;
+        }
+    }
+
+    return false;
 }
 
 jQuery(document).ready(function ($) {
@@ -201,7 +219,9 @@ jQuery(document).ready(function ($) {
     $("body").on('click', '.order-simple-form', function (e) {//changing last active form on click
         var inputForm = $(this);
         //saving cookie for one hour so user can be resumed from same form which he was filling
-        wpCookies.set(activeLinkHash, inputForm.attr('id'), 600);//preserving the last edit form for 10 minutes
+        if(triggerSectionEdit() === false) {//if section edit not requested
+            wpCookies.set(activeLinkHash, inputForm.attr('id'), 600);//preserving the last edit form for 10 minutes
+        }
     });
 
     //getting cookie values to activate any previously focused form
@@ -542,4 +562,7 @@ jQuery(document).ready(function ($) {
         //$('.typeahead').typeahead('close');
     });*/
     //autocomplete ends here
+
+    //The following code will make sure if someone comes back from confirmation step for editing data he see that portion in edit mode instead of summary
+    triggerSectionEdit();
 });
