@@ -113,7 +113,7 @@ jQuery(document).ready(function ($) {
     var activeLink = location.pathname;
     var activeLinkHash = activeLink.split('/').join('-')+'-last-active-form-id';
 
-    $("#ModalCheckAvailability form").submit(function (e) {
+    $("body").on('submit', '#ModalCheckAvailability form', function (e) {
 
         e.preventDefault();
         // get all the inputs into an array.
