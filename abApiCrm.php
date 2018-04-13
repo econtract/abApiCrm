@@ -56,7 +56,7 @@ class abApiCrm {
 			'jquery',
 			'jquery-bootstrap-typeahead',
 			'aanbieder_default_script'
-		), '1.7.20', true );
+		), '1.7.21', true );
 
 		// in JavaScript, object properties are accessed as ajax_object.ajax_url, ajax_object.we_value
 		//The object will be created before including callMeBack.js so its sufficient for orders.js too, there is no need to include it again
@@ -151,10 +151,15 @@ class abApiCrm {
 		$prvslug   = trim( sanitize_text_field( $_GET['prvslug'] ) );
 		$prvid     = intval( $_GET['prvid'] );
 		$sg        = trim( sanitize_text_field( $_GET['sg'] ) );
-		$cats      = $_GET['cat'];
+		$cats      = array_filter($_GET['cat']);
 		$cproducts = $_GET['cat_products'];
 		$action    = 'check_availability';
 		$response  = null;
+
+		if(empty($cats)) {
+			$cats[] = 'packs';
+		}
+
 		if ( empty( $zip ) || empty( $pid ) || empty( $lang ) || empty( $ptype ) ) {
 			$response = json_encode(
 				[
@@ -163,14 +168,17 @@ class abApiCrm {
 				]
 			);
 		} else {
-			global $post;
+			//global $post;
 			$parentSegment = getSectorOnCats( $cats );
 			$response      = file_get_contents( AB_CHK_AVL_URL . "?pid=$pid&zip=$zip&lang_mod=$lang&prt=$ptype&action=$action&rand=" . mt_rand() );
 			$jsonDecRes    = json_decode( $response );
 			if ( $jsonDecRes->available === false ) {
 				$catUrlPart = '';
 				foreach ( $cats as $cat ) {
-					$catUrlPart .= "cat[]=$cat&";
+					if($catUrlPart) {
+						$catUrlPart .= '&';
+					}
+					$catUrlPart .= "cat[]=$cat";
 				}
 				$urlParams             = "?$catUrlPart&zip=$zip&searchSubmit=&sg=$sg";
 				$urlParamsWithProvider = "$urlParams&pref_cs[]=$prvid";
