@@ -22,7 +22,7 @@ jQuery(document).ready(function($){
         };
 
         // We can also pass the url value separately from ajaxurl for front end AJAX implementations
-        jQuery.get(call_me_back_object.ajax_url, data, function(response) {
+        jQuery.get(site_obj.ajax_url, data, function(response) {
 
             if(response) {
                 $('#callMeBackSuccess').show();
