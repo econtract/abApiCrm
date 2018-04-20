@@ -122,6 +122,8 @@ jQuery(document).ready(function ($) {
             'action': 'checkAvailability',
         };
 
+        $('#ModalCheckAvailability').find('.modal-body').prepend('<div class="ajaxIconWrapper" style="margin:0; padding-top:0; padding-bottom:0;"><div class="ajaxIcon"><img src="'+site_obj.template_uri+'/images/common/icons/ajaxloader.png" alt="Loading..."></div></div>');
+
         // We can also pass the url value separately from ajaxurl for front end AJAX implementations
         $.get(site_obj.ajax_url + '?' + inputs, data, function (response) {
             var html;
@@ -130,6 +132,7 @@ jQuery(document).ready(function ($) {
             $('#ModalCheckAvailability .contact-lnk').remove();
             $('#ModalCheckAvailability .modal-list').remove();
             $('#ModalCheckAvailability .content-error').remove();
+            $('#ModalCheckAvailability .ajaxIconWrapper').remove();
             var jsonRes = false;
             if (response.length > 0) {
                 jsonRes = JSON.parse(response);
