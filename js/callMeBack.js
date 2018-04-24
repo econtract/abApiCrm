@@ -3,33 +3,45 @@ jQuery(document).ready(function($){
 
     $('#callMeBackSuccess').hide();
 
-    $( "#callMeLater" ).submit(function( event ) {
+    // $( "#callMeLater" ).submit(function( event ) {
+    $('#callMeLater').validator().on('submit', function (event) {
 
-        event.preventDefault();
+        var _self = $(this);
 
-        var values = {};
+        if (!event.isDefaultPrevented()) {
+            event.preventDefault();
 
-        // get all the inputs into an array.
-        var inputs = $( this ).serializeArray();
+            var mailForm = _self.parents('.mailForm');
+            var thankYouPanel = mailForm.siblings('.mailThankYou');
 
-        $.each( inputs, function( key, obj ) {
-            values[obj.name] = obj.value;
-        });
+            var values = {};
 
-        var data = {
-            'action'    : 'callMeBack',
-            'userInput' : values
-        };
+            // get all the inputs into an array.
+            var inputs = $( this ).serializeArray();
 
-        // We can also pass the url value separately from ajaxurl for front end AJAX implementations
-        jQuery.get(site_obj.ajax_url, data, function(response) {
+            $.each( inputs, function( key, obj ) {
+                values[obj.name] = obj.value;
+            });
 
-            if(response) {
-                $('#callMeBackSuccess').show();
-                $(this).siblings('input:text').val('');
-            }
+            var data = {
+                'action'    : 'callMeBack',
+                'userInput' : values
+            };
 
-        });
+            // We can also pass the url value separately from ajaxurl for front end AJAX implementations
+            jQuery.get(site_obj.ajax_url, data, function(response) {
+
+                if(response) {
+                    //$('#callMeBackSuccess').show();
+                    mailForm.addClass('hide');
+                    thankYouPanel.addClass('show');
+
+                    $(this).siblings('input:text').val('');
+                }
+
+            });
+        }
+
 
     });
 
