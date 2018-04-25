@@ -54,6 +54,8 @@ function enableDisableFormNextStep(targetStep) {
     }
 }
 
+var partialFormSubmit = null;
+
 function submitValidFormValues(form) {
     var $ = jQuery;
     var formElements = form.serializeArray();
@@ -61,17 +63,26 @@ function submitValidFormValues(form) {
     var formCleanElements = formElements.filter(function(elem) {
         //console.log("9999999**", $('[name='+elem.name+']').parents('.has-feedback'));
         if(!_.isEmpty(elem.value)) {
-            if(!$('[name='+elem.name+']').parents('.has-feedback').hasClass('has-error')) {
+            if(!$('[name="'+elem.name+'"]').parents('.has-feedback').hasClass('has-error')) {
                 return elem;
             }
         }
     });
 
-    $.post(site_obj.ajax_url, formElements, function (response) {
-        var jsonRes = JSON.parse(response);
-        if (jsonRes.success == true || jsonRes.success.toString() == "no-update") {
+    partialFormSubmit = $.ajax({
+        type: 'POST',
+        url: site_obj.ajax_url,
+        data: formElements,
+        beforeSend : function() {
+            if(partialFormSubmit != null) {
+                partialFormSubmit.abort();//if request already in process aboart that
+            }
+        },
+        success: function (response) {
             //nothing to do at the moment...
-        }
+        },
+        dataType: 'json',
+        async:true
     });
 }
 
@@ -190,7 +201,36 @@ jQuery(document).ready(function ($) {
 
         var data = formInputs;
 
-        $.post(site_obj.ajax_url, data, function (response) {
+        $.ajax({
+            type: 'POST',
+            url: site_obj.ajax_url,
+            data: data,
+            beforeSend : function() {
+                if(partialFormSubmit != null) {
+                    partialFormSubmit.abort();//if request already in process aboart that
+                }
+            },
+            success: function (response) {
+                //var jsonRes = JSON.parse(response);
+                var jsonRes = response;
+                if (jsonRes.success == true || jsonRes.success.toString() == "no-update") {
+                    //In case of mobile form trigger next button to open the next form
+                    self.parents('.form-type').find('.next-step-btn a').trigger('click');
+                    self.parents('.form-type').addClass('order-saved');
+                } else {
+                    $.each(jsonRes.errors, function(key, val) {
+                        self.append('<div class="alert alert-danger alert-dismissable">' +
+                            '<a href="#" class="close" data-dismiss="alert">×</a>' +
+                            val + '</div>');
+                    });
+                    hideAlertMessages();
+                }
+            },
+            dataType: 'json',
+            async:true
+        });
+
+        /*$.post(site_obj.ajax_url, data,  function (response) {
             var jsonRes = JSON.parse(response);
             if (jsonRes.success == true || jsonRes.success.toString() == "no-update") {
                 //In case of mobile form trigger next button to open the next form
@@ -532,8 +572,19 @@ jQuery(document).ready(function ($) {
         allAttrs += '&action=ajaxProductPriceBreakdownHtml';
 
         //data is now ready time to send an AJAX request
-        $.post(site_obj.ajax_url, allAttrs, function (response) {
+        /*$.post(site_obj.ajax_url, allAttrs, function (response) {
             $('.newCostCalc').replaceWith(response);
+        });*/
+
+        $.ajax({
+            type: 'POST',
+            url: site_obj.ajax_url,
+            data: allAttrs,
+            success: function (response) {
+                $('.newCostCalc').replaceWith(response);
+            },
+            dataType: 'text',//handle response as raw text without validating :)
+            async:true//do not block coming calls
         });
     });
 
