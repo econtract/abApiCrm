@@ -244,7 +244,7 @@ jQuery(document).ready(function ($) {
                 });
                 hideAlertMessages();
             }
-        });
+        });*/
     });
 
     //on chaning simple form values by ignoring hidden fields control the behavior of submit button
