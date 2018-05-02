@@ -120,6 +120,14 @@ function triggerSectionEdit() {
     return false;
 }
 
+function initAvailabilityToggle(){
+    jQuery('[data-toggle="availability-tooltip"]').tooltip({
+        animated: 'fade',
+        placement: 'bottom',
+        html: true
+    });
+}
+
 jQuery(document).ready(function ($) {
     var activeLink = location.pathname;
     var activeLinkHash = activeLink.split('/').join('-')+'-last-active-form-id';
@@ -176,6 +184,7 @@ jQuery(document).ready(function ($) {
             }
             hideAlertMessages();
             $('#ModalCheckAvailability .modal-body').append(html);
+            initAvailabilityToggle();
         });
     });
 

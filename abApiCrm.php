@@ -228,13 +228,13 @@ class abApiCrm {
 		return '<div class="modal-list">
 	                        <p>' . pll__( 'Be sure to check your infrastructure:' ) . '</p>
 	                        <ul class="list-unstyled bullet-list">
-	                            <li>' . pll__( 'Check internet cable' ) . '
+	                            <li>' . pll__( 'Check internet cable' ) . ' <span class="infoTip"><a href="#" data-toggle="availability-tooltip" title="<p>' . pll__( 'Lorem ipsum for internet cable' ) . ' </p>">?</a></span>
 	                                <!--div class="tooltip tooltip-info">
 	                                    <span class="tooltiptext"></span>
 	                                    <img src="' . get_bloginfo( 'template_url' ) . '/images/common/icons/question-mark.png" alt="icon">
 	                                </div-->
 	                            </li>
-	                            <li>' . pll__( 'Check phone line' ) . '
+	                            <li>' . pll__( 'Check phone line' ) . ' <span class="infoTip"><a href="#" data-toggle="availability-tooltip" title="<p>' . pll__( 'Lorem ipsum for phone line' ) . ' </p>">?</a></span>
 	                                <!--div class="tooltip tooltip-info">
 	                                    <span class="tooltiptext"></span>
 	                                    <img src="' . get_bloginfo( 'template_url' ) . '/images/common/icons/question-mark.png" alt="icon">
