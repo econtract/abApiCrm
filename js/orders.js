@@ -413,6 +413,8 @@ jQuery(document).ready(function ($) {
         if (parseInt(selectedVal) === 2) {
             $('#iban').parents('li').removeClass('hidden');
             $('#iban').removeAttr('disabled');
+            $('#iban').attr('required', true);
+
         }
         else if (parseInt(selectedVal) === 1) {
             if ($('#iban').hasClass('with-vir')) {
