@@ -186,8 +186,9 @@ class abApiCrm {
 				$jsonDecRes->html      = $this->availabilityErrorHtml( $parentSegment, $urlParamsWithProvider, $prvname, $urlParams );
 			}
 			if ( $jsonDecRes->available === true ) {
-				$this->initSessionForProduct( $zip, $pid, $pslug, $pname, $ptype, $lang, $prvid, $prvslug, $prvname, $cats, $sg, $cproducts );
-				$html             = $this->availabilitySuccessHtml( $parentSegment );
+				//$this->initSessionForProduct( $zip, $pid, $pslug, $pname, $ptype, $lang, $prvid, $prvslug, $prvname, $cats, $sg, $cproducts );
+				$checkoutParams   = "product_to_cart&product_id=$pid&provider_id=$prvid&sg=$sg&producttype=$ptype";
+				$html             = $this->availabilitySuccessHtml( $parentSegment, $checkoutParams );
 				$jsonDecRes->msg  = pll__('Congratulations! The product is available in your area');//Ignore the API response message
 				$jsonDecRes->html = $html;
 			}
@@ -224,7 +225,10 @@ class abApiCrm {
 	 *
 	 * @return string
 	 */
-	private function availabilitySuccessHtml( $parentSegment ) {
+	private function availabilitySuccessHtml( $parentSegment, $checkoutParams = "" ) {
+		if(!empty($checkoutParams)) {
+			$checkoutParams = "?$checkoutParams";
+		}
 		return '<div class="modal-list">
 	                        <p>' . pll__( 'Be sure to check your infrastructure:' ) . '</p>
 	                        <ul class="list-unstyled bullet-list">
@@ -241,7 +245,7 @@ class abApiCrm {
 	                                </div-->
 	                            </li>
 	                        </ul>
-	                        <a href="/' . $parentSegment . '/' . pll__( 'checkout' ) . '" class="btn btn-primary">' . pll__( 'All good! Proceed' ) . '</a>
+	                        <a href="/' . $parentSegment . '/' . pll__( 'checkout' ) . $checkoutParams . '" class="btn btn-primary">' . pll__( 'All good! Proceed' ) . '</a>
 	                    </div>';
 	}
 
@@ -355,11 +359,11 @@ class abApiCrm {
 				'meta_value'  => (int)$_POST['seq_number']
 			];
 			$subOrder = get_posts( $args )[0];
-			$res['debug'] = print_r($subOrder, true);
+			//$res['debug'] = print_r($subOrder, true);
 			$res['imp_data'] = [$_SESSION['order']['wp_order_id'], $subOrder->post_parent, $subOrder->ID];
 			if($subOrder->post_parent == $_SESSION['order']['wp_order_id']) {//Making sure that the person who initiated the order is deleting
 				$delPost = wp_delete_post($subOrder->ID);
-				$res['debug_del_post'] = print_r($delPost, true);
+				//$res['debug_del_post'] = print_r($delPost, true);
 				if($delPost) {
 					$res['success'] = true;
 				}
