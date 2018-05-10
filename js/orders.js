@@ -29,15 +29,25 @@ function requiredFieldsFilled(inputForm) {
     return filled;
 }
 
-function enableDisableFormNextStep(targetStep) {
-    var $ = jQuery;
+function allFormsAnyRequiredFieldHasError() {
     var error = false;
+
+    var $ = jQuery;
+
     $('body').find('form').each(function () {
         var inputForm = $(this);
         if (requiredFieldsFilled(inputForm) === false) {
             error = true;
         }
     });
+
+    return error;
+}
+
+function enableDisableFormNextStep(targetStep) {
+    var $ = jQuery;
+
+    var error = allFormsAnyRequiredFieldHasError();
 
     if (error === true) {
         if (!targetStep.hasClass("disabled")) {
@@ -55,19 +65,30 @@ function enableDisableFormNextStep(targetStep) {
 }
 
 var partialFormSubmit = null;
+var pbsAjaxCall = null;
 
 function submitValidFormValues(form) {
     var $ = jQuery;
     var formElements = form.serializeArray();
+    var hasActionElement = false;
 
     var formCleanElements = formElements.filter(function(elem) {
         //console.log("9999999**", $('[name='+elem.name+']').parents('.has-feedback'));
+        if(elem.name == 'action') {
+            hasActionElement = true;
+        }
         if(!_.isEmpty(elem.value)) {
             if(!$('[name="'+elem.name+'"]').parents('.has-feedback').hasClass('has-error')) {
                 return elem;
             }
         }
     });
+
+    if(hasActionElement === false) {
+        formElements.push({name: 'action', value: 'saveSimpleOrder'});
+    }
+
+    //ensure that action variable is set if not so set that as well.
 
     partialFormSubmit = $.ajax({
         type: 'POST',
@@ -349,7 +370,17 @@ jQuery(document).ready(function ($) {
         //now when the data is saved it's time to initiate redirect to the next page
         setTimeout(function() {
             window.location = currAttr.attr('href');
-        }, 1500);
+        }, 5);
+    });
+
+    //keep delivery button disabled until data gets saved
+    $( document ).ajaxStart(function() {
+        $( "#order-delivery-btn" ).addClass('disabled');
+    });
+    $( document ).ajaxStop(function() {
+        if(allFormsAnyRequiredFieldHasError() === false) {
+            $( "#order-delivery-btn" ).removeClass('disabled');
+        }
     });
 
     //control delivery form submit button
@@ -585,10 +616,15 @@ jQuery(document).ready(function ($) {
             $('.newCostCalc').replaceWith(response);
         });*/
 
-        $.ajax({
+        pbsAjaxCall = $.ajax({
             type: 'POST',
             url: site_obj.ajax_url,
             data: allAttrs,
+            beforeSend : function() {
+                if(pbsAjaxCall != null) {
+                    pbsAjaxCall.abort();//if request already in process aboart that
+                }
+            },
             success: function (response) {
                 $('.newCostCalc').replaceWith(response);
             },
@@ -613,6 +649,11 @@ jQuery(document).ready(function ($) {
         }
 
     });
+
+    //hide next button if there is only one form in order steps
+    if($('.OrderFormWrap').find('form').length == 1) {
+        $('.next-step-btn').hide();
+    }
 
     /*$('.typeahead').change(function (activeObj) {
         console.log("Changed***");
