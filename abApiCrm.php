@@ -112,9 +112,9 @@ class abApiCrm {
 	 * @return mixed
 	 */
 	public function prepareParametersCallMeBack( $data ) {
-		$explodeTime = explode( "-", $data['callTime'] );
+		$explodeTime = explode( " - ", $data['callTime'] );
 		$explodeName = explode( " ", $data['name'] );
-		$date        = date( 'Y-m-d', strtotime( $data['callDate'] ) );
+		$date        = date( 'Y-m-d', strtotime( str_replace( '/', '-', $data['callDate'] ) ) );
 
 		return [
 			'first_name'     => $explodeName[0],
