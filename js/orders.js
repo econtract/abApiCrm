@@ -446,7 +446,7 @@ jQuery(document).ready(function ($) {
         if(nat == 'BE') {
             $('#client_idnr').remove();
             natParent.prepend('<input type="text" class="form-control hasMask" ' +
-                'id="client_idnr" name="client_idnr" placeholder="591-0123456-78" ' +
+                'id="client_idnr" name="client_idnr" placeholder="591-0123456-78" data-idcard=""' +
                 'value="' + prevIdnrVal + '" data-error="' + site_obj.idcard_error + '" required>');
             // $('#client_idnr').addClass('hasMask');
             //$('#client_idnr').attr('data-mask', '999-9999999-99');
