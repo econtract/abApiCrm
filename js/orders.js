@@ -69,7 +69,7 @@ var pbsAjaxCall = null;
 
 function submitValidFormValues(form) {
     var $ = jQuery;
-    var formElements = form.serializeArray();
+    var formElements = form.serializeArray().concat($('#orderCommon').serializeArray());
     var hasActionElement = false;
 
     var formCleanElements = formElements.filter(function(elem) {
