@@ -312,7 +312,11 @@ class abApiCrm {
 		$data['order_title']     = $_POST['order_title'];
 		$data['order_slug']      = $_POST['order_slug'];
 		$data['parent_order_id'] = $_POST['parent_order_id'];
-		$data['order_id']        = $_POST['order_id'];
+
+		if(empty($data['order_id']) && !empty($_SESSION['order']['wp_order_id'])) {
+			$data['order_id'] = $_SESSION['order']['wp_order_id'];
+		}
+
 		$data['order_status']    = $_POST['order_status'];
 
 		$metaData['seq_number'] = $_POST['seq_number'];
