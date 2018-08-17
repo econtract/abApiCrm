@@ -118,12 +118,11 @@ class CreateOrderController
 
         $this->prepareParameters();
 	    if(isset($_GET['debug'])) {
-		    echo "Sending to: ".$this->crmBaseUrl .'/api/orders<br>';
 		    echo "Attributes: <pre>";
-		    print_r($attributes);
+		    print_r($this->data);
 		    echo "</pre>";
 
-		    echo "JSON:" . json_encode($attributes);
+		    echo "JSON:" . json_encode($this->data);
 	    }
 	    if(isset($_GET['die_before_push'])) {
 		    die();
