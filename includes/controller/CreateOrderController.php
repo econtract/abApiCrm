@@ -117,7 +117,17 @@ class CreateOrderController
         $this->address_invoice_id = $address_invoice_id;
 
         $this->prepareParameters();
+	    if(isset($_GET['debug'])) {
+		    echo "Sending to: ".$this->crmBaseUrl .'/api/orders<br>';
+		    echo "Attributes: <pre>";
+		    print_r($attributes);
+		    echo "</pre>";
 
+		    echo "JSON:" . json_encode($attributes);
+	    }
+	    if(isset($_GET['die_before_push'])) {
+		    die();
+	    }
         $this->order = new CreateOrder($this->data);
     }
 
