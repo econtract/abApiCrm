@@ -20,10 +20,15 @@ class abApiCrmEnergy extends abApiCrm{
     }
 
     public function initSessionForProduct( $getParams ) {
-        unset( $_SESSION['prodcut_energy'] );
+        unset( $_SESSION['product_energy'] );
+	    unset( $_SESSION['order_energy'] );
         foreach ($getParams as $key => $val){
-            $_SESSION['prodcut_energy'][$key] = $val;
+            $_SESSION['product_energy'][$key] = $val;
         }
+	    $_SESSION['product_energy']['id'] = $_SESSION['product_energy']['product_id'];
+	    $_SESSION['product_energy']['type'] = $_SESSION['product_energy']['cat'];
+	    $_SESSION['product_energy']['into_cart'] = true;
+
         //create a refferer link
         $_SESSION['HTTP_REFERER'] = isset($_SERVER['HTTP_REFERER']) || !empty($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
     }
