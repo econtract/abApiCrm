@@ -44,7 +44,6 @@ function allEnergyFormsAnyRequiredFieldHasError() {
         var inputForm = $(this);
         if (requiredFieldsFilledEnergy(inputForm) === false) {
             error = true;
-            return error;
         }
     });
 
@@ -53,7 +52,6 @@ function allEnergyFormsAnyRequiredFieldHasError() {
 
 // Enable button for next page
 function enableDisableEnergyFormNextStep(targetStep) {
-
     var $ = jQuery;
 
     var error = allEnergyFormsAnyRequiredFieldHasError();
@@ -449,10 +447,10 @@ jQuery(document).ready(function ($) {
         }
 
         //check all forms if everything required is filled enable delivery step
-        enableDisableEnergyFormNextStep($('.form-nextstep-energy a.btn-default'));
+        enableDisableEnergyFormNextStep($('.form-nextstep-energy a.btn'));
     });
 
-    $('.form-nextstep-energy .btn-default').on('mouseover', function(e) {
+    $('.form-nextstep-energy a.btn').on('mouseover', function(e) {
         enableDisableEnergyFormNextStep($(this));
     });
     //To display order information summary on the filled forms
