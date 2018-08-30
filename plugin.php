@@ -46,3 +46,5 @@ add_action( 'wp_ajax_nopriv_saveSimpleOrder', array($result, 'saveSimpleOrder'))
 
 add_action('wp_ajax_removeSubOrder', array($result, 'removeSubOrder'));
 add_action( 'wp_ajax_nopriv_removeSubOrder', array($result, 'removeSubOrder'));
+
+$resultEnergy = wpal_create_instance(abApiCrmEnergy::class);
