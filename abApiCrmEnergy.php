@@ -31,7 +31,7 @@ class abApiCrmEnergy extends abApiCrm{
             'jquery',
             'jquery-bootstrap-typeahead',
             'aanbieder_default_script'
-        ), '1.0.0', true );
+        ), '1.0.1', true );
 
         // in JavaScript, object properties are accessed as ajax_object.ajax_url, ajax_object.we_value
         //The object will be created before including callMeBack.js so its sufficient for orders.js too, there is no need to include it again
@@ -62,4 +62,45 @@ class abApiCrmEnergy extends abApiCrm{
         //create a refferer link
         $_SESSION['HTTP_REFERER'] = isset($_SERVER['HTTP_REFERER']) || !empty($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
     }
+
+	/**
+	 * Ajax method
+	 * Saves simple order form that, simple for are those using plain names in fields not arrays e.g. it'll be user_name but not user['name']
+	 */
+	public function saveSimpleOrder() {
+		//negate action from $_POST
+		unset( $_POST['action'] );
+
+		//separate order related data and loopable meta data
+		$data['order_title']     = $_POST['order_title'];
+		$data['order_slug']      = $_POST['order_slug'];
+		$data['order_id']        = $_POST['order_id'];
+		if(empty($data['order_id']) && !empty($_SESSION['order_energy']['wp_order_id'])) {
+			$data['order_id'] = $_SESSION['order_energy']['wp_order_id'];
+		}
+
+		$data['order_status']    = $_POST['order_status'];
+
+		//Time to unset these variables from $_POST to keep only loopable data in $_POST
+		unset( $_POST['order_title'] );
+		unset( $_POST['order_slug'] );
+		unset( $_POST['order_id'] );
+		unset( $_POST['order_status'] );
+
+		//now $_POST will have only the parameters which are ready to be saved, make sure to use same names which are in advance custom fields
+		list( $order, $wpError ) = saveAnbEnergyOrderInWp( $data, $_POST, $metaData );
+		$errors   = $wpError->get_error_messages();
+		$response = null;
+		if ( count( $errors ) > 0 ) {
+			//its an error so send response appropriatly
+			$response['success'] = false;
+			$response['errors']  = $errors;
+		} elseif ( $order > 0 ) {
+			$response['success'] = true;
+		} else {
+			$response['success'] = 'no-update';
+		}
+		echo json_encode( $response );
+		wp_die();
+	}
 }
