@@ -6,7 +6,6 @@ function requiredFieldsFilledEnergy(inputForm) {
         'select[required]:not(".hidden")').each(function () {
         var reqField = jQuery(this);
         var isSelectOpt = false;
-        console.log(reqField.attr('name'));
         if (reqField.prop("tagName").toLowerCase() == 'select') {
             if (typeof reqField.attr('disabled') == 'undefined') {
                 reqField = reqField.find('option').filter(':selected');
@@ -22,10 +21,8 @@ function requiredFieldsFilledEnergy(inputForm) {
         }
 
         if (_.isEmpty(reqField.val())) {
-            /*console.log(reqField.text(), reqField.attr('name'), "====>", reqField.val());*/
             filled = false;
         }
-        console.log(filled);
     });
 
     if (filled === true) {
@@ -44,7 +41,6 @@ function allEnergyFormsAnyRequiredFieldHasError() {
     var error = false,
         $ = jQuery;
     $('body').find('form').each(function () {
-        debugger;
         var inputForm = $(this);
         if (requiredFieldsFilledEnergy(inputForm) === false) {
             error = true;
@@ -138,7 +134,6 @@ function fillEnergyFormDynamicData(targetContainer) {
     );
 
     targetContainer.find('.filled-content table tbody').html(filledHtml);
-    //console.log(appendedFor);
 }
 
 
@@ -153,9 +148,7 @@ jQuery(document).ready(function ($) {
     //control CHECK YOUR ORDER form button
     $("#followUpForm").on("change", function () {
         var inputForm = $(this).parents('form');
-        // console.log(inputForm);
         var filled = requiredFieldsFilledEnergy(inputForm);
-        //console.log("Filled", filled);
         if (filled === true) {
             $('.btn.btn-default.disabled').removeClass("disabled");
         }
