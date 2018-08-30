@@ -425,7 +425,6 @@ jQuery(document).ready(function ($) {
     });
 
     $('body').on('click', '.next-step-btn-energy a', function (event) {
-
         event.preventDefault();
         var _self = $(this);
         var mainContainer = _self.parents('.formTypeWrapper');
@@ -450,7 +449,11 @@ jQuery(document).ready(function ($) {
         }
 
         //check all forms if everything required is filled enable delivery step
-        enableDisableEnergyFormNextStep($('.form-nextstep a.btn-default'));
+        enableDisableEnergyFormNextStep($('.form-nextstep-energy a.btn-default'));
+    });
+
+    $('.form-nextstep-energy .btn-default').on('mouseover', function(e) {
+        enableDisableEnergyFormNextStep($(this));
     });
     //To display order information summary on the filled forms
 
@@ -482,6 +485,21 @@ jQuery(document).ready(function ($) {
             $('#'+savedCookieFormId).parents('.form-type').removeClass('filled').addClass('active');
         }
     }
+
+    //trigger save options button automatically on clicking confirm button
+    $("body").on('click', '#energy-order-connection-btn', function(e) {
+        e.preventDefault();//stop click to follow href
+        var currAttr = $(this);
+        $('#energy-order-payment-info-btn').trigger('click');
+
+        //now we are going to 3rd step that is delivery till now all the forms should be filled that's why now expire the last edit form cookie
+        wpCookies.set(activeLinkHash, '', 0);
+
+        //now when the data is saved it's time to initiate redirect to the next page
+        setTimeout(function() {
+            window.location = currAttr.attr('href');
+        }, 5);
+    });
 });
 
 /*** READY FUNCTION ENDS ***/
