@@ -73,6 +73,66 @@ function enableDisableEnergyFormNextStep(targetStep) {
     }
 }
 
+var partialFormSubmitEnergy = null;
+
+function submitValidFormValuesEnergy(form) {
+    var $ = jQuery;
+    var formElements = form.serializeArray().concat($('#orderCommon').serializeArray());
+    var hasActionElement = false;
+
+    var formCleanElements = formElements.filter(function(elem) {
+        //console.log("9999999**", $('[name='+elem.name+']').parents('.has-feedback'));
+        if(elem.name == 'action') {
+            hasActionElement = true;
+        }
+        if(!_.isEmpty(elem.value)) {
+            if(!$('[name="'+elem.name+'"]').parents('.has-feedback').hasClass('has-error')) {
+                return elem;
+            }
+        }
+    });
+
+    if(hasActionElement === false) {
+        formElements.push({name: 'action', value: 'saveSimpleOrderEnergy'});
+    }
+
+    //ensure that action variable is set if not so set that as well.
+
+    partialFormSubmitEnergy = $.ajax({
+        type: 'POST',
+        url: site_obj.ajax_url,
+        data: formElements,
+        beforeSend : function() {
+            if(partialFormSubmitEnergy != null) {
+                partialFormSubmitEnergy.abort();//if request already in process aboart that
+            }
+        },
+        success: function (response) {
+            //nothing to do at the moment...
+        },
+        dataType: 'json',
+        async:true
+    });
+}
+
+function submitValidValuesWrapperEnergy(inputForm, activeLinkHash) {
+    submitValidFormValuesEnergy(inputForm);
+    var filled = requiredFieldsFilledEnergy(inputForm);
+    if (filled === true) {
+        inputForm.find('input[type=submit]').removeClass('disabled');
+        inputForm.find('.next-step-btn a').removeClass('disabled');
+    } else {
+        inputForm.find('.next-step-btn a').addClass('disabled');
+        inputForm.find('input[type=submit]').addClass('disabled');
+    }
+    //console.log("URL String***", window.location.search, location.search);
+    //console.log("***", window.location.search);
+    //saving cookie for one hour so user can be resumed from same form which he was filling
+    if(triggerSectionEdit() === false) {//if section edit not requested
+        wpCookies.set(activeLinkHash, inputForm.attr('id'), 600);//preserving the last edit form for 10 minutes
+    }
+}
+
 function fillEnergyFormDynamicData(targetContainer) {
     //Modify container to fill dynamic filled information
     //if the filled area contains a form get its data
@@ -142,6 +202,9 @@ function fillEnergyFormDynamicData(targetContainer) {
 ***/
 
 jQuery(document).ready(function ($) {
+    var activeLink = location.pathname;
+    var activeLinkHash = activeLink.split('/').join('-')+'-energy-last-active-form-id';
+
     /*
     * ENERGY ORDER STEP 4 STARTS
     */
@@ -252,18 +315,47 @@ jQuery(document).ready(function ($) {
     //Order steps, for the forms that are without array called as simple forms,
     //this means that the input variables are not this way e.g. form_input[], or form_input['order'][] etc
     $("body").on('submit', '.energy-order-simple-form', function (e) {
-
         e.preventDefault();
         var self = $(this);
         var inputForm = $(this);
-        var filled = requiredFieldsFilledEnergy(inputForm);
+        var formInputs = $(inputForm).serialize() + '&action=saveSimpleOrderEnergy&' + $('#orderCommon').serialize();
+
+        var filled = requiredFieldsFilled(inputForm);
+
         if (filled === false) {
             return false; //don't allow sumbitting the form
         }
-        else{
-            self.parents('.form-type').find('.next-step-btn-energy a').trigger('click');
-            self.parents('.form-type').addClass('order-saved');
-        }
+
+        var data = formInputs;
+
+        $.ajax({
+            type: 'POST',
+            url: site_obj.ajax_url,
+            data: data,
+            beforeSend : function() {
+                if(partialFormSubmitEnergy != null) {
+                    partialFormSubmitEnergy.abort();//if request already in process aboart that
+                }
+            },
+            success: function (response) {
+                //var jsonRes = JSON.parse(response);
+                var jsonRes = response;
+                if (jsonRes.success == true || jsonRes.success.toString() == "no-update") {
+                    //In case of mobile form trigger next button to open the next form
+                    self.parents('.form-type').find('.next-step-btn-energy a').trigger('click');
+                    self.parents('.form-type').addClass('order-saved');
+                } else {
+                    $.each(jsonRes.errors, function(key, val) {
+                        self.append('<div class="alert alert-danger alert-dismissable">' +
+                            '<a href="#" class="close" data-dismiss="alert">×</a>' +
+                            val + '</div>');
+                    });
+                    hideAlertMessages();
+                }
+            },
+            dataType: 'json',
+            async:true
+        });
     });
 
     $('body').on('click', '.next-step-btn-energy a', function (event) {
@@ -298,13 +390,32 @@ jQuery(document).ready(function ($) {
 
     //on chaning simple form values by ignoring hidden fields control the behavior of submit button
     //At this place also save the changed values, to preserve them
-    // $("body").on('change', '.energy-order-simple-form', function (e) {
-    //     var inputForm = $(this);
-    //     //requiredFieldsFilledEnergy(inputForm);
-    // });
+    $("body").on('change', '.energy-order-simple-form', function (e) {
+        var inputForm = $(this);
+        submitValidValuesWrapperEnergy(inputForm, activeLinkHash);
+    });
 
+    $("body").on('change', '.energy-order-simple-form-nonajax', function (e) {
+        var inputForm = $(this);
+        submitValidValuesWrapperEnergy(inputForm, activeLinkHash);
+    });
 
+    $("body").on('click', '.energy-order-simple-form', function (e) {//changing last active form on click
+        var inputForm = $(this);
+        //saving cookie for one hour so user can be resumed from same form which he was filling
+        if(triggerSectionEdit() === false) {//if section edit not requested
+            wpCookies.set(activeLinkHash, inputForm.attr('id'), 600);//preserving the last edit form for 10 minutes
+        }
+    });
 
+    //getting cookie values to activate any previously focused form
+    var savedCookieFormId = wpCookies.get(activeLinkHash);
+    if(savedCookieFormId) {
+        //check if there are multiple forms in that case active and inactive will be applicable as if there is only one form it'll always be active :)
+        if(jQuery('form:not(.hidden)').length >= 2) {
+            $('#'+savedCookieFormId).parents('.form-type').removeClass('filled').addClass('active');
+        }
+    }
 });
 
 /*** READY FUNCTION ENDS ***/
