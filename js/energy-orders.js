@@ -303,6 +303,72 @@ jQuery(document).ready(function ($) {
         }
     }
 
+    /*show content on check*/
+    function showContentsOnCheck( key ){
+        var id = jQuery(key).attr('id');
+        var className = jQuery(key).attr('name');
+        jQuery('.'+className).addClass('hide');
+        jQuery('.'+className).find('input').attr('disabled', 'disabled');
+        jQuery('.'+className).find('input[type="text"]').val('');
+
+
+        if(jQuery('#' + id ).is(':checked')){
+            jQuery('.' + id+ '_content').removeClass('hide');
+            jQuery('.' + id+ '_content').find('input').removeAttr('disabled');
+        }
+        else{
+            jQuery('.' + id+ '_content').addClass('hide');
+            jQuery('.' + id+ '_content').find('input').attr('disabled', 'disabled');
+        }
+
+        var inputForm = jQuery('#' + id ).parents('form');
+        inputForm.validator('update');
+        var filled = requiredFieldsFilledEnergy(inputForm);
+        if (filled === true)
+        {
+            $('.btn.btn-default.disabled').removeClass("disabled");
+        }
+        else{
+            $('.btn.btn-default').addClass('disabled');
+        }
+    }
+
+    /*hide content on check*/
+    function hideContentsOnCheck( key ){
+        var id = jQuery(key).attr('id');
+        if(jQuery('#' + id ).is(':checked')){
+            jQuery('.' + id+ '_content').addClass('hide');
+            jQuery('.' + id+ '_content').find('input').attr('disabled', 'disabled');
+        }
+        else{
+            jQuery('.' + id+ '_content').removeClass('hide');
+            jQuery('.' + id+ '_content').find('input').removeAttr('disabled');
+        }
+
+        var inputForm = jQuery('#' + id ).parents('form');
+        inputForm.validator('update');
+
+        var filled = requiredFieldsFilledEnergy(inputForm);
+        if (filled === true)
+        {
+            $('.btn.btn-default.disabled').removeClass("disabled");
+        }
+        else{
+            $('.btn.btn-default').addClass('disabled');
+        }
+    }
+
+    showContentsOnCheck($('.has-content:checked'));
+    $('.has-content').on('change', function(e){
+
+        showContentsOnCheck(jQuery(this));
+    });
+
+    hideContentsOnCheck('.has-content-inverse');
+    $('.has-content-inverse').on('change', function(e){
+        hideContentsOnCheck(jQuery(this));
+    });
+
     /*
     * ENERGY ORDER GENERIC STARTS
     */
