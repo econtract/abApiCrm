@@ -235,8 +235,8 @@ jQuery(document).ready(function ($) {
     //Edit Data ends
 
     //Step 2 - Electricity section
-    $('input[type=radio][name="suggestDate"]').on('change', function(e){
-        meterSuggestSwitchDate(jQuery(this), 'choose_switch_date');
+    $('input[type=radio][name="suggested_date_option"]').on('change', function(e){
+        meterSuggestSwitchDate(jQuery(this), 'user_choice_electricity_switch_date');
     });
 
     //Step 2 - Gas Connection section
@@ -251,13 +251,11 @@ jQuery(document).ready(function ($) {
             inputForm = $this.parents('form');
         if(radioValue ===  '3'){
             jQuery('#'+dateFieldId)
-                .removeAttr('disabled')
-                .attr('required','required');
+                .removeAttr('disabled');
         }
         else{
             jQuery('#'+dateFieldId)
                 .val("")
-                .removeAttr('required')
                 .attr('disabled','disabled');
         }
 
