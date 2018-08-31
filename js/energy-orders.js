@@ -22,6 +22,7 @@ function requiredFieldsFilledEnergy(inputForm) {
 
         if (_.isEmpty(reqField.val())) {
             filled = false;
+            // console.log("Missing...", reqField);
         }
     });
 
@@ -222,6 +223,23 @@ jQuery(document).ready(function ($) {
     * ENERGY ORDER GENERIC STARTS
     */
 
+    //On page refresh display summary data if already filled and summary already shown
+    setTimeout(function(){
+        if(jQuery('.form-type').length>0){
+            jQuery('.form-type').each(function(e){
+                var $this = jQuery(this),
+                    nextSectionButton = $this.find('.next-step-btn-energy a');
+                if($this.hasClass('filled')) {
+                    //Fill fields data and display in summary
+                    fillEnergyFormDynamicData($this);
+                    //check all forms if everything required is filled enable delivery step
+                    //enableDisableEnergyFormNextStep($('.form-nextstep-energy a.btn'));
+                }
+            });
+        }
+    }, 500);
+
+
     // Click on EDIT DATA on any section on energy order step 2,3
     $('body').on('click', '.form-type a.edit-data-energy', function (event) {
         var _self = $(this);
@@ -234,17 +252,17 @@ jQuery(document).ready(function ($) {
     });
     //Edit Data ends
 
-    //Step 2 - Electricity section
+    //Step 3 - Electricity section
     $('input[type=radio][name="suggested_date_option"]').on('change', function(e){
         meterSuggestSwitchDate(jQuery(this), 'user_choice_electricity_switch_date');
     });
 
-    //Step 2 - Gas Connection section
+    //Step 3 - Gas Connection section
     $('input[type=radio][name="suggested_gas_date_option"]').on('change', function(e){
         meterSuggestSwitchDate(jQuery(this), 'user_choice_gas_switch_date');
     });
 
-    //Step 2 - Used in - Electricity Section, Gas Connection Section
+    //Step 3 - Used in - Electricity Section, Gas Connection Section
     function meterSuggestSwitchDate($this, dateFieldId){
         var radioValue = $this.val(),
             // subContainer = $this.parents('.form-type'),
@@ -263,7 +281,7 @@ jQuery(document).ready(function ($) {
         requiredFieldsFilledEnergy(inputForm);
     }
 
-    // Step 2 - Gas Connection Section Radio buttons show/hide
+    // Step 3 - Gas Connection Section Radio buttons show/hide
     $('.has-content-energy').on('change', function(e){
         $this = jQuery(this);
         var inputForm = $this.parents('form');
@@ -278,7 +296,8 @@ jQuery(document).ready(function ($) {
             $('.btn.btn-default').addClass('disabled');
         }
     });
-    /*show/hide content on check*/
+
+    /*step 2 - show/hide content on check*/
     function showGasContentsOnCheck( key ){
         var id = jQuery(key).attr('id');
         var className = jQuery(key).attr('name');
@@ -299,7 +318,7 @@ jQuery(document).ready(function ($) {
         }
     }
 
-    /*show content on check*/
+    /*step 2 - show content on check*/
     function showContentsOnCheck( key ){
         var id = jQuery(key).attr('id');
         var className = jQuery(key).attr('name');
@@ -329,7 +348,7 @@ jQuery(document).ready(function ($) {
         }
     }
 
-    /*hide content on check*/
+    /*step 2 - hide content on check*/
     function hideContentsOnCheck( key ){
         var id = jQuery(key).attr('id');
         if(jQuery('#' + id ).is(':checked')){
@@ -353,10 +372,9 @@ jQuery(document).ready(function ($) {
             $('.btn.btn-default').addClass('disabled');
         }
     }
-
+    /* steo 2 */
     showContentsOnCheck($('.has-content:checked'));
     $('.has-content').on('change', function(e){
-
         showContentsOnCheck(jQuery(this));
     });
 
@@ -448,8 +466,8 @@ jQuery(document).ready(function ($) {
         enableDisableEnergyFormNextStep($('.form-nextstep-energy a.btn'));
     });
 
-    $('.form-nextstep-energy a.btn').on('mouseover', function(e) {
-        enableDisableEnergyFormNextStep($(this));
+    $('.form-nextstep-energy').on('mouseover', function(e) {
+        enableDisableEnergyFormNextStep($(this).find('a.btn'));
     });
     //To display order information summary on the filled forms
 
@@ -458,6 +476,7 @@ jQuery(document).ready(function ($) {
     $("body").on('change', '.energy-order-simple-form', function (e) {
         var inputForm = $(this);
         submitValidValuesWrapperEnergy(inputForm, activeLinkHash);
+        enableDisableEnergyFormNextStep($('.form-nextstep-energy a.btn'));
     });
 
     $("body").on('change', '.energy-order-simple-form-nonajax', function (e) {
@@ -487,6 +506,21 @@ jQuery(document).ready(function ($) {
         e.preventDefault();//stop click to follow href
         var currAttr = $(this);
         $('#energy-order-payment-info-btn').trigger('click');
+
+        //now we are going to 3rd step that is delivery till now all the forms should be filled that's why now expire the last edit form cookie
+        wpCookies.set(activeLinkHash, '', 0);
+
+        //now when the data is saved it's time to initiate redirect to the next page
+        setTimeout(function() {
+            window.location = currAttr.attr('href');
+        }, 5);
+    });
+
+    //trigger save options button automatically on clicking follow up button
+    $("body").on('click', '#energy-order-followup-btn', function(e) {
+        e.preventDefault();//stop click to follow href
+        var currAttr = $(this);
+        $('#energy-order-gas-conn-btn').trigger('click');
 
         //now we are going to 3rd step that is delivery till now all the forms should be filled that's why now expire the last edit form cookie
         wpCookies.set(activeLinkHash, '', 0);
