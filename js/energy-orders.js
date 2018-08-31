@@ -258,8 +258,8 @@ jQuery(document).ready(function ($) {
     });
 
     //Step 3 - Gas Connection section
-    $('input[type=radio][name="suggestDateGas"]').on('change', function(e){
-        meterSuggestSwitchDate(jQuery(this), 'choose_switch_date_gas');
+    $('input[type=radio][name="suggested_gas_date_option"]').on('change', function(e){
+        meterSuggestSwitchDate(jQuery(this), 'user_choice_gas_switch_date');
     });
 
     //Step 3 - Used in - Electricity Section, Gas Connection Section
