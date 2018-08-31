@@ -515,6 +515,21 @@ jQuery(document).ready(function ($) {
             window.location = currAttr.attr('href');
         }, 5);
     });
+
+    //trigger save options button automatically on clicking follow up button
+    $("body").on('click', '#energy-order-followup-btn', function(e) {
+        e.preventDefault();//stop click to follow href
+        var currAttr = $(this);
+        $('#energy-order-gas-conn-btn').trigger('click');
+
+        //now we are going to 3rd step that is delivery till now all the forms should be filled that's why now expire the last edit form cookie
+        wpCookies.set(activeLinkHash, '', 0);
+
+        //now when the data is saved it's time to initiate redirect to the next page
+        setTimeout(function() {
+            window.location = currAttr.attr('href');
+        }, 5);
+    });
 });
 
 /*** READY FUNCTION ENDS ***/
