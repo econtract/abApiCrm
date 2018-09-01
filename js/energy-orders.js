@@ -24,6 +24,7 @@ function requiredFieldsFilledEnergy(inputForm) {
             filled = false;
             // console.log("Missing...", reqField);
         }
+        // console.log(reqField);
     });
 
     if (filled === true) {
@@ -232,8 +233,6 @@ jQuery(document).ready(function ($) {
                 if($this.hasClass('filled')) {
                     //Fill fields data and display in summary
                     fillEnergyFormDynamicData($this);
-                    //check all forms if everything required is filled enable delivery step
-                    //enableDisableEnergyFormNextStep($('.form-nextstep-energy a.btn'));
                 }
             });
         }
@@ -265,7 +264,6 @@ jQuery(document).ready(function ($) {
     //Step 3 - Used in - Electricity Section, Gas Connection Section
     function meterSuggestSwitchDate($this, dateFieldId){
         var radioValue = $this.val(),
-            // subContainer = $this.parents('.form-type'),
             inputForm = $this.parents('form');
         if(radioValue ===  '3'){
             jQuery('#'+dateFieldId)
@@ -275,6 +273,9 @@ jQuery(document).ready(function ($) {
             jQuery('#'+dateFieldId)
                 .val("")
                 .attr('disabled','disabled');
+            jQuery('#'+dateFieldId)
+                .parents('.form-group.has-feedback')
+                .removeClass('.has-error .has-danger .has-success');
         }
 
         inputForm.validator('update');
@@ -297,7 +298,7 @@ jQuery(document).ready(function ($) {
         }
     });
 
-    /*step 2 - show/hide content on check*/
+    /*step 3 - show/hide content on check*/
     function showGasContentsOnCheck( key ){
         var id = jQuery(key).attr('id');
         var className = jQuery(key).attr('name');
@@ -311,10 +312,6 @@ jQuery(document).ready(function ($) {
         else if(jQuery('#sameForGasYes' ).is(':checked')){
             jQuery('.sameForGasNo_content').addClass('hide');
             jQuery('.sameForGasNo_content').find('input').attr('disabled','disabled').removeAttr('checked');
-        }
-        else{
-            jQuery('.sameForGasNo_content').find('input').attr('disabled', 'disabled');
-            jQuery('.sameForGasNo_content').addClass('hide');
         }
     }
 
