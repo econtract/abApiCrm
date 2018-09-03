@@ -56,20 +56,34 @@ class abApiCrm {
 			'jquery',
 			'jquery-bootstrap-typeahead',
 			'aanbieder_default_script'
-		), '1.9.1', true );
+		), '1.9.2', true );
 
 		// in JavaScript, object properties are accessed as ajax_object.ajax_url, ajax_object.we_value
 		//The object will be created before including callMeBack.js so its sufficient for orders.js too, there is no need to include it again
 		wp_localize_script( 'crm-script-callMeBack', 'site_obj',
 			array(
-				'ajax_url'          => admin_url( 'admin-ajax.php' ),
-				'contact_uri'       => "/" . pll__( 'contact' ),
-				'contact_trans'     => pll__( 'Or contact us directly' ),
-				'change_zip_trans'  => pll__( 'Change zip code' ),
-				'api_resp_trans'    => pll__( 'Something went wrong as API is not responding!' ),
-				'req_fields_filled' => pll__( 'Make sure all required fields are filled' ),
-				'idcard_error'      => pll__('Please enter your ID card number'),
-				'template_uri'      => get_template_directory_uri()
+				'ajax_url'                        => admin_url( 'admin-ajax.php' ),
+				'contact_uri'                     => "/" . pll__( 'contact' ),
+				'contact_trans'                   => pll__( 'Or contact us directly' ),
+				'change_zip_trans'                => pll__( 'Change zip code' ),
+				'api_resp_trans'                  => pll__( 'Something went wrong as API is not responding!' ),
+				'req_fields_filled'               => pll__( 'Make sure all required fields are filled' ),
+				'idcard_error'                    => pll__( 'Please enter your ID card number' ),
+				'template_uri'                    => get_template_directory_uri()
+			)
+		);
+
+		wp_localize_script( 'crm-script-orders', 'site_obj',
+			array(
+				'ajax_url'                        => admin_url( 'admin-ajax.php' ),
+				'site_url'                        => get_home_url(),
+				'lang'                    => getLanguage(),
+				'trans_monthly_cost'              => pll__( 'Monthly costs' ),
+				'trans_monthly_total'             => pll__( 'Monthly total' ),
+				'trans_first_month'               => pll__( 'First month' ),
+				'trans_monthly_total_tooltip_txt' => pll__( 'PBS: Monthly total tooltip text' ),
+				'trans_ontime_costs'              => pll__( 'One-time costs' ),
+				'trans_ontime_total'              => pll__( 'One-time total' )
 			)
 		);
 	}
