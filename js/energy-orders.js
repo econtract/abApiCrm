@@ -209,13 +209,22 @@ jQuery(document).ready(function ($) {
     * ENERGY ORDER STEP 4 STARTS
     */
     //control CHECK YOUR ORDER form button
-    $("#followUpForm").on("change", function () {
-        var inputForm = $(this).parents('form');
-        var filled = requiredFieldsFilledEnergy(inputForm);
-        if (filled === true) {
-            $('.btn.btn-default.disabled').removeClass("disabled");
+    var followUpForm = $('#followUpForm');
+    if(followUpForm.length > 0){
+        var followUpCheckedEl = followUpForm.find('input[name=like_to_follow_up]:checked');
+        if(followUpCheckedEl.length>0){
+            followUpCheckedEl.parent().addClass('active');
         }
-    });
+        followUpForm.on("change", function () {
+            debugger;
+            var inputForm = $(this).parents('form');
+            var filled = requiredFieldsFilledEnergy(inputForm);
+            if (filled === true) {
+                $('.btn.btn-default.disabled').removeClass("disabled");
+            }
+        });
+    }
+
     /*
     * ENERGY ORDER STEP 4 ENDS
     */
