@@ -622,7 +622,6 @@ jQuery(document).ready(function ($) {
         allAttrs += '&pid=' + $('#pid').val();
         allAttrs += '&lang='+site_obj.lang;
         allAttrs += '&'+transLabelsUri;
-        allAttrs += '&debug=true&';
 
         //data is now ready time to send an AJAX request
         /*$.post(site_obj.ajax_url, allAttrs, function (response) {
