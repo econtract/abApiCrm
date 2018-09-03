@@ -608,10 +608,20 @@ jQuery(document).ready(function ($) {
             allAttrs += attrName + '=' + attrVal;
         });
 
+        var transLabelsUri = '';
+
+        transLabelsUri = 'trans_monthly_cost=' + search_compare_obj.trans_monthly_cost +
+            '&trans_monthly_total=' + search_compare_obj.trans_monthly_total +
+            '&trans_first_month=' + search_compare_obj.trans_first_month +
+            '&trans_monthly_total_tooltip_txt=' + search_compare_obj.trans_monthly_total_tooltip_txt +
+            '&trans_ontime_costs=' + search_compare_obj.trans_ontime_costs +
+            '&trans_ontime_total=' + search_compare_obj.trans_ontime_total;
+
         //appending remaining variables which are required to grab the updated cart
         allAttrs += '&prt=' + $('#prt').val();
         allAttrs += '&pid=' + $('#pid').val();
-        allAttrs += '&action=ajaxProductPriceBreakdownHtml';
+        allAttrs += '&lang='+site_obj.lang;
+        allAttrs += '&'+transLabelsUri;
 
         //data is now ready time to send an AJAX request
         /*$.post(site_obj.ajax_url, allAttrs, function (response) {
@@ -620,7 +630,7 @@ jQuery(document).ready(function ($) {
 
         pbsAjaxCall = $.ajax({
             type: 'POST',
-            url: site_obj.ajax_url,
+            url: site_obj.site_url+'/api/?action=ajaxProductPriceBreakdownHtml&load=product',
             data: allAttrs,
             beforeSend : function() {
                 if(pbsAjaxCall != null) {
