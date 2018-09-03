@@ -31,7 +31,7 @@ class abApiCrmEnergy extends abApiCrm{
             'jquery',
             'jquery-bootstrap-typeahead',
             'aanbieder_default_script'
-        ), '1.0.3', true );
+        ), '1.0.9', true );
 
         // in JavaScript, object properties are accessed as ajax_object.ajax_url, ajax_object.we_value
         //The object will be created before including callMeBack.js so its sufficient for orders.js too, there is no need to include it again
