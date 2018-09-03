@@ -216,7 +216,6 @@ jQuery(document).ready(function ($) {
             followUpCheckedEl.parent().addClass('active');
         }
         followUpForm.on("change", function () {
-            debugger;
             var inputForm = $(this).parents('form');
             var filled = requiredFieldsFilledEnergy(inputForm);
             if (filled === true) {
