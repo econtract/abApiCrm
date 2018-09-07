@@ -16,6 +16,14 @@ if ( ! defined( 'AP_ABI_CRM_DIR' ) ) {
 	define( 'AP_ABI_CRM_DIR', ABSPATH . '../../' );
 }
 
+if(!function_exists('getLanguage')) {
+	function getLanguage() {
+		$locale = function_exists('pll_current_language') ? pll_current_language() : Locale::getPrimaryLanguage(get_locale());
+
+		return $locale;
+	}
+}
+
 class abApiCrm {
 
 	/**
