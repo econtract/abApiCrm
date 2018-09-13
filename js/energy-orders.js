@@ -100,7 +100,7 @@ function submitValidFormValuesEnergy(form) {
 
     partialFormSubmitEnergy = $.ajax({
         type: 'POST',
-        url: site_obj.ajax_url,
+        url: orders_obj_energy.ajax_url,
         data: formElements,
         beforeSend : function() {
             if(partialFormSubmitEnergy != null) {
@@ -415,7 +415,7 @@ jQuery(document).ready(function ($) {
 
         $.ajax({
             type: 'POST',
-            url: site_obj.ajax_url,
+            url: orders_obj_energy.ajax_url,
             data: data,
             beforeSend : function() {
                 if(partialFormSubmitEnergy != null) {

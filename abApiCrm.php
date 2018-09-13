@@ -58,7 +58,7 @@ class abApiCrm {
 	 */
 	function enqueueScripts() {
 
-		wp_enqueue_script( 'crm-script-callMeBack', plugins_url( '/js/callMeBack.js', __FILE__ ), array( 'jquery', 'aanbieder_bootstrap_validate' ), '1.0.3', true );
+		wp_enqueue_script( 'crm-script-callMeBack', plugins_url( '/js/callMeBack.js', __FILE__ ), array( 'jquery', 'aanbieder_bootstrap_validate' ), '1.0.4', true );
 		wp_enqueue_script( 'utils');
 		wp_enqueue_script( 'crm-script-orders', plugins_url( '/js/orders.js', __FILE__ ), array(
 			'jquery',
@@ -68,7 +68,7 @@ class abApiCrm {
 
 		// in JavaScript, object properties are accessed as ajax_object.ajax_url, ajax_object.we_value
 		//The object will be created before including callMeBack.js so its sufficient for orders.js too, there is no need to include it again
-		wp_localize_script( 'crm-script-callMeBack', 'site_obj',
+		wp_localize_script( 'crm-script-callMeBack', 'callmeback_obj',
 			array(
 				'ajax_url'          => admin_url( 'admin-ajax.php' ),
 				'contact_uri'       => "/" . pll__( 'contact' ),
@@ -84,7 +84,7 @@ class abApiCrm {
 		wp_localize_script( 'crm-script-orders', 'site_obj',
 			array(
 				'ajax_url'                        => admin_url( 'admin-ajax.php' ),
-				'site_url'                        => get_home_url(),
+				'site_url'                        => pll_home_url(),
 				'lang'                            => getLanguage(),
 				'trans_monthly_cost'              => pll__( 'Monthly costs' ),
 				'trans_monthly_total'             => pll__( 'Monthly total' ),
