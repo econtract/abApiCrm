@@ -26,6 +26,14 @@ function requiredFieldsFilled(inputForm) {
         }
     });
 
+    if(inputForm.hasClass('simple-form-radio-checkbox')){
+        inputForm.find(':input[required]:radio:not(:disabled), :input[required]:checkbox:not(:disabled)').each(function () {
+            var reqField = jQuery(this);
+            if(!reqField.is(':checked')){
+                filled = false;
+            }
+        });
+    }
     return filled;
 }
 
@@ -354,6 +362,7 @@ jQuery(document).ready(function ($) {
             //reset its value to empty so that it may not get submitted
         }
 
+        targetForm.validator('destroy');
         targetForm.validator('update');
         /*mobileDonorNr.trigger('input');*/
     });
@@ -483,7 +492,7 @@ jQuery(document).ready(function ($) {
                 console.log("Blocking new request*****");
                 return false;
             }*/
-            console.log("current***", current);
+           // console.log("current***", current);
             var ajaxUrl = site_obj.ajax_url + '?action=ajaxQueryToolboxApi&query_method=' + current.attr('query_method') +
                 "&query_params[" + current.attr('query_key') + "]=" + query;
 
