@@ -1,5 +1,9 @@
 function requiredFieldsFilled(inputForm) {
     var filled = true;
+    if ((inputForm.attr('id') == "mc4wp-form-1") || inputForm.hasClass('mc4wp-form') || inputForm.data('name') == "Newsletter Subscription"){
+        return true;
+    }
+
     //check all required fields if they are filled submit the form
     inputForm.find(':input[required]:not(:radio):not(:checkbox):not(:disabled):not([type=hidden]), ' +
         ':input[required]:radio:checked:not(:disabled), :input[required]:checkbox:checked:not(:disabled), select[required]:not(:disabled), ' +
