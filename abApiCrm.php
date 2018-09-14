@@ -64,7 +64,7 @@ class abApiCrm {
 			'jquery',
 			'jquery-bootstrap-typeahead',
 			'aanbieder_default_script'
-		), '1.9.5', true );
+		), '1.9.6', true );
 
 		// in JavaScript, object properties are accessed as ajax_object.ajax_url, ajax_object.we_value
 		//The object will be created before including callMeBack.js so its sufficient for orders.js too, there is no need to include it again
@@ -93,7 +93,9 @@ class abApiCrm {
 				'trans_ontime_costs'              => pll__( 'One-time costs' ),
 				'trans_ontime_total'              => pll__( 'One-time total' ),
 				'template_uri'                    => get_template_directory_uri(),
-                'idcard_error'                    => pll__('Please enter valid ID card number')
+                'idcard_error'                    => pll__('Please enter valid ID card number'),
+                'toolkit_api_url'                 => TOOLKIT_API_URL,
+                'toolkit_api_key'                 => TOOLKIT_API_KEY,
 			)
 		);
 	}
