@@ -483,11 +483,13 @@ jQuery(document).ready(function ($) {
     });
 
     //autocomplete
+    //on September 14, 2018 - the funcationlity has been implemented to fetch data directly from Toolbox API.
     $('#personal_info_form .typeahead.complex-typeahead').typeahead({//only apply to complex typeaheads the zipcode one is same across whole site.
         name: 'id',
         display: 'name',
         delay: 300,//will ensure that the request goes after 300 ms delay so that there are no multipe ajax calls while user is typing
         source: function (query, process) {
+            var zipCode = parseInt($('#location').val()); // aquiring zip code to be sent to toolbox api
             //console.log("Another ajax***");
             var current = $(document.activeElement);
 
@@ -495,10 +497,13 @@ jQuery(document).ready(function ($) {
                 console.log("Blocking new request*****");
                 return false;
             }*/
-           // console.log("current***", current);
-            var ajaxUrl = site_obj.ajax_url + '?action=ajaxQueryToolboxApi&query_method=' + current.attr('query_method') +
-                "&query_params[" + current.attr('query_key') + "]=" + query;
+            // console.log("current***", current);
 
+            //old url => var ajaxUrl = site_obj.ajax_url + '?action=ajaxQueryToolboxApi&query_method=' + current.attr('query_method') + "&query_params[" + current.attr('query_key') + "]=" + query;
+            var ajaxUrl = site_obj.toolkit_api_url + 'streets?postcode=' + zipCode + '&toolbox_key=' + site_obj.toolkit_api_key; // url changed to get cities data direct from toolbox api
+
+            /** Old code commented out in order to get data from toolbox api directly **/
+            /*
             //check if there are any parent params to be included
             var extraQueryParams = '';
             if(!_.isEmpty(current.attr('parent_query_key1'))) {
@@ -509,17 +514,21 @@ jQuery(document).ready(function ($) {
                 }
                 extraQueryParams += '&query_params[' + current.attr('parent_query_key1') + ']=' + extraFirstVal;
             }
-
             if(!_.isEmpty(current.attr('parent_query_key2'))) {
                 extraQueryParams += '&query_params[' + current.attr('parent_query_key2') + ']=' +
                     $('#' + current.attr('parent_query_key2_id')).val();
             }
-
             ajaxUrl += extraQueryParams;
+            */
+            /** Old code commented out in order to get data from toolbox api directly **/
 
             return $.get(ajaxUrl, function (data) {
-                var jsonData = JSON.parse(data);
-
+                try { // if data is json object
+                    var jsonData = JSON.parse(data);
+                }
+                catch (error){ // if data is already json
+                    var jsonData = data;
+                }
                 /**
                  * Preparing data in following format
                  * [
