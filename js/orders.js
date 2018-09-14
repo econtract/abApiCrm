@@ -607,6 +607,10 @@ jQuery(document).ready(function ($) {
 
             allAttrs += attrName + '=' + attrVal;
         });
+        //if diy is checked include its price as well
+        if($('#by_diy').is(':checked')) {
+            allAttrs += '&tmp_diy_inst_price='+$('#tmp_diy_inst_price').val();
+        }
 
         var transLabelsUri = '';
 
