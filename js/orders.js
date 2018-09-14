@@ -27,9 +27,10 @@ function requiredFieldsFilled(inputForm) {
     });
 
     if(inputForm.hasClass('simple-form-radio-checkbox')){
-        inputForm.find(':input[required]:radio:not(:disabled), :input[required]:checkbox:not(:disabled)').each(function () {
-            var reqField = jQuery(this);
-            if(!reqField.is(':checked')){
+        var allElements = inputForm.find(':input[required]:radio:not(:disabled), :input[required]:checkbox:not(:disabled)');
+        allElements.each(function(){
+            if(jQuery(':'+jQuery(this).attr('type')+'[name='+jQuery(this).attr('name')+']:checked').length == 0)
+            {
                 filled = false;
             }
         });
@@ -457,8 +458,6 @@ jQuery(document).ready(function ($) {
             natParent.prepend('<input type="text" class="form-control hasMask" ' +
                 'id="client_idnr" name="client_idnr" placeholder="591-0123456-78" data-idcard=""' +
                 'value="' + prevIdnrVal + '" data-error="' + site_obj.idcard_error + '" required>');
-            // $('#client_idnr').addClass('hasMask');
-            //$('#client_idnr').attr('data-mask', '999-9999999-99');
             $('#client_idnr').mask("999-9999999-99");
         } else {
             $('#client_idnr').remove();//Removing because unmask doesn't work well, as all of unmasking methods don't work reliably
@@ -468,7 +467,6 @@ jQuery(document).ready(function ($) {
             $('#client_idnr').unmask("999-9999999-99");
             $('#client_idnr').unmask();
             $('#client_idnr').trigger("unmask");
-
             $('#client_idnr').trigger('unmask.bs.inputmask');*/
 
             natParent.prepend('<input type="text" class="form-control" ' +
@@ -476,6 +474,7 @@ jQuery(document).ready(function ($) {
                 'value="" data-error="' + site_obj.idcard_error + '" required>');
             //console.log(natParent);
         }
+        $(this).parents('form').validator('destroy');
         $(this).parents('form').validator('update');
     });
 
