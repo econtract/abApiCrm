@@ -238,6 +238,23 @@ function initAvailabilityToggle(){
     });
 }
 
+function updateOnInstallationSituation($this){
+    var moveDateSection = jQuery('#move_date_section'),
+        moveDate = moveDateSection.find('#move_date'),
+        parentForm = moveDateSection.parents('form');
+
+    if($this.val() == 2){
+        moveDateSection.removeClass('hidden');
+        moveDate.removeAttr('disabled');
+    }
+    else{
+        moveDate.attr('disabled',true);
+        moveDateSection.addClass('hidden');
+    }
+    parentForm.validator('destroy');
+    parentForm.validator('update');
+}
+
 jQuery(document).ready(function ($) {
     var activeLink = location.pathname;
     var activeLinkHash = activeLink.split('/').join('-')+'-last-active-form-id';
@@ -789,5 +806,38 @@ jQuery(document).ready(function ($) {
 
     if(!_.isEmpty($('.newCostCalc')) && !_.isEmpty($('#diy_inst_price')) && !_.isEmpty($('.diy-requested'))) {
         applyDiyPriceOnPbs($('#diy_inst_price').val());
+    }
+
+    /*--Update validation on page load for hidden date field Telecom Step 4 - Situation and When do you move? --*/
+    //updateOnInstallationSituation(jQuery('input[name=situation]'));
+
+    $('input[name=situation]').on('change',function(){
+        updateOnInstallationSituation(jQuery(this));
+    });
+
+});
+
+
+
+jQuery(window).load(function(){
+    /*--Telecom step 4 Phone number spacing issue between phone numbers fixed */
+    if(jQuery('#phone_number').length>0){
+        var el = jQuery('#phone_number'),
+            elVal = el.val(),
+            parentForm = el.parents('form');
+        if(elVal.length>0){
+            var phoneChunks='',
+                result='';
+            phoneChunks = elVal.split(" ");
+            for(var i=0; i<phoneChunks.length; i++){
+                result = result.concat(phoneChunks[i]);
+            }
+            // console.log(result);
+            parentForm.validator('destroy');
+            setTimeout(function(){
+                el.val(result);
+                parentForm.validator('update');
+                }, 300);
+        }
     }
 });
