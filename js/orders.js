@@ -1,3 +1,79 @@
+function formatMoney(amount, decimalCount = 2, decimal = ".", thousands = ",") {
+    try {
+        decimalCount = Math.abs(decimalCount);
+        decimalCount = isNaN(decimalCount) ? 2 : decimalCount;
+
+        const negativeSign = amount < 0 ? "-" : "";
+
+        let i = parseInt(amount = Math.abs(Number(amount) || 0).toFixed(decimalCount)).toString();
+        let j = (i.length > 3) ? i.length % 3 : 0;
+
+        return negativeSign + (j ? i.substr(0, j) + thousands : '') + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thousands) + (decimalCount ? decimal + Math.abs(amount - i).toFixed(decimalCount).slice(2) : "");
+    } catch (e) {
+        console.log(e)
+    }
+}
+
+function formatPrice(price, numDecimals = 2, preFix = "")
+{
+    //check if the digits already has comma instead of dot
+    if(_.includes(price.toString(), ',')) {
+        price = price.toString().replace(',', '.');
+    }
+
+    // Set thousand separator to ., and decimal separator to a ,
+    number = formatMoney(price, numDecimals, ',', '.');
+
+    // remove trailing ,00 from a price
+    price = preFix + number + "";
+
+    return price;
+}
+
+function formatPriceInParts(price, numDecimals = 2) {
+    price = formatPrice(price, numDecimals, '');
+    priceArr = price.toString().split(',');
+
+    if (!_.isEmpty(priceArr[1]) || priceArr[1].length == 0) {
+        priceArr[1] = '00';
+    }
+    else if(strlen(priceArr[1]) == 1)
+    {
+        priceArr[1] = '0'.priceArr[1];
+    }
+
+    return [priceArr[0], priceArr[1]];
+}
+
+function applyDiyPriceOnPbs(diyPrice) {
+    if(!_.isEmpty(jQuery('.newCostCalc')) && !_.isEmpty(diyPrice.toString())) {
+        //apply if further conditions are matched
+        //No need to apply if both prices are same
+        var instTarget = jQuery('.ident-inst .ident-applied-price');
+        var oneTimeTotalRarget = jQuery('.ident-onetime-total');
+
+        var appliedPrice = instTarget.attr('applied-price');
+        if(diyPrice != appliedPrice) {
+            var diyPriceInParts = formatPriceInParts(diyPrice);
+            //console.log('diyPriceInParts***', diyPriceInParts);
+            instTarget.find('.amount').text(diyPriceInParts[0]);
+            instTarget.find('.cents').text(diyPriceInParts[1]);
+
+            var diffPrice = appliedPrice - diyPrice;//to subtruct from total
+            //console.log('diffPrice***', diffPrice);
+            var oneTimeTotal = oneTimeTotalRarget.attr('onetime-total');
+            //console.log('oneTimeTotal', oneTimeTotal);
+            var oneTimeTotalDiff = oneTimeTotal - diffPrice;
+            //console.log('oneTimeTotalDiff', oneTimeTotalDiff);
+            var diffOnetimeInParts = formatPriceInParts(oneTimeTotalDiff);
+            //console.log('diffOnetimeInParts***', diffOnetimeInParts);
+            //console.log('diffOnetimeInParts[0]', diffOnetimeInParts[0]);
+            oneTimeTotalRarget.find('.amount').text(diffOnetimeInParts[0]);
+            oneTimeTotalRarget.find('.cents').text(diffOnetimeInParts[1]);
+        }
+    }
+}
+
 function requiredFieldsFilled(inputForm) {
     var filled = true;
     if ((inputForm.attr('id') == "mc4wp-form-1") || inputForm.hasClass('mc4wp-form') || inputForm.data('name') == "Newsletter Subscription"){
@@ -681,6 +757,10 @@ jQuery(document).ready(function ($) {
             },
             success: function (response) {
                 $('.newCostCalc').replaceWith(response);
+                //Time to fix DIY price problem, TODO remove it once DIY problem is fixed in PBS API
+                if($('#by_diy').is(':checked')) {
+                    applyDiyPriceOnPbs($('#tmp_diy_inst_price').val());
+                }
             },
             dataType: 'text',//handle response as raw text without validating :)
             async:true//do not block coming calls
@@ -724,10 +804,14 @@ jQuery(document).ready(function ($) {
     //The following code will make sure if someone comes back from confirmation step for editing data he see that portion in edit mode instead of summary
     triggerSectionEdit();
 
+    if(!_.isEmpty($('.newCostCalc')) && !_.isEmpty($('#diy_inst_price')) && !_.isEmpty($('.diy-requested'))) {
+        applyDiyPriceOnPbs($('#diy_inst_price').val());
+    }
+
     /*--Update validation on page load for hidden date field Telecom Step 4 - Situation and When do you move? --*/
     //updateOnInstallationSituation(jQuery('input[name=situation]'));
 
-    jQuery('input[name=situation]').on('change',function(){
+    $('input[name=situation]').on('change',function(){
         updateOnInstallationSituation(jQuery(this));
     });
 
@@ -756,7 +840,4 @@ jQuery(window).load(function(){
                 }, 300);
         }
     }
-
-
-
 });
