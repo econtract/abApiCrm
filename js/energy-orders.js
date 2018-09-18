@@ -335,10 +335,12 @@ jQuery(document).ready(function ($) {
         if(jQuery('#' + id ).is(':checked')){
             jQuery('.' + id+ '_content').removeClass('hide');
             jQuery('.' + id+ '_content').find('input').removeAttr('disabled');
+            jQuery('.' + id+ '_content').find('input').attr('required', 'required');
         }
         else{
             jQuery('.' + id+ '_content').addClass('hide');
             jQuery('.' + id+ '_content').find('input').attr('disabled', 'disabled');
+            jQuery('.' + id+ '_content').find('input').removeAttr('required');
         }
 
         var inputForm = jQuery('#' + id ).parents('form');
