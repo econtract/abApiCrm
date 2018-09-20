@@ -240,7 +240,7 @@ function initAvailabilityToggle(){
 
 function updateOnInstallationSituation($this){
     var moveDateSection = jQuery('#move_date_section'),
-        moveDate = moveDateSection.find('#move_date');
+        moveDate = moveDateSection.find('#move_date'),
         parentForm = moveDateSection.parents('form');
 
     if($this.val() == 2){
