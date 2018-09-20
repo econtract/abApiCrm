@@ -242,24 +242,23 @@ function updateOnInstallationSituation($this){
     var moveDateSection = jQuery('#move_date_section'),
         moveDate = moveDateSection.find('#move_date'),
         parentForm = moveDateSection.parents('form');
-
-    if($this.val() == 2){
-        moveDate.removeAttr('disabled');
-        moveDateSection.removeClass('hidden');
+    if(moveDateSection.length>0 && moveDate.length>0){
+        if($this.val() == 2){
+            moveDate.removeAttr('disabled');
+            moveDateSection.removeClass('hidden');
+        }
+        else{
+            moveDate.attr('disabled',true);
+            moveDateSection.addClass('hidden');
+            moveDate.val('');
+        }
+        if(moveDate.val() == ''){
+            customValidateDateField(moveDate, 'change');
+        }
+        else{
+            customValidateDateField(moveDate, 'blur');
+        }
     }
-    else{
-        moveDate.attr('disabled',true);
-        moveDateSection.addClass('hidden');
-        moveDate.val('');
-    }
-    if(moveDate.val() == ''){
-        customValidateDateField(moveDate, 'change');
-    }
-    else{
-        customValidateDateField(moveDate, 'blur');
-    }
-
-
 }
 
 jQuery(document).ready(function ($) {
@@ -816,11 +815,13 @@ jQuery(document).ready(function ($) {
     }
 
 
-    $('input[name=situation]').on('change',function(){
-        updateOnInstallationSituation(jQuery(this));
-    });
 
-    if(jQuery('#move_date').length>0){
+    //TELECOME Step 4 Move date section validation and show hide
+    if(jQuery('#move_date').length>0 && jQuery('#move_date_section').length>0){
+        $('input[name=situation]').on('change',function(){
+            updateOnInstallationSituation(jQuery(this));
+        });
+
         var moveDate =  jQuery('#move_date');
         moveDate.on('blur',function(){
             setTimeout(function(){
@@ -829,9 +830,9 @@ jQuery(document).ready(function ($) {
         });
     }
 
-
-
 });//Ready Ends
+
+//TELECOME Step 4 Move date section validation and show hide - Core Function
 function customValidateDateField($el, eventType){
     var moveDate = jQuery('#move_date'),
         hasFeedback = moveDate.parents('.has-feedback'),
@@ -884,7 +885,10 @@ function customValidateDateField($el, eventType){
 
 jQuery(window).load(function(){
     /*--Update validation on page load for hidden date field Telecom Step 4 - Situation and When do you move? --*/
-    updateOnInstallationSituation(jQuery('input[name=situation]:checked'));
+        if(jQuery('input[name=situation]').length>0 && jQuery('#move_date_section').length>0){
+            updateOnInstallationSituation(jQuery('input[name=situation]:checked'));
+        }
+
     /*--Telecom step 4 Phone number spacing issue between phone numbers fixed */
     if(jQuery('#phone_number').length>0){
         var el = jQuery('#phone_number'),
