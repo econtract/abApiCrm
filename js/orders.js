@@ -240,19 +240,26 @@ function initAvailabilityToggle(){
 
 function updateOnInstallationSituation($this){
     var moveDateSection = jQuery('#move_date_section'),
-        moveDate = moveDateSection.find('#move_date'),
+        moveDate = moveDateSection.find('#move_date');
         parentForm = moveDateSection.parents('form');
 
     if($this.val() == 2){
-        moveDateSection.removeClass('hidden');
         moveDate.removeAttr('disabled');
+        moveDateSection.removeClass('hidden');
     }
     else{
         moveDate.attr('disabled',true);
         moveDateSection.addClass('hidden');
+        moveDate.val('');
     }
-    parentForm.validator('destroy');
-    parentForm.validator('update');
+    if(moveDate.val() == ''){
+        customValidateDateField(moveDate, 'change');
+    }
+    else{
+        customValidateDateField(moveDate, 'blur');
+    }
+
+
 }
 
 jQuery(document).ready(function ($) {
@@ -808,18 +815,76 @@ jQuery(document).ready(function ($) {
         applyDiyPriceOnPbs($('#diy_inst_price').val());
     }
 
-    /*--Update validation on page load for hidden date field Telecom Step 4 - Situation and When do you move? --*/
-    //updateOnInstallationSituation(jQuery('input[name=situation]'));
 
     $('input[name=situation]').on('change',function(){
         updateOnInstallationSituation(jQuery(this));
     });
 
-});
+    if(jQuery('#move_date').length>0){
+        var moveDate =  jQuery('#move_date');
+        moveDate.on('blur',function(){
+            setTimeout(function(){
+                customValidateDateField(moveDate, 'blur');
+            },100);
+        });
+    }
 
 
+
+});//Ready Ends
+function customValidateDateField($el, eventType){
+    var moveDate = jQuery('#move_date'),
+        hasFeedback = moveDate.parents('.has-feedback'),
+        iconSpan = hasFeedback.find('.form-control-feedback'),
+        parentForm = moveDate.parents('form'),
+        blockWithErrors = hasFeedback.find('.help-block.with-errors'),
+        errorMsg = '',
+        html ='',
+        value = $el.val();
+    if(!moveDate.is(':disabled') && eventType == 'blur'){
+        if(value.length === 10){
+            var valParts = value.split('/');
+            var dateObj = new Date(valParts[2], valParts[1] - 1, valParts[0]);
+            var minDate = new Date();
+            var maxDate = new Date();
+            minDate.setDate(minDate.getDate() - 30);
+            maxDate.setDate(maxDate.getDate() + 180);
+            if(dateObj < minDate || dateObj > maxDate){
+                errorMsg = $el.data('move-check');
+                html = '<ul class="list-unstyled"><li>'+ errorMsg +'</li></ul></div>';
+                hasFeedback.removeClass('has-success').addClass('has-error has-danger');
+                iconSpan.removeClass('glyphicon-ok').addClass('glyphicon-remove');
+                blockWithErrors.html(html);
+                $el.val('');
+            }
+            else{
+                errorMsg = '';
+                hasFeedback.removeClass('has-error has-danger').addClass('has-success');
+                iconSpan.removeClass('glyphicon-remove').addClass('glyphicon-ok');
+                blockWithErrors.html('');
+            }
+        }
+        else {
+            errorMsg = $el.data('error');
+            html = '<ul class="list-unstyled"><li>'+ errorMsg +'</li></ul></div>';
+            hasFeedback.removeClass('has-success').addClass('has-error has-danger');
+            iconSpan.removeClass('glyphicon-ok').addClass('glyphicon-remove');
+            blockWithErrors.html(html);
+        }
+
+    }
+    else{
+        errorMsg = '';
+        hasFeedback.removeClass('has-error has-danger has-success');
+        iconSpan.removeClass('glyphicon-remove glyphicon-ok');
+        blockWithErrors.html('');
+    }
+
+}//customValidateDateField Ends
 
 jQuery(window).load(function(){
+    /*--Update validation on page load for hidden date field Telecom Step 4 - Situation and When do you move? --*/
+    updateOnInstallationSituation(jQuery('input[name=situation]:checked'));
     /*--Telecom step 4 Phone number spacing issue between phone numbers fixed */
     if(jQuery('#phone_number').length>0){
         var el = jQuery('#phone_number'),
@@ -832,12 +897,10 @@ jQuery(window).load(function(){
             for(var i=0; i<phoneChunks.length; i++){
                 result = result.concat(phoneChunks[i]);
             }
-            // console.log(result);
-            parentForm.validator('destroy');
             setTimeout(function(){
                 el.val(result);
-                parentForm.validator('update');
+                el.trigger('input');
                 }, 300);
         }
     }
-});
+});//Load Ends
