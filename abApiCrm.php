@@ -64,7 +64,7 @@ class abApiCrm {
 			'jquery',
 			'jquery-bootstrap-typeahead',
 			'aanbieder_default_script'
-		), '1.9.9', true );
+		), '2.0.0', true );
 
 		// in JavaScript, object properties are accessed as ajax_object.ajax_url, ajax_object.we_value
 		//The object will be created before including callMeBack.js so its sufficient for orders.js too, there is no need to include it again

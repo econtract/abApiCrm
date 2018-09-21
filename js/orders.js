@@ -104,6 +104,10 @@ function requiredFieldsFilled(inputForm) {
             /*console.log(reqField.text(), reqField.attr('name'), "====>", reqField.val());*/
             filled = false;
         }
+        //Multi Phone validation
+        if(reqField.filter('[data-mulPhone]').length>0 && reqField.parents('.has-feedback').hasClass('has-error')){
+            filled = false;
+        }
     });
 
     if(inputForm.hasClass('simple-form-radio-checkbox')){
@@ -830,7 +834,32 @@ jQuery(document).ready(function ($) {
         });
     }
 
+    //Telecom step 2 on the basis of current internet provider display phone number
+    if(jQuery('.clientNumberCnt').length>0){
+        clientNumberShowHide();
+
+        jQuery('#select_provider').on('change',function(){
+            clientNumberShowHide();
+        });
+
+    }
+
 });//Ready Ends
+
+//Telecom step 2 on the basis of current internet provider display phone number
+function clientNumberShowHide(){
+    var elVal = jQuery('#select_provider').find('option:selected').val();
+    var clientContainer = jQuery('.clientNumberCnt');
+    var clientNumber = jQuery('#client_number');
+    if(elVal == '' || elVal == 'Ik heb nog geen provider'){
+        clientNumber.attr('disabled',true);
+        clientContainer.hide();
+    }
+    else{
+        clientNumber.removeAttr('disabled');
+        clientContainer.show();
+    }
+}
 
 //TELECOME Step 4 Move date section validation and show hide - Core Function
 function customValidateDateField($el, eventType){
@@ -891,20 +920,26 @@ jQuery(window).load(function(){
 
     /*--Telecom step 4 Phone number spacing issue between phone numbers fixed */
     if(jQuery('#phone_number').length>0){
-        var el = jQuery('#phone_number'),
-            elVal = el.val(),
-            parentForm = el.parents('form');
-        if(elVal.length>0){
-            var phoneChunks='',
-                result='';
-            phoneChunks = elVal.split(" ");
-            for(var i=0; i<phoneChunks.length; i++){
-                result = result.concat(phoneChunks[i]);
-            }
-            setTimeout(function(){
-                el.val(result);
-                el.trigger('input');
-                }, 300);
-        }
+        removeSpacesPhoneFixValidation(jQuery('#phone_number'));
+    }
+    if(jQuery('#client_number').length>0){
+        removeSpacesPhoneFixValidation(jQuery('#client_number'));
     }
 });//Load Ends
+
+function removeSpacesPhoneFixValidation(el){
+    var elVal = el.val(),
+        parentForm = el.parents('form');
+    if(elVal.length>0){
+        var phoneChunks='',
+            result='';
+        phoneChunks = elVal.split(" ");
+        for(var i=0; i<phoneChunks.length; i++){
+            result = result.concat(phoneChunks[i]);
+        }
+        setTimeout(function(){
+            el.val(result);
+            el.trigger('input');
+        }, 300);
+    }
+}
