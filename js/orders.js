@@ -104,11 +104,19 @@ function requiredFieldsFilled(inputForm) {
             /*console.log(reqField.text(), reqField.attr('name'), "====>", reqField.val());*/
             filled = false;
         }
-        //Multi Phone validation
-        if(reqField.filter('[data-mulPhone]').length>0 && reqField.parents('.has-feedback').hasClass('has-error')){
-            filled = false;
-        }
+
     });
+
+    //Multi Phone validation
+    var multiPhone = jQuery(':input[type=tel]:not(:disabled)');
+    if(multiPhone.length>0){
+        multiPhone.each(function () {
+            $this = jQuery(this);
+            if($this.parents('.has-feedback').hasClass('has-error')){
+                filled = false;
+            }
+        });
+    }
 
     if(inputForm.hasClass('simple-form-radio-checkbox')){
         var allElements = inputForm.find(':input[required]:radio:not(:disabled), :input[required]:checkbox:not(:disabled)');
