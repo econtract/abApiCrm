@@ -128,7 +128,7 @@ function submitValidValuesWrapperEnergy(inputForm, activeLinkHash) {
     //console.log("URL String***", window.location.search, location.search);
     //console.log("***", window.location.search);
     //saving cookie for one hour so user can be resumed from same form which he was filling
-    if(triggerSectionEdit() === false) {//if section edit not requested
+    if(triggerSectionEditEnergy() === false) {//if section edit not requested
         wpCookies.set(activeLinkHash, inputForm.attr('id'), 600);//preserving the last edit form for 10 minutes
     }
 }
@@ -196,6 +196,20 @@ function fillEnergyFormDynamicData(targetContainer) {
     targetContainer.find('.filled-content table tbody').html(filledHtml);
 }
 
+function triggerSectionEditEnergy() {
+    var url = window.location.href;
+    var urlArr = url.split('#');
+    if(urlArr.length === 2) {
+        var editSection = urlArr[1];
+        var targetEditLink = jQuery('#'+editSection).find('a.edit-data');
+        if(targetEditLink) {
+            targetEditLink.trigger('click');
+            return true;
+        }
+    }
+
+    return false;
+}
 
 /***
  *  READY FUNCTION STARTS
@@ -494,7 +508,7 @@ jQuery(document).ready(function ($) {
     $("body").on('click', '.energy-order-simple-form', function (e) {//changing last active form on click
         var inputForm = $(this);
         //saving cookie for one hour so user can be resumed from same form which he was filling
-        if(triggerSectionEdit() === false) {//if section edit not requested
+        if(triggerSectionEditEnergy() === false) {//if section edit not requested
             wpCookies.set(activeLinkHash, inputForm.attr('id'), 600);//preserving the last edit form for 10 minutes
         }
     });
