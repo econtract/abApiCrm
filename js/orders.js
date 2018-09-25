@@ -240,8 +240,8 @@ function triggerSectionEdit() {
         var editSection = urlArr[1];
         var targetEditLink = jQuery('#'+editSection).find('a.edit-data');
         if(targetEditLink) {
-            targetEditLink.trigger('click');
             sectionEditTriggered = true;
+            targetEditLink.trigger('click');
             return true;
         }
     }
