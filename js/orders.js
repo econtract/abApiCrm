@@ -1,3 +1,5 @@
+var sectionEditTriggered = false;
+
 function formatMoney(amount, decimalCount = 2, decimal = ".", thousands = ",") {
     try {
         decimalCount = Math.abs(decimalCount);
@@ -228,6 +230,10 @@ function submitValidValuesWrapper(inputForm, activeLinkHash) {
 
 //The following code will make sure if someone comes back from confirmation step for editing data he see that portion in edit mode instead of summary
 function triggerSectionEdit() {
+    if(sectionEditTriggered === true) {
+        return true;
+    }
+
     var url = window.location.href;
     var urlArr = url.split('#');
     if(urlArr.length === 2) {
@@ -235,6 +241,7 @@ function triggerSectionEdit() {
         var targetEditLink = jQuery('#'+editSection).find('a.edit-data');
         if(targetEditLink) {
             targetEditLink.trigger('click');
+            sectionEditTriggered = true;
             return true;
         }
     }
