@@ -937,9 +937,7 @@ jQuery(window).load(function(){
     if(jQuery('#phone_number').length>0){
         removeSpacesPhoneFixValidation(jQuery('#phone_number'));
     }
-    if(jQuery('#client_number').length>0){
-        removeSpacesPhoneFixValidation(jQuery('#client_number'));
-    }
+
 });//Load Ends
 
 function removeSpacesPhoneFixValidation(el){
