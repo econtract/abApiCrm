@@ -114,7 +114,7 @@ function requiredFieldsFilled(inputForm) {
     if(multiPhone.length>0){
         multiPhone.each(function () {
             $this = jQuery(this);
-            if($this.parents('.has-feedback').hasClass('has-error')){
+            if(!$this.intlTelInput('isValidNumber')){
                 filled = false;
             }
         });
@@ -866,9 +866,7 @@ function clientNumberShowHide(){
     var elVal = jQuery('#select_provider').find('option:selected').val();
     var clientContainer = jQuery('.clientNumberCnt');
     var clientNumber = jQuery('#client_number');
-
-    //TODO: Pass this as translation from localize script otherwise because this will change for french version
-    if(elVal == '' || elVal == 'Ik heb nog geen provider'){
+    if(elVal == '' || elVal == site_obj.no_provider){
         clientNumber.attr('disabled',true);
         clientContainer.hide();
     }
