@@ -58,7 +58,7 @@ class abApiCrm {
 	 */
 	function enqueueScripts() {
 
-		wp_enqueue_script( 'crm-script-callMeBack', plugins_url( '/js/callMeBack.js', __FILE__ ), array( 'jquery', 'aanbieder_bootstrap_validate' ), '1.0.4', true );
+		wp_enqueue_script( 'crm-script-callMeBack', plugins_url( '/js/callMeBack.js', __FILE__ ), array( 'jquery', 'aanbieder_bootstrap_validate' ), '1.0.5', true );
 		wp_enqueue_script( 'utils');
 		wp_enqueue_script( 'crm-script-orders', plugins_url( '/js/orders.js', __FILE__ ), array(
 			'jquery',
@@ -106,18 +106,29 @@ class abApiCrm {
      * @return bool
      */
 	public function callMeBack() {
-		$params = $this->prepareParametersCallMeBack( $_REQUEST['userInput'] );
 
-		$this->callMeBack = new callMeBackLeadController( $params );
-		$this->callMeBack->send();
-		$this->callMeBackResponse = $this->callMeBack->getResponse();
+        $validCaptacha = isValidCaptcha($_REQUEST['userInput']['g-recaptcha-response']);
 
-		if ( $this->callMeBackResponse->status == 200 ) {
-			//$this->address_id = $this->callMeBackResponse->data;
-			return true;
-		}
+        if($validCaptacha == 1) {
 
-		return false;
+            $params = $this->prepareParametersCallMeBack($_REQUEST['userInput']);
+
+            $this->callMeBack = new callMeBackLeadController($params);
+            $this->callMeBack->send();
+            $this->callMeBackResponse = $this->callMeBack->getResponse();
+
+            if ($this->callMeBackResponse->status == 200) {
+                //$this->address_id = $this->callMeBackResponse->data;
+                echo 'done';
+                exit();
+            } else {
+                echo 'cmrerror';
+                exit();
+            }
+        } else {
+            echo 'error';
+            exit();
+        }
 	}
 
     /**
