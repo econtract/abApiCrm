@@ -37,12 +37,13 @@ jQuery(document).ready(function($){
                     thankYouPanel.addClass('show');
 
                     $(this).siblings('input:text').val('');
+                    $('#CallBack').find('.error-recaptcha').empty();
                 } else if(response == 'cmrerror') {
-                    alert('We have encountered a problem.');
+                    $('#CallBack').find('.error-recaptcha').append('<span>'+main_js.error_recaptcha_problem+'</span>');
                     grecaptcha.reset(callUsBack);
                     //showRecaptcha('callUsBackRecaptcha');
                 } else {
-                    alert('Please validate the robot check');
+                    $('#CallBack').find('.error-recaptcha').append('<span>'+main_js.error_recaptcha+'</span>');
                     grecaptcha.reset(callUsBack);
                 }
 
