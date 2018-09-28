@@ -103,22 +103,22 @@ function requiredFieldsFilled(inputForm) {
         }
 
         if (_.isEmpty(reqField.val())) {
-            /*console.log(reqField.text(), reqField.attr('name'), "====>", reqField.val());*/
+            //console.log(reqField.text(), reqField.attr('name'), "====>", reqField.val());
             filled = false;
         }
 
     });
 
     //Multi Phone validation
-    var multiPhone = jQuery(':input[type=tel]:not(:disabled)');
-    if(multiPhone.length>0){
-        multiPhone.each(function () {
-            $this = jQuery(this);
-            if(!$this.intlTelInput('isValidNumber')){
-                filled = false;
-            }
-        });
-    }
+    // var multiPhone = inputForm.find(':input[type=tel]:not(:disabled)');
+    // if(multiPhone.length>0){
+    //     multiPhone.each(function () {
+    //         $this = jQuery(this);
+    //         if(!$this.intlTelInput('isValidNumber')){
+    //             filled = false;
+    //         }
+    //     });
+    // }
 
     if(inputForm.hasClass('simple-form-radio-checkbox')){
         var allElements = inputForm.find(':input[required]:radio:not(:disabled), :input[required]:checkbox:not(:disabled)');
@@ -933,26 +933,33 @@ jQuery(window).load(function(){
             updateOnInstallationSituation(jQuery('input[name=situation]:checked'));
         }
 
+    //Multi Phone initialization
+    // var multiPhone = jQuery('input[type=tel]');
+    // if(multiPhone.length>0){
+    //     //multiPhone.intlTelInput('destroy');
+    //     multiPhone.intlTelInput();
+    // }
+
     /*--Telecom step 4 Phone number spacing issue between phone numbers fixed */
-    if(jQuery('#phone_number').length>0){
-        removeSpacesPhoneFixValidation(jQuery('#phone_number'));
-    }
+    // if(jQuery('#phone_number').length>0){
+    //     removeSpacesPhoneFixValidation(jQuery('#phone_number'));
+    // }
 
 });//Load Ends
 
-function removeSpacesPhoneFixValidation(el){
-    var elVal = el.val(),
-        parentForm = el.parents('form');
-    if(elVal.length>0){
-        var phoneChunks='',
-            result='';
-        phoneChunks = elVal.split(" ");
-        for(var i=0; i<phoneChunks.length; i++){
-            result = result.concat(phoneChunks[i]);
-        }
-        setTimeout(function(){
-            el.val(result);
-            el.trigger('input');
-        }, 300);
-    }
-}
+// function removeSpacesPhoneFixValidation(el){
+//     var elVal = el.val(),
+//         parentForm = el.parents('form');
+//     if(elVal.length>0){
+//         var phoneChunks='',
+//             result='';
+//         phoneChunks = elVal.split(" ");
+//         for(var i=0; i<phoneChunks.length; i++){
+//             result = result.concat(phoneChunks[i]);
+//         }
+//         setTimeout(function(){
+//             el.val(result);
+//             el.trigger('input');
+//         }, 300);
+//     }
+// }
