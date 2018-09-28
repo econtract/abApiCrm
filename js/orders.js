@@ -129,6 +129,11 @@ function requiredFieldsFilled(inputForm) {
             }
         });
     }
+
+    if(inputForm.find('#move_date').length>0){
+        filled = customValidateDateField(jQuery('#move_date'));
+    }
+
     return filled;
 }
 
@@ -270,12 +275,6 @@ function updateOnInstallationSituation($this){
             moveDate.attr('disabled',true);
             moveDateSection.addClass('hidden');
             moveDate.val('');
-        }
-        if(moveDate.val() == ''){
-            customValidateDateField(moveDate, 'change');
-        }
-        else{
-            customValidateDateField(moveDate, 'blur');
         }
     }
 }
@@ -840,13 +839,6 @@ jQuery(document).ready(function ($) {
         $('input[name=situation]').on('change',function(){
             updateOnInstallationSituation(jQuery(this));
         });
-
-        var moveDate =  jQuery('#move_date');
-        moveDate.on('blur',function(){
-            setTimeout(function(){
-                customValidateDateField(moveDate, 'blur');
-            },100);
-        });
     }
 
     //Telecom step 2 on the basis of current internet provider display phone number
@@ -877,16 +869,15 @@ function clientNumberShowHide(){
 }
 
 //TELECOME Step 4 Move date section validation and show hide - Core Function
-function customValidateDateField($el, eventType){
-    var moveDate = jQuery('#move_date'),
-        hasFeedback = moveDate.parents('.has-feedback'),
+function customValidateDateField(moveDate){
+    var hasFeedback = moveDate.parents('.has-feedback'),
         iconSpan = hasFeedback.find('.form-control-feedback'),
         parentForm = moveDate.parents('form'),
         blockWithErrors = hasFeedback.find('.help-block.with-errors'),
         errorMsg = '',
         html ='',
-        value = $el.val();
-    if(!moveDate.is(':disabled') && eventType == 'blur'){
+        value = moveDate.val();
+    if(!moveDate.is(':disabled')){
         if(value.length === 10){
             var valParts = value.split('/');
             var dateObj = new Date(valParts[2], valParts[1] - 1, valParts[0]);
@@ -895,26 +886,29 @@ function customValidateDateField($el, eventType){
             minDate.setDate(minDate.getDate() - 30);
             maxDate.setDate(maxDate.getDate() + 180);
             if(dateObj < minDate || dateObj > maxDate){
-                errorMsg = $el.data('move-check');
+                errorMsg = moveDate.data('error');
                 html = '<ul class="list-unstyled"><li>'+ errorMsg +'</li></ul></div>';
                 hasFeedback.removeClass('has-success').addClass('has-error has-danger');
                 iconSpan.removeClass('glyphicon-ok').addClass('glyphicon-remove');
                 blockWithErrors.html(html);
-                $el.val('');
+                moveDate.val('');
+                return false;
             }
             else{
                 errorMsg = '';
                 hasFeedback.removeClass('has-error has-danger').addClass('has-success');
                 iconSpan.removeClass('glyphicon-remove').addClass('glyphicon-ok');
                 blockWithErrors.html('');
+                return true;
             }
         }
         else {
-            errorMsg = $el.data('error');
+            errorMsg = moveDate.data('error');
             html = '<ul class="list-unstyled"><li>'+ errorMsg +'</li></ul></div>';
             hasFeedback.removeClass('has-success').addClass('has-error has-danger');
             iconSpan.removeClass('glyphicon-ok').addClass('glyphicon-remove');
             blockWithErrors.html(html);
+            return false;
         }
 
     }
@@ -923,15 +917,12 @@ function customValidateDateField($el, eventType){
         hasFeedback.removeClass('has-error has-danger has-success');
         iconSpan.removeClass('glyphicon-remove glyphicon-ok');
         blockWithErrors.html('');
+        return true;
     }
 
 }//customValidateDateField Ends
 
 jQuery(window).load(function(){
-    /*--Update validation on page load for hidden date field Telecom Step 4 - Situation and When do you move? --*/
-        if(jQuery('input[name=situation]').length>0 && jQuery('#move_date_section').length>0){
-            updateOnInstallationSituation(jQuery('input[name=situation]:checked'));
-        }
 
     //Multi Phone initialization
     // var multiPhone = jQuery('input[type=tel]');
