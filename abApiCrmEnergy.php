@@ -16,6 +16,7 @@ if ( ! defined( 'AP_ABI_CRM_DIR' ) ) {
 class abApiCrmEnergy extends abApiCrm{
 
     public function __construct() {
+    	parent::__construct();
         add_action( 'init', array( $this, 'enqueueScripts' ) );
         //add_action( 'wp_enqueue_scripts', array( $this, 'enqueueScripts' ) );
     }
@@ -27,26 +28,26 @@ class abApiCrmEnergy extends abApiCrm{
 
         /*wp_enqueue_script( 'crm-script-callMeBack', plugins_url( '/js/callMeBack.js', __FILE__ ), array( 'jquery', 'aanbieder_bootstrap_validate' ), '1.0.3', true );
         wp_enqueue_script( 'utils');*/
-        wp_enqueue_script( 'crm-script-energy-orders', plugins_url( '/js/energy-orders.js', __FILE__ ), array(
-            'jquery',
-            'jquery-bootstrap-typeahead',
-            'aanbieder_default_script'
-        ), '1.1.1', true );
+	    if($this->sector == pll__('energy')) {
+		    wp_enqueue_script( 'crm-script-energy-orders', plugins_url( '/js/energy-orders.js', __FILE__ ), array(
+			    'jquery',
+			    'jquery-bootstrap-typeahead',
+			    'aanbieder_default_script'
+		    ), '1.1.1', true );
 
-        // in JavaScript, object properties are accessed as ajax_object.ajax_url, ajax_object.we_value
-        //The object will be created before including callMeBack.js so its sufficient for orders.js too, there is no need to include it again
-        wp_localize_script( 'crm-script-callMeBack', 'orders_obj_energy',
-            array(
-                'ajax_url'          => admin_url( 'admin-ajax.php' ),
-                'contact_uri'       => "/" . pll__( 'contact' ),
-                'contact_trans'     => pll__( 'Or contact us directly' ),
-                'change_zip_trans'  => pll__( 'Change zip code' ),
-                'api_resp_trans'    => pll__( 'Something went wrong as API is not responding!' ),
-                'req_fields_filled' => pll__( 'Make sure all required fields are filled' ),
-                'idcard_error'      => pll__('Please enter your ID card number'),
-                'template_uri'      => get_template_directory_uri()
-            )
-        );
+		    wp_localize_script( 'crm-script-energy-orders', 'orders_obj_energy',
+			    array(
+				    'ajax_url'          => admin_url( 'admin-ajax.php' ),
+				    'contact_uri'       => "/" . pll__( 'contact' ),
+				    'contact_trans'     => pll__( 'Or contact us directly' ),
+				    'change_zip_trans'  => pll__( 'Change zip code' ),
+				    'api_resp_trans'    => pll__( 'Something went wrong as API is not responding!' ),
+				    'req_fields_filled' => pll__( 'Make sure all required fields are filled' ),
+				    'idcard_error'      => pll__('Please enter your ID card number'),
+				    'template_uri'      => get_template_directory_uri()
+			    )
+		    );
+	    }
     }
 
     public function initSessionForProduct( $getParams ) {

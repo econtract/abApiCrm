@@ -24,6 +24,15 @@ if(!function_exists('getLanguage')) {
 	}
 }
 
+if(!function_exists('getUriSegment')) {
+	function getUriSegment($n)
+	{
+		$segment = explode("/", parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
+
+		return count($segment) > 0 && count($segment) >= ($n - 1) ? $segment[$n] : '';
+	}
+}
+
 class abApiCrm {
 
 	/**
@@ -46,8 +55,11 @@ class abApiCrm {
      */
     protected $createFullOrderResponse;
 
+    public $sector;
+
 
 	public function __construct() {
+		$this->sector = getUriSegment(1);
 		//enqueue JS scripts
 		add_action( 'init', array( $this, 'enqueueScripts' ) );
 
@@ -59,13 +71,6 @@ class abApiCrm {
 	function enqueueScripts() {
 
 		wp_enqueue_script( 'crm-script-callMeBack', plugins_url( '/js/callMeBack.js', __FILE__ ), array( 'jquery', 'aanbieder_bootstrap_validate' ), '1.0.7', true );
-		wp_enqueue_script( 'utils');
-		wp_enqueue_script( 'crm-script-orders', plugins_url( '/js/orders.js', __FILE__ ), array(
-			'jquery',
-			'jquery-bootstrap-typeahead',
-			'aanbieder_default_script'
-		), '2.0.7', true );
-
 		// in JavaScript, object properties are accessed as ajax_object.ajax_url, ajax_object.we_value
 		//The object will be created before including callMeBack.js so its sufficient for orders.js too, there is no need to include it again
 		wp_localize_script( 'crm-script-callMeBack', 'callmeback_obj',
@@ -81,25 +86,35 @@ class abApiCrm {
 			)
 		);
 
-		wp_localize_script( 'crm-script-orders', 'site_obj',
-			array(
-				'ajax_url'                        => admin_url( 'admin-ajax.php' ),
-				'site_url'                        => pll_home_url(),
-				'lang'                            => getLanguage(),
-				'trans_monthly_cost'              => pll__( 'Monthly costs' ),
-				'trans_monthly_total'             => pll__( 'Monthly total' ),
-				'trans_first_month'               => pll__( 'First month' ),
-				'trans_monthly_total_tooltip_txt' => pll__( 'PBS: Monthly total tooltip text' ),
-				'trans_ontime_costs'              => pll__( 'One-time costs' ),
-				'trans_ontime_total'              => pll__( 'One-time total' ),
-				'template_uri'                    => get_template_directory_uri(),
-                'idcard_error'                    => pll__('Please enter valid ID card number'),
-                'toolkit_api_url'                 => TOOLKIT_API_URL,
-                'toolkit_api_key'                 => TOOLKIT_API_KEY,
-                'change_zip_trans'                => pll__( 'Change zip code' ),
-                'no_provider'                     => pll__( 'No Provider' )
-			)
-		);
+		wp_enqueue_script( 'utils');
+
+		if($this->sector == pll__('telecom')) {
+			wp_enqueue_script( 'crm-script-orders', plugins_url( '/js/orders.js', __FILE__ ), array(
+				'jquery',
+				'jquery-bootstrap-typeahead',
+				'aanbieder_default_script'
+			), '2.0.7', true );
+
+			wp_localize_script( 'crm-script-orders', 'site_obj',
+				array(
+					'ajax_url'                        => admin_url( 'admin-ajax.php' ),
+					'site_url'                        => pll_home_url(),
+					'lang'                            => getLanguage(),
+					'trans_monthly_cost'              => pll__( 'Monthly costs' ),
+					'trans_monthly_total'             => pll__( 'Monthly total' ),
+					'trans_first_month'               => pll__( 'First month' ),
+					'trans_monthly_total_tooltip_txt' => pll__( 'PBS: Monthly total tooltip text' ),
+					'trans_ontime_costs'              => pll__( 'One-time costs' ),
+					'trans_ontime_total'              => pll__( 'One-time total' ),
+					'template_uri'                    => get_template_directory_uri(),
+					'idcard_error'                    => pll__('Please enter valid ID card number'),
+					'toolkit_api_url'                 => TOOLKIT_API_URL,
+					'toolkit_api_key'                 => TOOLKIT_API_KEY,
+					'change_zip_trans'                => pll__( 'Change zip code' ),
+					'no_provider'                     => pll__( 'No Provider' )
+				)
+			);
+		}
 	}
 
     /**
