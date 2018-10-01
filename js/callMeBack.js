@@ -30,13 +30,21 @@ jQuery(document).ready(function($){
 
             // We can also pass the url value separately from ajaxurl for front end AJAX implementations
             jQuery.get(callmeback_obj.ajax_url, data, function(response) {
-
-                if(response) {
+                $('#CallBack').find('.error-recaptcha').empty();
+                if(response == 'done') {
                     //$('#callMeBackSuccess').show();
                     mailForm.addClass('hide');
                     thankYouPanel.addClass('show');
 
                     $(this).siblings('input:text').val('');
+                    $('#CallBack').find('.error-recaptcha').empty();
+                } else if(response == 'cmrerror') {
+                    $('#CallBack').find('.error-recaptcha').append('<span>'+main_js.error_recaptcha_problem+'</span>');
+                    grecaptcha.reset(callUsBack);
+                    //showRecaptcha('callUsBackRecaptcha');
+                } else {
+                    $('#CallBack').find('.error-recaptcha').append('<span>'+main_js.error_recaptcha+'</span>');
+                    grecaptcha.reset(callUsBack);
                 }
 
             });
