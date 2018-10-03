@@ -421,7 +421,7 @@ jQuery(document).ready(function ($) {
         var inputForm = $(this);
         var formInputs = $(inputForm).serialize() + '&action=saveSimpleOrderEnergy&' + $('#orderCommon').serialize();
 
-        var filled = requiredFieldsFilled(inputForm);
+        var filled = requiredFieldsFilledEnergy(inputForm);
 
         if (filled === false) {
             return false; //don't allow sumbitting the form
