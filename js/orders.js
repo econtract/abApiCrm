@@ -752,12 +752,12 @@ jQuery(document).ready(function ($) {
 
         var transLabelsUri = '';
 
-        transLabelsUri = 'trans_monthly_cost=' + search_compare_obj.trans_monthly_cost +
-            '&trans_monthly_total=' + search_compare_obj.trans_monthly_total +
-            '&trans_first_month=' + search_compare_obj.trans_first_month +
-            '&trans_monthly_total_tooltip_txt=' + search_compare_obj.trans_monthly_total_tooltip_txt +
-            '&trans_ontime_costs=' + search_compare_obj.trans_ontime_costs +
-            '&trans_ontime_total=' + search_compare_obj.trans_ontime_total;
+        transLabelsUri = 'trans_monthly_cost=' + site_obj.trans_monthly_cost +
+            '&trans_monthly_total=' + site_obj.trans_monthly_total +
+            '&trans_first_month=' + site_obj.trans_first_month +
+            '&trans_monthly_total_tooltip_txt=' + site_obj.trans_monthly_total_tooltip_txt +
+            '&trans_ontime_costs=' + site_obj.trans_ontime_costs +
+            '&trans_ontime_total=' + site_obj.trans_ontime_total;
 
         //appending remaining variables which are required to grab the updated cart
         allAttrs += '&prt=' + $('#prt').val();
