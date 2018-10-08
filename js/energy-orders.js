@@ -551,6 +551,35 @@ jQuery(document).ready(function ($) {
             window.location = currAttr.attr('href');
         }, 5);
     });
+
+    //control account number field based on payment info selection, copied from order.js, no difference
+    $("input[name=payment_method]").on('change', function () {
+        var selectedField = $(this);
+        var selectedVal = selectedField.val();
+
+        if (parseInt(selectedVal) === 2) {
+            $('#iban').parents('li').removeClass('hidden');
+            $('#iban').removeAttr('disabled');
+            $('#iban').attr('required', true);
+
+        }
+        else if (parseInt(selectedVal) === 1) {
+            if ($('#iban').hasClass('with-vir')) {
+                $('#iban').parents('li').removeClass('hidden');
+                $('#iban').removeAttr('disabled');
+                $('#iban').attr('required', true);
+            } else {
+                $('#iban').parents('li').addClass('hidden');
+                $('#iban').attr('disabled', true);
+                $('#iban').removeAttr('required');
+            }
+        }
+        else {
+            $('#iban').parents('li').addClass('hidden');
+            $('#iban').attr('disabled', true);
+        }
+        selectedField.parents('form').validator('update');
+    });
 });
 
 /*** READY FUNCTION ENDS ***/
