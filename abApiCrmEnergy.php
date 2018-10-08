@@ -33,7 +33,7 @@ class abApiCrmEnergy extends abApiCrm{
 			    'jquery',
 			    'jquery-bootstrap-typeahead',
 			    'aanbieder_default_script'
-		    ), '1.1.2', true );
+		    ), '1.1.3', true );
 
 		    wp_localize_script( 'crm-script-energy-orders', 'orders_obj_energy',
 			    array(
