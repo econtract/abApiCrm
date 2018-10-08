@@ -109,16 +109,16 @@ function requiredFieldsFilled(inputForm) {
 
     });
 
-    //Multi Phone validation
-    // var multiPhone = inputForm.find(':input[type=tel]:not(:disabled)');
-    // if(multiPhone.length>0){
-    //     multiPhone.each(function () {
-    //         $this = jQuery(this);
-    //         if(!$this.intlTelInput('isValidNumber')){
-    //             filled = false;
-    //         }
-    //     });
-    // }
+    // Multi Phone validation
+    var multiPhone = inputForm.find(':input[type=tel]:not(:disabled)');
+    if(multiPhone.length>0){
+        multiPhone.each(function () {
+            $this = jQuery(this);
+            if(!libphonenumber.isValidNumber($this.val())){
+                filled = false;
+            }
+        });
+    }
 
     if(inputForm.hasClass('simple-form-radio-checkbox')){
         var allElements = inputForm.find(':input[required]:radio:not(:disabled), :input[required]:checkbox:not(:disabled)');
