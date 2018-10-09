@@ -130,8 +130,9 @@ function requiredFieldsFilled(inputForm) {
         });
     }
 
-    if(inputForm.find('#move_date').length>0){
-        filled = customValidateDateField(jQuery('#move_date'));
+    var moveDate = inputForm.find('#move_date');
+    if(moveDate.length>0){
+        filled = customValidateDateField(moveDate);
     }
 
     return filled;
@@ -514,30 +515,19 @@ jQuery(document).ready(function ($) {
     });
 
     $("input[name=client_nationality]").on('change', function() {
-        var nat = $(this).val();
-        var natParent = $('#client_idnr').parents('div.form-group');
-        var prevIdnrVal = $('#client_idnr').val();
+        var idcardEl = $('#client_idnr'),
+        nat = $(this).val();
+        idcardEl.val('');
 
         if(nat == 'BE') {
-            $('#client_idnr').remove();
-            natParent.prepend('<input type="text" class="form-control hasMask" ' +
-                'id="client_idnr" name="client_idnr" placeholder="591-0123456-78" data-idcard=""' +
-                'value="' + prevIdnrVal + '" data-error="' + site_obj.idcard_error + '" required>');
-            $('#client_idnr').mask("999-9999999-99");
+            idcardEl.attr({
+                'placeholder':'591-0123456-78',
+                'data-idcard':''
+            });
+            idcardEl.mask("000-0000000-00");
         } else {
-            $('#client_idnr').remove();//Removing because unmask doesn't work well, as all of unmasking methods don't work reliably
-            /*$('#client_idnr').removeClass('hasMask');
-            $('#client_idnr').removeAttr('data-mask');
-            $('#client_idnr').mask();
-            $('#client_idnr').unmask("999-9999999-99");
-            $('#client_idnr').unmask();
-            $('#client_idnr').trigger("unmask");
-            $('#client_idnr').trigger('unmask.bs.inputmask');*/
-
-            natParent.prepend('<input type="text" class="form-control" ' +
-                'id="client_idnr" name="client_idnr" placeholder="" ' +
-                'value="" data-error="' + site_obj.idcard_error + '" required>');
-            //console.log(natParent);
+            idcardEl.removeAttr('placeholder data-idcard');
+            idcardEl.unmask();
         }
         $(this).parents('form').validator('destroy');
         $(this).parents('form').validator('update');
@@ -821,21 +811,30 @@ function customValidateDateField(moveDate){
         errorMsg = '',
         html ='',
         value = moveDate.val();
+
+    function errorMessage(type){
+        if(type == 'show'){
+            errorMsg = moveDate.data('error');
+            html = '<ul class="list-unstyled"><li>'+ errorMsg +'</li></ul></div>';
+            hasFeedback.removeClass('has-success').addClass('has-error has-danger');
+            iconSpan.removeClass('glyphicon-ok').addClass('glyphicon-remove');
+            blockWithErrors.html(html);
+        }
+    }
     if(!moveDate.is(':disabled')){
         if(value.length === 10){
             var valParts = value.split('/');
+            if(valParts[1] == "00") {
+                errorMessage('show');
+                return false;
+            }
             var dateObj = new Date(valParts[2], valParts[1] - 1, valParts[0]);
             var minDate = new Date();
             var maxDate = new Date();
             minDate.setDate(minDate.getDate() - 30);
             maxDate.setDate(maxDate.getDate() + 180);
             if(dateObj < minDate || dateObj > maxDate){
-                errorMsg = moveDate.data('error');
-                html = '<ul class="list-unstyled"><li>'+ errorMsg +'</li></ul></div>';
-                hasFeedback.removeClass('has-success').addClass('has-error has-danger');
-                iconSpan.removeClass('glyphicon-ok').addClass('glyphicon-remove');
-                blockWithErrors.html(html);
-                moveDate.val('');
+                errorMessage('show');
                 return false;
             }
             else{
@@ -865,36 +864,3 @@ function customValidateDateField(moveDate){
     }
 
 }//customValidateDateField Ends
-
-jQuery(window).load(function(){
-
-    //Multi Phone initialization
-    // var multiPhone = jQuery('input[type=tel]');
-    // if(multiPhone.length>0){
-    //     //multiPhone.intlTelInput('destroy');
-    //     multiPhone.intlTelInput();
-    // }
-
-    /*--Telecom step 4 Phone number spacing issue between phone numbers fixed */
-    // if(jQuery('#phone_number').length>0){
-    //     removeSpacesPhoneFixValidation(jQuery('#phone_number'));
-    // }
-
-});//Load Ends
-
-// function removeSpacesPhoneFixValidation(el){
-//     var elVal = el.val(),
-//         parentForm = el.parents('form');
-//     if(elVal.length>0){
-//         var phoneChunks='',
-//             result='';
-//         phoneChunks = elVal.split(" ");
-//         for(var i=0; i<phoneChunks.length; i++){
-//             result = result.concat(phoneChunks[i]);
-//         }
-//         setTimeout(function(){
-//             el.val(result);
-//             el.trigger('input');
-//         }, 300);
-//     }
-// }
