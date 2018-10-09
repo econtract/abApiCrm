@@ -507,6 +507,7 @@ jQuery(document).ready(function ($) {
             $('#iban').parents('li').addClass('hidden');
             $('#iban').attr('disabled', true);
         }
+        selectedField.parents('form').validator('destroy');
         selectedField.parents('form').validator('update');
     });
 
@@ -514,21 +515,28 @@ jQuery(document).ready(function ($) {
         $(this).attr('required', true);
     });
 
-    $("input[name=client_nationality]").on('change', function() {
+    $("input[name=client_nationality]").on('change', function(e) {
+        e.stopPropagation();
         var idcardEl = $('#client_idnr'),
         nat = $(this).val();
+        var natParent = $('#client_idnr').parents('div.form-group');
+        var prevIdnrVal = $('#client_idnr').val();
         idcardEl.val('');
 
         if(nat == 'BE') {
-            idcardEl.attr({
-                'placeholder':'591-0123456-78',
-                'data-idcard':''
-            });
+            idcardEl.remove();
+            natParent.prepend('<input type="text" class="form-control telecom-order4-idcard" ' +
+                'id="client_idnr" name="client_idnr" placeholder="591-0123456-78" data-idcard=""' +
+                'value="' + prevIdnrVal + '" data-error="' + site_obj.idcard_error + '" required>');
             idcardEl.mask("000-0000000-00");
         } else {
-            idcardEl.removeAttr('placeholder data-idcard');
+            idcardEl.remove();//Removing because unmask doesn't work well, as all of unmasking methods don't work reliably
+            natParent.prepend('<input type="text" class="form-control" ' +
+                'id="client_idnr" name="client_idnr" placeholder="" ' +
+                'value="" data-error="' + site_obj.idcard_error + '" required>');
             idcardEl.unmask();
         }
+
         $(this).parents('form').validator('destroy');
         $(this).parents('form').validator('update');
     });
