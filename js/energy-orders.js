@@ -698,7 +698,7 @@ jQuery(document).ready(function ($) {
 /*** READY FUNCTION ENDS ***/
 
 
-//TELECOME Step 4 Move date section validation and show hide - Core Function
+//Energy Step 2 Move date section validation and show hide - Core Function
 function customValidateDateField(moveDate){
     var hasFeedback = moveDate.parents('.has-feedback'),
         iconSpan = hasFeedback.find('.form-control-feedback'),
