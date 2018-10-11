@@ -27,13 +27,18 @@ function requiredFieldsFilledEnergy(inputForm) {
         // console.log(reqField);
     });
 
-    if (filled === true) {
-        inputForm.find('input[type=submit]').removeClass('disabled');
-        inputForm.find('.next-step-btn-energy a').removeClass('disabled');
-    } else {
-        inputForm.find('.next-step-btn-energy a').addClass('disabled');
-        inputForm.find('input[type=submit]').addClass('disabled');
+    var moveDate = inputForm.find('#move_date');
+    if(moveDate.length>0){
+        filled = customValidateDateField(moveDate);
     }
+
+    // if (filled === true) {
+    //     inputForm.find('input[type=submit]').removeClass('disabled');
+    //     inputForm.find('.next-step-btn-energy a').removeClass('disabled');
+    // } else {
+    //     inputForm.find('.next-step-btn-energy a').addClass('disabled');
+    //     inputForm.find('input[type=submit]').addClass('disabled');
+    // }
     return filled;
 }
 
@@ -580,6 +585,178 @@ jQuery(document).ready(function ($) {
         }
         selectedField.parents('form').validator('update');
     });
+
+
+    //autocomplete
+    //on September 14, 2018 - the funcationlity has been implemented to fetch data directly from Toolbox API.
+    $('#energyOrderInstallationAddressForm .typeahead_energy.complex-typeahead').typeahead({//only apply to complex typeaheads the zipcode one is same across whole site.
+        name: 'id',
+        display: 'name',
+        delay: 300,//will ensure that the request goes after 300 ms delay so that there are no multipe ajax calls while user is typing
+        source: function (query, process) {
+            var zipCode = parseInt($('#location').val()); // aquiring zip code to be sent to toolbox api
+            //console.log("Another ajax***");
+            var current = $(document.activeElement);
+
+            /*if(current.val() == query) {//if field value and new query have same input don't send ajax request
+                console.log("Blocking new request*****");
+                return false;
+            }*/
+            // console.log("current***", current);
+
+            //old url => var ajaxUrl = site_obj.ajax_url + '?action=ajaxQueryToolboxApi&query_method=' + current.attr('query_method') + "&query_params[" + current.attr('query_key') + "]=" + query;
+            var ajaxUrl = site_obj.toolkit_api_url + 'streets?postcode=' + zipCode + '&toolbox_key=' + site_obj.toolkit_api_key; // url changed to get cities data direct from toolbox api
+
+            /** Old code commented out in order to get data from toolbox api directly **/
+            /*
+            //check if there are any parent params to be included
+            var extraQueryParams = '';
+            if(!_.isEmpty(current.attr('parent_query_key1'))) {
+                var extraFirstVal = $('#' + current.attr('parent_query_key1_id')).val();
+                //Zipcode can be with city name like "3500 - Hasselt"
+                if(extraFirstVal.indexOf(" - ") !== -1) {
+                    extraFirstVal = extraFirstVal.split(" - ")[0];
+                }
+                extraQueryParams += '&query_params[' + current.attr('parent_query_key1') + ']=' + extraFirstVal;
+            }
+            if(!_.isEmpty(current.attr('parent_query_key2'))) {
+                extraQueryParams += '&query_params[' + current.attr('parent_query_key2') + ']=' +
+                    $('#' + current.attr('parent_query_key2_id')).val();
+            }
+            ajaxUrl += extraQueryParams;
+            */
+            /** Old code commented out in order to get data from toolbox api directly **/
+
+            return $.get(ajaxUrl, function (data) {
+                try { // if data is json object
+                    var jsonData = JSON.parse(data);
+                }
+                catch (error){ // if data is already json
+                    var jsonData = data;
+                }
+                /**
+                 * Preparing data in following format
+                 * [
+                 {id: "5400", name: "5400 Text"},
+                 {id: "3500", name: "3500 Text"},
+                 {id: "4500", name: "4500 Text"}
+                 ]
+                 */
+
+                var prepareData = [];
+                for (var prop in jsonData) {
+                    var propVal = jsonData[prop][current.attr('query_key')];
+                    var queryKeyExist = false;
+                    if (!_.isEmpty(jsonData[prop][current.attr('query_name_key1')])) {
+                        queryKeyExist = true;
+                        propVal += " - " + jsonData[prop][current.attr('query_name_key1')];
+                    }
+
+                    if (!_.isEmpty(jsonData[prop][current.attr('query_name_key2')])) {
+                        queryKeyExist = true;
+                        propVal += " (" + jsonData[prop][current.attr('query_name_key2')] + ")";
+                    }
+
+                    if (!queryKeyExist) {
+                        propVal += " - " + jsonData[prop]['name'];
+                    }
+
+                    //propVal += (!_.isEmpty(jsonData[prop]['name'])) ? jsonData[prop]['name'] : jsonData[prop][current.attr('query_name_key1')];
+                    //propVal = jsonData[prop][current.attr('query_key')] + " - " + propVal;
+                    //console.log("***propVal", propVal);
+                    prepareData.push({
+                        id: jsonData[prop][current.attr('query_key')],
+                        name: jsonData[prop][current.attr('query_key')],
+                        value: propVal
+                    });
+                }
+                //console.log("prepData***", prepareData);
+                return process(prepareData);
+            });
+        },
+        displayText: function(item) {
+            //console.log("****label:", item);
+            //console.log("***elem:", this.$element);
+            return item.value;
+        },
+        afterSelect: function(selectedItem) {
+            //this.$element[0].value = item.value
+            var keepVal = selectedItem.id;
+
+            //keep value if it has " - " pattern in it otherwise id
+            if(selectedItem.value.indexOf(" - ") !== -1) {
+                keepVal = selectedItem.value;
+            }
+
+            this.$element[0].value = keepVal;
+            //console.log("***selectedItem", selectedItem);
+        }
+    });
+
 });
 
 /*** READY FUNCTION ENDS ***/
+
+
+//TELECOME Step 4 Move date section validation and show hide - Core Function
+function customValidateDateField(moveDate){
+    var hasFeedback = moveDate.parents('.has-feedback'),
+        iconSpan = hasFeedback.find('.form-control-feedback'),
+        parentForm = moveDate.parents('form'),
+        blockWithErrors = hasFeedback.find('.help-block.with-errors'),
+        errorMsg = '',
+        html ='',
+        value = moveDate.val();
+
+    function errorMessage(type){
+        if(type == 'show'){
+            errorMsg = moveDate.data('error');
+            html = '<ul class="list-unstyled"><li>'+ errorMsg +'</li></ul></div>';
+            hasFeedback.removeClass('has-success').addClass('has-error has-danger');
+            iconSpan.removeClass('glyphicon-ok').addClass('glyphicon-remove');
+            blockWithErrors.html(html);
+        }
+    }
+    if(!moveDate.is(':disabled')){
+        if(value.length === 10){
+            var valParts = value.split('/');
+            if(valParts[1] == "00") {
+                errorMessage('show');
+                return false;
+            }
+            var dateObj = new Date(valParts[2], valParts[1] - 1, valParts[0]);
+            var minDate = new Date();
+            var maxDate = new Date();
+            minDate.setDate(minDate.getDate() - 30);
+            maxDate.setDate(maxDate.getDate() + 180);
+            if(dateObj < minDate || dateObj > maxDate){
+                errorMessage('show');
+                return false;
+            }
+            else{
+                errorMsg = '';
+                hasFeedback.removeClass('has-error has-danger').addClass('has-success');
+                iconSpan.removeClass('glyphicon-remove').addClass('glyphicon-ok');
+                blockWithErrors.html('');
+                return true;
+            }
+        }
+        else {
+            errorMsg = moveDate.data('error');
+            html = '<ul class="list-unstyled"><li>'+ errorMsg +'</li></ul></div>';
+            hasFeedback.removeClass('has-success').addClass('has-error has-danger');
+            iconSpan.removeClass('glyphicon-ok').addClass('glyphicon-remove');
+            blockWithErrors.html(html);
+            return false;
+        }
+
+    }
+    else{
+        errorMsg = '';
+        hasFeedback.removeClass('has-error has-danger has-success');
+        iconSpan.removeClass('glyphicon-remove glyphicon-ok');
+        blockWithErrors.html('');
+        return true;
+    }
+
+}//customValidateDateField Ends
