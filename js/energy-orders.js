@@ -348,7 +348,6 @@ jQuery(document).ready(function ($) {
         var className = jQuery(key).attr('name');
         jQuery('.'+className).addClass('hide');
         jQuery('.'+className).find('input').attr('disabled', 'disabled');
-        jQuery('.'+className).find('input[type="text"]').val('');
 
 
         if(jQuery('#' + id ).is(':checked')){
@@ -364,14 +363,7 @@ jQuery(document).ready(function ($) {
 
         var inputForm = jQuery('#' + id ).parents('form');
         inputForm.validator('update');
-        var filled = requiredFieldsFilledEnergy(inputForm);
-        if (filled === true)
-        {
-            $('.btn.btn-default.disabled').removeClass("disabled");
-        }
-        else{
-            $('.btn.btn-default').addClass('disabled');
-        }
+
     }
 
     /*step 2 - hide content on check*/
@@ -389,17 +381,9 @@ jQuery(document).ready(function ($) {
         var inputForm = jQuery('#' + id ).parents('form');
         inputForm.validator('update');
 
-        var filled = requiredFieldsFilledEnergy(inputForm);
-        if (filled === true)
-        {
-            $('.btn.btn-default.disabled').removeClass("disabled");
-        }
-        else{
-            $('.btn.btn-default').addClass('disabled');
-        }
     }
     /* steo 2 */
-    showContentsOnCheck($('.has-content:checked'));
+   showContentsOnCheck($('.has-content:checked'));
     $('.has-content').on('change', function(e){
         showContentsOnCheck(jQuery(this));
     });
