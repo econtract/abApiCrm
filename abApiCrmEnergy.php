@@ -33,7 +33,13 @@ class abApiCrmEnergy extends abApiCrm{
 			    'jquery',
 			    'jquery-bootstrap-typeahead',
 			    'aanbieder_default_script'
-		    ), '1.1.5', true );
+		    ), '1.1.6', true );
+
+		    $moveDate = "";
+
+		    if($_SESSION['order_energy']['wp_order_id']) {
+			    $moveDate = get_metadata('post', $_SESSION['order_energy']['wp_order_id'], 'move_date', true);
+		    }
 
 		    wp_localize_script( 'crm-script-energy-orders', 'orders_obj_energy',
 			    array(
@@ -44,7 +50,9 @@ class abApiCrmEnergy extends abApiCrm{
 				    'api_resp_trans'    => pll__( 'Something went wrong as API is not responding!' ),
 				    'req_fields_filled' => pll__( 'Make sure all required fields are filled' ),
 				    'idcard_error'      => pll__('Please enter your ID card number'),
-				    'template_uri'      => get_template_directory_uri()
+				    'template_uri'      => get_template_directory_uri(),
+				    'move_date'         => $moveDate,
+				    'server_date'       => date("d/m/Y", strtotime("now"))
 			    )
 		    );
 	    }
