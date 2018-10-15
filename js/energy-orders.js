@@ -1,3 +1,5 @@
+var disableEnergyNextStep = false;
+
 function requiredFieldsFilledEnergy(inputForm) {
     var filled = true;
     //check all required fields if they are filled submit the form
@@ -432,10 +434,12 @@ jQuery(document).ready(function ($) {
                 var jsonRes = response;
                 if (jsonRes.success == true || jsonRes.success.toString() == "no-update") {
                     //In case of mobile form trigger next button to open the next form
+                    disableEnergyNextStep = false;
                     self.parents('.form-type').find('.next-step-btn-energy a').trigger('click');
                     self.parents('.form-type').addClass('order-saved');
                 } else {
                     $.each(jsonRes.errors, function(key, val) {
+                        disableEnergyNextStep = true;
                         self.append('<div class="alert alert-danger alert-dismissable">' +
                             '<a href="#" class="close" data-dismiss="alert">×</a>' +
                             val + '</div>');
@@ -537,8 +541,12 @@ jQuery(document).ready(function ($) {
 
         //now when the data is saved it's time to initiate redirect to the next page
         setTimeout(function() {
-            window.location = currAttr.attr('href');
-        }, 5);
+            if(!disableEnergyNextStep) {
+                window.location = currAttr.attr('href');
+            } else {
+                $('#energy-order-followup-btn').addClass('disabled');
+            }
+        }, 200);
     });
 
     //control account number field based on payment info selection, copied from order.js, no difference
