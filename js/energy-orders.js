@@ -1,4 +1,5 @@
 var disableEnergyNextStep = false;
+var sectionEditTriggered = false;
 
 function requiredFieldsFilledEnergy(inputForm) {
     var filled = true;
@@ -204,12 +205,17 @@ function fillEnergyFormDynamicData(targetContainer) {
 }
 
 function triggerSectionEditEnergy() {
+    if(sectionEditTriggered === true) {
+        return true;
+    }
+
     var url = window.location.href;
     var urlArr = url.split('#');
     if(urlArr.length === 2) {
         var editSection = urlArr[1];
         var targetEditLink = jQuery('#'+editSection).find('a.edit-data');
         if(targetEditLink) {
+            sectionEditTriggered = true;
             targetEditLink.trigger('click');
             return true;
         }
@@ -581,7 +587,7 @@ jQuery(document).ready(function ($) {
 
     //autocomplete
     //on September 14, 2018 - the funcationlity has been implemented to fetch data directly from Toolbox API.
-    $('#energyOrderInstallationAddressForm .typeahead_energy.complex-typeahead').typeahead({//only apply to complex typeaheads the zipcode one is same across whole site.
+    $('.typeahead_energy.complex-typeahead').typeahead({//only apply to complex typeaheads the zipcode one is same across whole site.
         name: 'id',
         display: 'name',
         delay: 300,//will ensure that the request goes after 300 ms delay so that there are no multipe ajax calls while user is typing
@@ -596,8 +602,8 @@ jQuery(document).ready(function ($) {
             }*/
             // console.log("current***", current);
 
-            //old url => var ajaxUrl = site_obj.ajax_url + '?action=ajaxQueryToolboxApi&query_method=' + current.attr('query_method') + "&query_params[" + current.attr('query_key') + "]=" + query;
-            var ajaxUrl = site_obj.toolkit_api_url + 'streets?postcode=' + zipCode + '&toolbox_key=' + site_obj.toolkit_api_key; // url changed to get cities data direct from toolbox api
+            //old url => var ajaxUrl = orders_obj_energy.ajax_url + '?action=ajaxQueryToolboxApi&query_method=' + current.attr('query_method') + "&query_params[" + current.attr('query_key') + "]=" + query;
+            var ajaxUrl = orders_obj_energy.toolkit_api_url + 'streets?postcode=' + zipCode + '&toolbox_key=' + orders_obj_energy.toolkit_api_key; // url changed to get cities data direct from toolbox api
 
             /** Old code commented out in order to get data from toolbox api directly **/
             /*
@@ -685,8 +691,27 @@ jQuery(document).ready(function ($) {
         }
     });
 
-});
+    $('.heating-working-gas, .threat-suspended-gas, .budget-meter-available-gas').on('change', function(){
+        var $q1 =jQuery('input[name="is_heating_working"]:checked'),
+            $q2 =jQuery('input[name="is_threat_gas_suspended"]:checked'),
+            $q3 = jQuery('input[name="is_gas_budget_meter_available"]:checked'),
+            $content =jQuery('.contents-gas'),
+            $ul = jQuery('ul.energyOrderQuestionMessagesGas'),
+            $form = jQuery(this).parents('form');
+        orderStepThreeQuestions($(this), $q1, $q2, $q3, $content, $ul, $form);
+    });
+    $('.order-questions-lightening, .order-questions-threat, .order-questions-meter').on('change', function(){
+        var $q1 =jQuery('input[name="is_lightening_working"]:checked'),
+            $q2 =jQuery('input[name="is_threat_suspended"]:checked'),
+            $q3 = jQuery('input[name="is_budget_meter_available"]:checked'),
+            $content =jQuery('.contents'),
+            $ul = jQuery('ul.energyOrderQuestionMessages'),
+            $form = jQuery(this).parents('form');
 
+        orderStepThreeQuestions($(this), $q1, $q2, $q3, $content, $ul, $form);
+    });
+
+});
 /*** READY FUNCTION ENDS ***/
 
 
@@ -752,3 +777,84 @@ function customValidateDateField(moveDate){
     }
 
 }//customValidateDateField Ends
+
+var stepTwoSituation;
+if(orders_obj_energy.move_date != '' && orders_obj_energy.move_date != '01/01/1970'){
+    console.log('not empty');
+}
+else{
+    console.log('empty');
+}
+
+
+//Energy Step 3
+function getSuggestedDate( numberOfDays ) {
+    var suggestedDate = new Date();
+    var annualReadingDate = new Date();
+    suggestedDate.setDate(suggestedDate.getDate() + numberOfDays);
+    annualReadingDate.setDate(annualReadingDate.getDate() + 215);
+    console.log('sd date'+ suggestedDate);
+
+    var sd_dd = suggestedDate.getDate();
+    var sd_mm = suggestedDate.getMonth() + 1;
+    var sd_yy = suggestedDate.getFullYear();
+
+    var ar_dd = annualReadingDate.getDate();
+    var ar_mm = annualReadingDate.getMonth() + 1;
+    var ar_yy = annualReadingDate.getFullYear();
+
+    var sd_Date = sd_dd + '/' + sd_mm + '/' + sd_yy;
+    var ar_Date = ar_dd + '/' + ar_mm + '/' + ar_yy;
+    jQuery('#suggested_date').empty();
+
+    jQuery('#suggested_date').append(sd_Date);
+    jQuery('#anb_suggested_electricity_switch_date').val(sd_Date);
+    /*
+        jQuery('#
+        connect_date').append(ar_Date);
+        jQuery('#annual_meter_reading_electricity_switch_date').val(ar_Date);*/
+
+}
+
+//Energy Step 3
+function orderStepThreeQuestions($el, $q1, $q2, $q3, $content, $ul, $form){
+    var formName = $el.parents('form');
+    var $q1 =$q1.val(),
+        $q2 =$q2.val(),
+        $q3 =$q3.val(),
+        $contentDv =$content;
+
+    $contentDv.addClass('hide');
+    $ul.empty();
+
+
+    // if($q3 == 1 || $q3 == undefined){
+    //     if($q3 == 1){
+    //         $ul.append('<li>'+main_js.contact_your_Dnb+'</li>');
+    //     }
+    //     else if ($q1 == 1 && $q2 == undefined && ($q3 == 0 || $q3 == undefined) ) {
+    //         $contentDv.removeClass('hide');
+    //     }
+    //     else if ($q1 == 0 && $q2 == undefined &&  ($q3 == 0 || $q3 == undefined)) {
+    //         $ul.append('<li>'+main_js.contact_to_open_meter+'</li>');
+    //     }
+    //     else if ($q1 == 1 && $q2 == 1 &&  ($q3 == 0 || $q3 == undefined)) {
+    //         $ul.append('<li>'+main_js.threat_disappared+'</li>');
+    //     }
+    //     else if ($q1 == 1 && $q2 == 0 &&  ($q3 == 0 || $q3 == undefined)) {
+    //         $contentDv.removeClass('hide');
+    //         getSuggestedDate(35);
+    //     }
+    //     else if ($q1 == 0 && $q2 == 1 &&  ($q3 == 0 || $q3 == undefined)) {
+    //         $ul.append('<li>'+mian_js.threat_disappared+'</li>');
+    //     }
+    //     else if ($q1 == 0 && $q2 == 0 &&  ($q3 == 0 || $q3 == undefined)) {
+    //         $contentDv.removeClass('hide');
+    //         getSuggestedDate(35);
+    //     }
+    //     else if ($q1 == 0 && $q2 == 0 && $q3 == 1) {
+    //         $ul.append('<li>'+main_js.deblock_budget_meter+'</li>');
+    //     }
+    // }//q3 = 1 or undefined
+    $form.validator('update');
+}
