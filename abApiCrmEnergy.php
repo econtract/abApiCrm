@@ -33,7 +33,7 @@ class abApiCrmEnergy extends abApiCrm{
 			    'jquery',
 			    'jquery-bootstrap-typeahead',
 			    'aanbieder_default_script'
-		    ), '1.1.7', true );
+		    ), '1.1.8', true );
 
 		    $moveDate = "";
 
@@ -51,6 +51,9 @@ class abApiCrmEnergy extends abApiCrm{
 				    'req_fields_filled' => pll__( 'Make sure all required fields are filled' ),
 				    'idcard_error'      => pll__('Please enter your ID card number'),
 				    'template_uri'      => get_template_directory_uri(),
+                    'toolkit_api_url'   => TOOLKIT_API_URL,
+                    'toolkit_api_key'   => TOOLKIT_API_KEY,
+                    'change_zip_trans'  => pll__( 'Change zip code' ),
 				    'move_date'         => $moveDate,
 				    'server_date'       => date("d/m/Y", strtotime("now"))
 			    )
