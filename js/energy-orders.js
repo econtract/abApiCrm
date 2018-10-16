@@ -230,7 +230,7 @@ function triggerSectionEditEnergy() {
 
 jQuery(document).ready(function ($) {
     var activeLink = location.pathname;
-    var activeLinkHash = activeLink.split('/').join('-')+'-energy-last-active-form-id';
+    var activeLinkHash = activeLink.split('/').join('-')+'-energy-last-active-form-id-'+window.location.search;
 
     /*
     * ENERGY ORDER STEP 4 STARTS
@@ -695,24 +695,54 @@ jQuery(document).ready(function ($) {
         var $q1 =jQuery('input[name="is_heating_working"]:checked'),
             $q2 =jQuery('input[name="is_threat_gas_suspended"]:checked'),
             $q3 = jQuery('input[name="is_gas_budget_meter_available"]:checked'),
-            $content =jQuery('.contents-gas'),
             $ul = jQuery('ul.energyOrderQuestionMessagesGas'),
-            $form = jQuery(this).parents('form');
-        orderStepThreeQuestions($(this), $q1, $q2, $q3, $content, $ul, $form);
+            $form = jQuery('.heating-working-gas').parents('form'),
+            $content =$form.find('.contents-gas');
+        orderStepThreeQuestions($q1, $q2, $q3, $content, $ul, $form, stepTwoMoveDate);
     });
     $('.order-questions-lightening, .order-questions-threat, .order-questions-meter').on('change', function(){
         var $q1 =jQuery('input[name="is_lightening_working"]:checked'),
             $q2 =jQuery('input[name="is_threat_suspended"]:checked'),
             $q3 = jQuery('input[name="is_budget_meter_available"]:checked'),
-            $content =jQuery('.contents'),
             $ul = jQuery('ul.energyOrderQuestionMessages'),
-            $form = jQuery(this).parents('form');
+            $form = jQuery('.order-questions-lightening').parents('form'),
+            $content =$form.find('.contents');
 
-        orderStepThreeQuestions($(this), $q1, $q2, $q3, $content, $ul, $form);
+        orderStepThreeQuestions($q1, $q2, $q3, $content, $ul, $form, stepTwoMoveDate);
     });
+
+    //On page load
+    setElectricityFlow();
+    setGasFlow();
 
 });
 /*** READY FUNCTION ENDS ***/
+
+//on load set electricty step 3 flow
+function setElectricityFlow(){
+    var $q1 =jQuery('input[name="is_lightening_working"]:checked'),
+        $q2 =jQuery('input[name="is_threat_suspended"]:checked'),
+        $q3 = jQuery('input[name="is_budget_meter_available"]:checked'),
+        $ul = jQuery('ul.energyOrderQuestionMessages'),
+        $form = jQuery('.order-questions-lightening').parents('form'),
+        $content =$form.find('.contents');
+    if($form.length>0){
+        orderStepThreeQuestions($q1, $q2, $q3, $content, $ul, $form, stepTwoMoveDate);
+    }
+}
+
+//on load set gas step 3 flow
+function setGasFlow(){
+    var $q1 =jQuery('input[name="is_heating_working"]:checked'),
+        $q2 =jQuery('input[name="is_threat_gas_suspended"]:checked'),
+        $q3 = jQuery('input[name="is_gas_budget_meter_available"]:checked'),
+        $ul = jQuery('ul.energyOrderQuestionMessagesGas'),
+        $form = jQuery(this).parents('form'),
+        $content =$form.find('.contents-gas');
+    if($form.length>0){
+        orderStepThreeQuestions($q1, $q2, $q3, $content, $ul, $form, stepTwoMoveDate);
+    }
+}
 
 
 //Energy Step 2 Move date section validation and show hide - Core Function
@@ -778,12 +808,12 @@ function customValidateDateField(moveDate){
 
 }//customValidateDateField Ends
 
-var stepTwoSituation;
+var stepTwoMoveDate;
 if(orders_obj_energy.move_date != '' && orders_obj_energy.move_date != '01/01/1970'){
-    console.log('not empty');
+    stepTwoMoveDate = orders_obj_energy.move_date;
 }
 else{
-    console.log('empty');
+    stepTwoMoveDate = '';
 }
 
 
@@ -817,44 +847,101 @@ function getSuggestedDate( numberOfDays ) {
 }
 
 //Energy Step 3
-function orderStepThreeQuestions($el, $q1, $q2, $q3, $content, $ul, $form){
-    var formName = $el.parents('form');
-    var $q1 =$q1.val(),
-        $q2 =$q2.val(),
-        $q3 =$q3.val(),
+function orderStepThreeQuestions($elq1, $elq2, $elq3, $content, $ul, $form, stepTwoMoveDate){
+    var formName = $form;
+    var $q1 =$elq1.val(),
+        $q2 =$elq2.val(),
+        $q3 =$elq3.val(),
         $contentDv =$content;
 
     $contentDv.addClass('hide');
     $ul.empty();
+    var $q2li = formName.find('li.questionTwo'),
+        $q3li = formName.find('li.questionThree'),
+        $q2Inputs = $q2li.find('input'),
+        $q3Inputs = $q3li.find('input');
 
 
-    // if($q3 == 1 || $q3 == undefined){
-    //     if($q3 == 1){
-    //         $ul.append('<li>'+main_js.contact_your_Dnb+'</li>');
-    //     }
-    //     else if ($q1 == 1 && $q2 == undefined && ($q3 == 0 || $q3 == undefined) ) {
-    //         $contentDv.removeClass('hide');
-    //     }
-    //     else if ($q1 == 0 && $q2 == undefined &&  ($q3 == 0 || $q3 == undefined)) {
-    //         $ul.append('<li>'+main_js.contact_to_open_meter+'</li>');
-    //     }
-    //     else if ($q1 == 1 && $q2 == 1 &&  ($q3 == 0 || $q3 == undefined)) {
-    //         $ul.append('<li>'+main_js.threat_disappared+'</li>');
-    //     }
-    //     else if ($q1 == 1 && $q2 == 0 &&  ($q3 == 0 || $q3 == undefined)) {
-    //         $contentDv.removeClass('hide');
-    //         getSuggestedDate(35);
-    //     }
-    //     else if ($q1 == 0 && $q2 == 1 &&  ($q3 == 0 || $q3 == undefined)) {
-    //         $ul.append('<li>'+mian_js.threat_disappared+'</li>');
-    //     }
-    //     else if ($q1 == 0 && $q2 == 0 &&  ($q3 == 0 || $q3 == undefined)) {
-    //         $contentDv.removeClass('hide');
-    //         getSuggestedDate(35);
-    //     }
-    //     else if ($q1 == 0 && $q2 == 0 && $q3 == 1) {
-    //         $ul.append('<li>'+main_js.deblock_budget_meter+'</li>');
-    //     }
-    // }//q3 = 1 or undefined
+    $q3li.addClass('hide');
+    $q3Inputs.attr('disabled','disabled');
+
+    //if step 2 move date is empty
+    //Installation at current residence
+    if(stepTwoMoveDate == ''){
+
+        if( $q1 == 0){
+
+            $q2li.addClass('hide');
+            $q2Inputs.attr('disabled','disabled');
+            $q2Inputs.removeAttr('checked');
+            $q3li.removeClass('hide');
+            $q3Inputs.removeAttr('disabled');
+
+            if( $q3 == 0){
+                $ul.append('<li>'+main_js.contact_to_open_meter+'</li>');
+            }
+            else if( $q3 == 1){
+                $ul.append('<li>'+main_js.contact_your_Dnb+'</li>');
+            }
+
+        }
+
+        else if($q1 == 1){
+
+            $q2li.removeClass('hide');
+            $q2Inputs.removeAttr('disabled');
+
+            if( $q2 == 0){
+                $q3li.removeClass('hide');
+                $q3Inputs.removeAttr('disabled');
+
+                if( $q3 == 0){
+                    $contentDv.removeClass('hide');
+                }
+                else if( $q3 == 1){
+                    $ul.append('<li>'+main_js.contact_your_Dnb+'</li>');
+                }
+
+            }
+            else if( $q2 == 1){
+                $q3li.addClass('hide');
+                $q3Inputs.attr('disabled','disabled');
+                $q3Inputs.removeAttr('checked');
+                $ul.append('<li>'+main_js.contact_to_open_meter+'</li>');
+            }
+
+        }
+
+    }// If move date is empty
+    else{
+        $q2li.addClass('hide');
+        $q2Inputs.attr('disabled','disabled');
+        $q2Inputs.removeAttr('checked');
+
+        if( $q1 == 1){
+            $q3li.removeClass('hide');
+            $q3Inputs.removeAttr('disabled');
+
+            if( $q3 == 0){
+                $contentDv.removeClass('hide');
+            }
+            else if( $q3 == 1){
+                $ul.append('<li>'+main_js.contact_your_Dnb+'</li>');
+            }
+        }
+        else if( $q1 == 0){
+            $q3li.removeClass('hide');
+            $q3Inputs.removeAttr('disabled');
+
+            if( $q3 == 0){
+                $ul.append('<li>'+main_js.contact_to_open_meter+'</li>');
+            }
+            else if( $q3 == 1){
+                $ul.append('<li>'+main_js.contact_your_Dnb+'</li>');
+            }
+        }
+
+    }// move date is not empty
+
     $form.validator('update');
 }

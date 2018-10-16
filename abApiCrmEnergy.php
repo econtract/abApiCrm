@@ -33,7 +33,7 @@ class abApiCrmEnergy extends abApiCrm{
 			    'jquery',
 			    'jquery-bootstrap-typeahead',
 			    'aanbieder_default_script'
-		    ), '1.1.8', true );
+		    ), '1.1.9', true );
 
 		    $moveDate = "";
 
@@ -54,7 +54,7 @@ class abApiCrmEnergy extends abApiCrm{
                     'toolkit_api_url'   => TOOLKIT_API_URL,
                     'toolkit_api_key'   => TOOLKIT_API_KEY,
                     'change_zip_trans'  => pll__( 'Change zip code' ),
-				    'move_date'         => $moveDate,
+				    'move_date'         => date("d/m/Y", strtotime($moveDate)),
 				    'server_date'       => date("d/m/Y", strtotime("now"))
 			    )
 		    );
