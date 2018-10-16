@@ -33,7 +33,7 @@ class abApiCrmEnergy extends abApiCrm{
 			    'jquery',
 			    'jquery-bootstrap-typeahead',
 			    'aanbieder_default_script'
-		    ), '1.1.9', true );
+		    ), '1.2.0', true );
 
 		    $moveDate = "";
 

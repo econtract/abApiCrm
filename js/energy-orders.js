@@ -1,6 +1,14 @@
 var disableEnergyNextStep = false;
 var sectionEditTriggered = false;
 
+var stepTwoMoveDate;
+if(orders_obj_energy.move_date != '' && orders_obj_energy.move_date != '01/01/1970'){
+    stepTwoMoveDate = orders_obj_energy.move_date;
+}
+else{
+    stepTwoMoveDate = '';
+}
+
 function requiredFieldsFilledEnergy(inputForm) {
     var filled = true;
     //check all required fields if they are filled submit the form
@@ -691,24 +699,11 @@ jQuery(document).ready(function ($) {
         }
     });
 
-    $('.heating-working-gas, .threat-suspended-gas, .budget-meter-available-gas').on('change', function(){
-        var $q1 =jQuery('input[name="is_heating_working"]:checked'),
-            $q2 =jQuery('input[name="is_threat_gas_suspended"]:checked'),
-            $q3 = jQuery('input[name="is_gas_budget_meter_available"]:checked'),
-            $ul = jQuery('ul.energyOrderQuestionMessagesGas'),
-            $form = jQuery('.heating-working-gas').parents('form'),
-            $content =$form.find('.contents-gas');
-        orderStepThreeQuestions($q1, $q2, $q3, $content, $ul, $form, stepTwoMoveDate);
+    $('.heating-working-gas, .threat-suspended-gas, .budget-meter-available-gas, .has-content-energy').on('change', function(){
+        setGasFlow();
     });
-    $('.order-questions-lightening, .order-questions-threat, .order-questions-meter').on('change', function(){
-        var $q1 =jQuery('input[name="is_lightening_working"]:checked'),
-            $q2 =jQuery('input[name="is_threat_suspended"]:checked'),
-            $q3 = jQuery('input[name="is_budget_meter_available"]:checked'),
-            $ul = jQuery('ul.energyOrderQuestionMessages'),
-            $form = jQuery('.order-questions-lightening').parents('form'),
-            $content =$form.find('.contents');
-
-        orderStepThreeQuestions($q1, $q2, $q3, $content, $ul, $form, stepTwoMoveDate);
+    $('.order-questions-lightening, .order-questions-threat, .order-questions-meter, .has_solar_question').on('change', function(){
+        setElectricityFlow();
     });
 
     //On page load
@@ -723,11 +718,12 @@ function setElectricityFlow(){
     var $q1 =jQuery('input[name="is_lightening_working"]:checked'),
         $q2 =jQuery('input[name="is_threat_suspended"]:checked'),
         $q3 = jQuery('input[name="is_budget_meter_available"]:checked'),
+        $q4 = jQuery('input[name="has_solar"]:checked'),
         $ul = jQuery('ul.energyOrderQuestionMessages'),
         $form = jQuery('.order-questions-lightening').parents('form'),
         $content =$form.find('.contents');
     if($form.length>0){
-        orderStepThreeQuestions($q1, $q2, $q3, $content, $ul, $form, stepTwoMoveDate);
+        orderStepThreeQuestions($q1, $q2, $q3, $q4, $content, $ul, $form, stepTwoMoveDate, 'electricity');
     }
 }
 
@@ -736,11 +732,12 @@ function setGasFlow(){
     var $q1 =jQuery('input[name="is_heating_working"]:checked'),
         $q2 =jQuery('input[name="is_threat_gas_suspended"]:checked'),
         $q3 = jQuery('input[name="is_gas_budget_meter_available"]:checked'),
+        $q4 = jQuery('input[name="similar_option_for_gas_as_electricity"]:checked'),
         $ul = jQuery('ul.energyOrderQuestionMessagesGas'),
         $form = jQuery(this).parents('form'),
         $content =$form.find('.contents-gas');
     if($form.length>0){
-        orderStepThreeQuestions($q1, $q2, $q3, $content, $ul, $form, stepTwoMoveDate);
+        orderStepThreeQuestions($q1, $q2, $q3, $q4, $content, $ul, $form, stepTwoMoveDate, 'gas');
     }
 }
 
@@ -808,15 +805,6 @@ function customValidateDateField(moveDate){
 
 }//customValidateDateField Ends
 
-var stepTwoMoveDate;
-if(orders_obj_energy.move_date != '' && orders_obj_energy.move_date != '01/01/1970'){
-    stepTwoMoveDate = orders_obj_energy.move_date;
-}
-else{
-    stepTwoMoveDate = '';
-}
-
-
 //Energy Step 3
 function getSuggestedDate( numberOfDays ) {
     var suggestedDate = new Date();
@@ -847,11 +835,12 @@ function getSuggestedDate( numberOfDays ) {
 }
 
 //Energy Step 3
-function orderStepThreeQuestions($elq1, $elq2, $elq3, $content, $ul, $form, stepTwoMoveDate){
+function orderStepThreeQuestions($elq1, $elq2, $elq3, $elq4, $content, $ul, $form, stepTwoMoveDate, $type){
     var formName = $form;
     var $q1 =$elq1.val(),
         $q2 =$elq2.val(),
         $q3 =$elq3.val(),
+        $q4 =$elq4.val(),
         $contentDv =$content;
 
     $contentDv.addClass('hide');
@@ -942,6 +931,18 @@ function orderStepThreeQuestions($elq1, $elq2, $elq3, $content, $ul, $form, step
         }
 
     }// move date is not empty
+
+    // Solar question in Electricity
+    if($type == 'electricity'){
+        var solarSection = jQuery('.solarSection');
+
+        if($q4 == 0 || $q4 == undefined){
+            solarSection.addClass('hide');
+        }
+        else if($q4 == 1){
+            solarSection.removeClass('hide');
+        }
+    }
 
     $form.validator('update');
 }
