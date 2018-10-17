@@ -163,7 +163,7 @@ function fillEnergyFormDynamicData(targetContainer) {
             var label = $("label[for='" + input.attr('id') + "']").text();
             var value = input.val();
 
-            if(input.hasClass('hidden')) {
+            if(input.hasClass('hidden') || input.hasClass('skip')) {
                 return true;//move on skip this step
             }
 
@@ -322,7 +322,7 @@ jQuery(document).ready(function ($) {
         }
 
         inputForm.validator('update');
-        requiredFieldsFilledEnergy(inputForm);
+        //requiredFieldsFilledEnergy(inputForm);
     }
 
     // Step 3 - Gas Connection Section Radio buttons show/hide
@@ -363,18 +363,18 @@ jQuery(document).ready(function ($) {
         var id = jQuery(key).attr('id');
         var className = jQuery(key).attr('name');
         jQuery('.'+className).addClass('hide');
-        jQuery('.'+className).find('input').attr('disabled', 'disabled');
+        jQuery('.'+className).find('input:not([type=hidden])').attr('disabled', 'disabled');
 
 
         if(jQuery('#' + id ).is(':checked')){
             jQuery('.' + id+ '_content').removeClass('hide');
-            jQuery('.' + id+ '_content').find('input').removeAttr('disabled');
-            jQuery('.' + id+ '_content').find('input').attr('required', 'required');
+            jQuery('.' + id+ '_content').find('input:not([type=hidden])').removeAttr('disabled');
+            jQuery('.' + id+ '_content').find('input:not([type=hidden])').attr('required', 'required');
         }
         else{
             jQuery('.' + id+ '_content').addClass('hide');
-            jQuery('.' + id+ '_content').find('input').attr('disabled', 'disabled');
-            jQuery('.' + id+ '_content').find('input').removeAttr('required');
+            jQuery('.' + id+ '_content').find('input:not([type=hidden])').attr('disabled', 'disabled');
+            jQuery('.' + id+ '_content').find('input:not([type=hidden])').removeAttr('required');
         }
 
         var inputForm = jQuery('#' + id ).parents('form');
@@ -706,12 +706,53 @@ jQuery(document).ready(function ($) {
         setElectricityFlow();
     });
 
+    //Annual electricity meter reading
+    $('#electricityAnnualReading').on('change',function(){
+        setAnnualConnectionDate($(this), $('#connect_date'), $('#annual_meter_reading_electricity_switch_date'));
+    });
+
+    //Annual gas meter reading
+    $('#annual_gas_meter_reading_month').on('change',function(){
+        setAnnualConnectionDate($(this), $('#connect_date_gas'), $('#annual_meter_reading_gas_switch_date'));
+    });
+
     //On page load
     setElectricityFlow();
     setGasFlow();
+    setAnnualConnectionDate($('#electricityAnnualReading'), $('#connect_date'), $('#annual_meter_reading_electricity_switch_date'));
+    setAnnualConnectionDate($('#annual_gas_meter_reading_month'), $('#connect_date_gas'), $('#annual_meter_reading_gas_switch_date'));
+    setSuggestedDate();
+
 
 });
 /*** READY FUNCTION ENDS ***/
+
+//Step 3 Set connect date on based on Annual electricity/gas meter readying
+function setAnnualConnectionDate($this, $connectDate, $hiddenField){
+    var d = new Date(),
+        currentMonth = d.getMonth(),
+        currentYear = d.getFullYear(),
+        annualYear,
+        result;
+    if($this.val() <= currentMonth){
+        currentYear = currentYear+1;
+    }
+    result = $this.find('option:selected').text()+' '+currentYear;
+
+    if($this.val() ==""){
+        $connectDate.parents('label').hide();
+        $connectDate.parents('label').find('input:checked').removeAttr('checked');
+        $hiddenField.val('');
+        $connectDate.html('');
+    }
+    else{
+        $connectDate.parents('label').show();
+        $hiddenField.val(result);
+        $connectDate.html(result);
+    }
+
+}//setAnnualConnectionDate function ends
+
 
 //on load set electricty step 3 flow
 function setElectricityFlow(){
@@ -734,7 +775,7 @@ function setGasFlow(){
         $q3 = jQuery('input[name="is_gas_budget_meter_available"]:checked'),
         $q4 = jQuery('input[name="similar_option_for_gas_as_electricity"]:checked'),
         $ul = jQuery('ul.energyOrderQuestionMessagesGas'),
-        $form = jQuery(this).parents('form'),
+        $form = jQuery('.heating-working-gas').parents('form'),
         $content =$form.find('.contents-gas');
     if($form.length>0){
         orderStepThreeQuestions($q1, $q2, $q3, $q4, $content, $ul, $form, stepTwoMoveDate, 'gas');
@@ -806,31 +847,33 @@ function customValidateDateField(moveDate){
 }//customValidateDateField Ends
 
 //Energy Step 3
-function getSuggestedDate( numberOfDays ) {
+function setSuggestedDate() {
     var suggestedDate = new Date();
-    var annualReadingDate = new Date();
-    suggestedDate.setDate(suggestedDate.getDate() + numberOfDays);
-    annualReadingDate.setDate(annualReadingDate.getDate() + 215);
-    console.log('sd date'+ suggestedDate);
+    if(stepTwoMoveDate == ""){
+       suggestedDate.setDate(suggestedDate.getDate() + 35);
+        var sd_mm = suggestedDate.getMonth() + 2;
+        var sd_yy = suggestedDate.getFullYear();
+        if(sd_mm > 12){
+            sd_mm = 1;
+            sd_yy =sd_yy + 1;
+        }
+        suggestedDate.setFullYear(sd_yy, sd_mm-1, 1);
 
-    var sd_dd = suggestedDate.getDate();
-    var sd_mm = suggestedDate.getMonth() + 1;
-    var sd_yy = suggestedDate.getFullYear();
+    }
 
-    var ar_dd = annualReadingDate.getDate();
-    var ar_mm = annualReadingDate.getMonth() + 1;
-    var ar_yy = annualReadingDate.getFullYear();
+    var sd_d = suggestedDate.getDate();
+    var sd_m = suggestedDate.getMonth()+1;
+    if(sd_d<10){
+        sd_d='0'+sd_d;
+    }
+    if(sd_m<10){
+        sd_m='0'+sd_m;
+    }
+    var sd_Date = sd_d + '/' + sd_m + '/' + suggestedDate.getFullYear();
+    console.log(sd_Date);
 
-    var sd_Date = sd_dd + '/' + sd_mm + '/' + sd_yy;
-    var ar_Date = ar_dd + '/' + ar_mm + '/' + ar_yy;
-    jQuery('#suggested_date').empty();
-
-    jQuery('#suggested_date').append(sd_Date);
-    jQuery('#anb_suggested_electricity_switch_date').val(sd_Date);
-    /*
-        jQuery('#
-        connect_date').append(ar_Date);
-        jQuery('#annual_meter_reading_electricity_switch_date').val(ar_Date);*/
+    jQuery('#suggested_date, #suggested_date_gas').html(sd_Date);
+    jQuery('#anb_suggested_electricity_switch_date, #anb_suggested_gas_switch_date').val(sd_Date);
 
 }
 
@@ -942,6 +985,18 @@ function orderStepThreeQuestions($elq1, $elq2, $elq3, $elq4, $content, $ul, $for
         else if($q4 == 1){
             solarSection.removeClass('hide');
         }
+    }
+
+    //whenSwitch Title hiding
+    var whenSwitch = formName.find('.whenSwitch');
+    if($ul.html() == "" && $content.hasClass('hide') && $type == "electricity" && solarSection.hasClass('hide')){
+        whenSwitch.addClass('hide');
+    }
+    else if($ul.html() == "" && $content.hasClass('hide') && $type == "gas"){
+        whenSwitch.addClass('hide');
+    }
+    else{
+        whenSwitch.removeClass('hide');
     }
 
     $form.validator('update');
