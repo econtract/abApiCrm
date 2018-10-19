@@ -311,12 +311,16 @@ jQuery(document).ready(function ($) {
     // Click on EDIT DATA on any section on energy order step 2,3
     $('body').on('click', '.form-type a.edit-data-energy', function (event) {
         var _self = $(this);
-        event.preventDefault();
-        _self
-            .parents('.form-type')
-            .removeClass('filled')
-            .removeClass('order-saved')
-            .addClass('active');
+        if(!_self.hasClass('clickable')){
+            event.preventDefault();
+
+            _self
+                .parents('.form-type')
+                .removeClass('filled')
+                .removeClass('order-saved')
+                .addClass('active');
+        }
+
     });
     //Edit Data ends
 
