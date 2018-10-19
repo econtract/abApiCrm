@@ -252,7 +252,7 @@ function triggerSectionEditEnergy() {
     var urlArr = url.split('#');
     if(urlArr.length === 2) {
         var editSection = urlArr[1];
-        var targetEditLink = jQuery('#'+editSection).find('a.edit-data');
+        var targetEditLink = jQuery('#'+editSection).find('a.edit-data-energy');
         if(targetEditLink) {
             sectionEditTriggered = true;
             targetEditLink.trigger('click');
@@ -300,14 +300,9 @@ jQuery(document).ready(function ($) {
 
     //On page refresh display summary data if already filled and summary already shown
     setTimeout(function(){
-        if(jQuery('.form-type').length>0){
-            jQuery('.form-type').each(function(e){
-                var $this = jQuery(this),
-                    nextSectionButton = $this.find('.next-step-btn-energy a');
-                if($this.hasClass('filled')) {
-                    //Fill fields data and display in summary
-                    fillEnergyFormDynamicData($this);
-                }
+        if(jQuery('.form-type.filled').length>0){
+            jQuery('.form-type.filled').each(function(e){
+                fillEnergyFormDynamicData(jQuery(this));
             });
         }
     }, 500);
@@ -738,7 +733,8 @@ function setAnnualConnectionDate($this, $connectDate, $hiddenField){
         currentYear = d.getFullYear(),
         annualYear,
         result,
-        $connectParent = $connectDate.parents('label');
+        $connectParent = $connectDate.parents('label'),
+        $form = $this.parents('form');
     if($this.val() <= currentMonth){
         currentYear = currentYear+1;
     }
@@ -757,21 +753,15 @@ function setAnnualConnectionDate($this, $connectDate, $hiddenField){
         $connectParent.find('input[type=radio]').attr('checked','checked');
         $hiddenField.val(result);
         $connectDate.html(result);
-
-
     }
 
-    var $nextParent = $connectParent.next();
-    if($nextParent.hasClass('dateFieldWithLabelText') && $nextParent.find('.has-feedback.has-error.has-danger').length>0){
-        var dateFieldId = $nextParent.find('input[type=text]').attr('id');
-        jQuery('#'+dateFieldId)
-            .val("")
-            .attr('disabled','disabled');
-        jQuery('#'+dateFieldId)
-            .parents('.form-group.has-feedback')
-            .removeClass('has-error has-danger has-success');
-        $nextParent.find('.help-block.with-errors ul').empty();
-        $nextParent.find('.staricicon.form-control-feedback').removeClass('glyphicon-remove');
+    var dateDiv = $form.find('.dateFieldWithLabelText');
+    var dateField = dateDiv.find('.actualText');
+    if(dateDiv.find('input[type=radio]:checked').length<=0) {
+        dateField.val("").attr('disabled', 'disabled');
+        dateField.parents('.form-group.has-feedback').removeClass('has-error has-danger has-success');
+        dateDiv.find('.help-block.with-errors ul').empty();
+        dateDiv.find('.staricicon.form-control-feedback').removeClass('glyphicon-remove glyphicon-ok');
     }
 
 }//setAnnualConnectionDate function ends
