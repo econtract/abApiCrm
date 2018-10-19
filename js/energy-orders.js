@@ -14,6 +14,9 @@ function requiredFieldsFilledEnergy(inputForm) {
     if ((inputForm.attr('id') == "mc4wp-form-1") || inputForm.hasClass('mc4wp-form') || inputForm.data('name') == "Newsletter Subscription"){
         return true;
     }
+    if(inputForm.attr('id') == 'remindMeLaterForm'){
+        return true;
+    }
 
     //check all required fields if they are filled submit the form
     inputForm.find(':input[required]:not(:radio):not(:checkbox):not(:disabled):not([type=hidden]), ' +
@@ -357,39 +360,6 @@ jQuery(document).ready(function ($) {
         }
 
         inputForm.validator('update');
-    }
-
-    // Step 3 - Gas Connection Section Radio buttons show/hide
-    $('.has-content-energy').on('change', function(e){
-        $this = jQuery(this);
-        var inputForm = $this.parents('form');
-        showGasContentsOnCheck($this);
-        inputForm.validator('update');
-        var filled = requiredFieldsFilledEnergy(inputForm);
-        if (filled === true)
-        {
-            $('.btn.btn-default.disabled').removeClass("disabled");
-        }
-        else{
-            $('.btn.btn-default').addClass('disabled');
-        }
-    });
-
-    /*step 3 - show/hide content on check*/
-    function showGasContentsOnCheck( key ){
-        var id = jQuery(key).attr('id');
-        var className = jQuery(key).attr('name');
-        jQuery('.'+className).addClass('hide');
-
-        if(jQuery('#sameForGasNo' ).is(':checked')){
-            jQuery('.sameForGasNo_content').find('input').removeAttr('disabled').removeAttr('checked');
-            jQuery('.sameForGasNo_content').removeClass('hide');
-
-        }
-        else if(jQuery('#sameForGasYes' ).is(':checked')){
-            jQuery('.sameForGasNo_content').addClass('hide');
-            jQuery('.sameForGasNo_content').find('input').attr('disabled','disabled').removeAttr('checked');
-        }
     }
 
     /*step 2 - show content on check*/
@@ -950,6 +920,20 @@ function orderStepThreeQuestions($elq1, $elq2, $elq3, $elq4, $content, $ul, $for
     $q3li.addClass('hide');
     $q3Inputs.attr('disabled','disabled');
 
+    if($type == 'gas'){
+        var gasSubContainer = jQuery('.replicateSection');
+        if($q4 == 0 || $q4 == undefined){
+            gasSubContainer.addClass('hide');
+            gasSubContainer.find('li').addClass('hide');
+           // gasSubContainer.find('input[type=radio]').attr('disabled','disabled').removeAttr('checked');
+        }
+        else if($q4 == 1){
+           // gasSubContainer.find('input[type=radio]').removeAttr('disabled checked');
+            gasSubContainer.removeClass('hide');
+            gasSubContainer.find('li').removeClass('hide');
+        }
+    }
+
     //if step 2 move date is empty
     //Installation at current residence
     if(stepTwoMoveDate == ''){
@@ -1054,6 +1038,9 @@ function orderStepThreeQuestions($elq1, $elq2, $elq3, $elq4, $content, $ul, $for
         whenSwitch.addClass('hide');
     }
     else if($ul.html() == "" && $content.hasClass('hide') && $type == "gas"){
+        whenSwitch.addClass('hide');
+    }
+    else if( $type == 'gas' && ($q4 == 0 || $q4 == undefined) ){
         whenSwitch.addClass('hide');
     }
     else{
