@@ -30,7 +30,7 @@ jQuery(document).ready(function($){
 
             // We can also pass the url value separately from ajaxurl for front end AJAX implementations
             jQuery.get(callmeback_obj.ajax_url, data, function(response) {
-                $('#CallBack').find('.error-recaptcha').empty();
+
                 if(response == 'done') {
                     //$('#callMeBackSuccess').show();
                     mailForm.addClass('hide');

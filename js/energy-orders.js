@@ -1,6 +1,7 @@
 var disableEnergyNextStep = false;
 var sectionEditTriggered = false;
 
+//
 var stepTwoMoveDate;
 if(orders_obj_energy.move_date != '' && orders_obj_energy.move_date != '01/01/1970'){
     stepTwoMoveDate = orders_obj_energy.move_date;
