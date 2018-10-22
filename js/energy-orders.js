@@ -1,6 +1,7 @@
 var disableEnergyNextStep = false;
 var sectionEditTriggered = false;
 
+//
 var stepTwoMoveDate;
 if(orders_obj_energy.move_date != '' && orders_obj_energy.move_date != '01/01/1970'){
     stepTwoMoveDate = orders_obj_energy.move_date;
@@ -603,39 +604,15 @@ jQuery(document).ready(function ($) {
         display: 'name',
         delay: 300,//will ensure that the request goes after 300 ms delay so that there are no multipe ajax calls while user is typing
         source: function (query, process) {
-            var zipCode = parseInt($('#location').val()); // aquiring zip code to be sent to toolbox api
-            //console.log("Another ajax***");
+            var zipCode;// aquiring zip code to be sent to toolbox api
             var current = $(document.activeElement);
-
-            /*if(current.val() == query) {//if field value and new query have same input don't send ajax request
-                console.log("Blocking new request*****");
-                return false;
-            }*/
-            // console.log("current***", current);
-
-            //old url => var ajaxUrl = orders_obj_energy.ajax_url + '?action=ajaxQueryToolboxApi&query_method=' + current.attr('query_method') + "&query_params[" + current.attr('query_key') + "]=" + query;
+            if($(current).attr('id') == "installation_address"){
+                zipCode = parseInt($('#location').val());
+            }
+            else if($(current).attr('id') == "installation_address_invoice"){
+                zipCode = parseInt($('#location_invoice').val());
+            }
             var ajaxUrl = orders_obj_energy.toolkit_api_url + 'streets?postcode=' + zipCode + '&toolbox_key=' + orders_obj_energy.toolkit_api_key; // url changed to get cities data direct from toolbox api
-
-            /** Old code commented out in order to get data from toolbox api directly **/
-            /*
-            //check if there are any parent params to be included
-            var extraQueryParams = '';
-            if(!_.isEmpty(current.attr('parent_query_key1'))) {
-                var extraFirstVal = $('#' + current.attr('parent_query_key1_id')).val();
-                //Zipcode can be with city name like "3500 - Hasselt"
-                if(extraFirstVal.indexOf(" - ") !== -1) {
-                    extraFirstVal = extraFirstVal.split(" - ")[0];
-                }
-                extraQueryParams += '&query_params[' + current.attr('parent_query_key1') + ']=' + extraFirstVal;
-            }
-            if(!_.isEmpty(current.attr('parent_query_key2'))) {
-                extraQueryParams += '&query_params[' + current.attr('parent_query_key2') + ']=' +
-                    $('#' + current.attr('parent_query_key2_id')).val();
-            }
-            ajaxUrl += extraQueryParams;
-            */
-            /** Old code commented out in order to get data from toolbox api directly **/
-
             return $.get(ajaxUrl, function (data) {
                 try { // if data is json object
                     var jsonData = JSON.parse(data);
@@ -643,14 +620,6 @@ jQuery(document).ready(function ($) {
                 catch (error){ // if data is already json
                     var jsonData = data;
                 }
-                /**
-                 * Preparing data in following format
-                 * [
-                 {id: "5400", name: "5400 Text"},
-                 {id: "3500", name: "3500 Text"},
-                 {id: "4500", name: "4500 Text"}
-                 ]
-                 */
 
                 var prepareData = [];
                 for (var prop in jsonData) {
@@ -670,26 +639,19 @@ jQuery(document).ready(function ($) {
                         propVal += " - " + jsonData[prop]['name'];
                     }
 
-                    //propVal += (!_.isEmpty(jsonData[prop]['name'])) ? jsonData[prop]['name'] : jsonData[prop][current.attr('query_name_key1')];
-                    //propVal = jsonData[prop][current.attr('query_key')] + " - " + propVal;
-                    //console.log("***propVal", propVal);
                     prepareData.push({
                         id: jsonData[prop][current.attr('query_key')],
                         name: jsonData[prop][current.attr('query_key')],
                         value: propVal
                     });
                 }
-                //console.log("prepData***", prepareData);
                 return process(prepareData);
             });
         },
         displayText: function(item) {
-            //console.log("****label:", item);
-            //console.log("***elem:", this.$element);
             return item.value;
         },
         afterSelect: function(selectedItem) {
-            //this.$element[0].value = item.value
             var keepVal = selectedItem.id;
 
             //keep value if it has " - " pattern in it otherwise id
@@ -698,7 +660,6 @@ jQuery(document).ready(function ($) {
             }
 
             this.$element[0].value = keepVal;
-            //console.log("***selectedItem", selectedItem);
         }
     });
 
