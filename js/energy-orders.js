@@ -1,7 +1,6 @@
 var disableEnergyNextStep = false;
 var sectionEditTriggered = false;
 
-//
 var stepTwoMoveDate;
 if(orders_obj_energy.move_date != '' && orders_obj_energy.move_date != '01/01/1970'){
     stepTwoMoveDate = orders_obj_energy.move_date;
@@ -783,15 +782,29 @@ function customValidateDateField(moveDate){
     if(!moveDate.is(':disabled')){
         if(value.length === 10){
             var valParts = value.split('/');
-            if(valParts[1] == "00") {
+            if(valParts[0] == "00" || valParts[1] == "00") {
                 errorMessage('show');
                 return false;
             }
-            var dateObj = new Date(valParts[2], valParts[1] - 1, valParts[0]);
-            var minDate = new Date();
-            var maxDate = new Date();
-            minDate.setDate(minDate.getDate() - 30);
-            maxDate.setDate(maxDate.getDate() + 180);
+            var dateObj = new Date(valParts[2], valParts[1] - 1, valParts[0]),
+                minDate =new Date(),
+                maxDate = new Date();
+
+            if( stepTwoMoveDate == '' && (moveDate.hasClass('energy-order3-switchDate1') || moveDate.hasClass('energy-order3-switchDate2') ) ){
+                 var suggestedValue = jQuery('#suggested_date').text();
+                var minParts = suggestedValue.split('/');
+                minDate.setFullYear(minParts[2], minParts[1] - 1, minParts[0]);
+                var maxD = minDate.getDate();
+                var maxM = minDate.getMonth();
+                var maxY = minDate.getFullYear();
+                maxDate.setFullYear(maxY, maxM, maxD);
+                maxDate.setDate(maxDate.getDate() + 180);
+            }
+            else{
+                minDate.setDate(minDate.getDate() - 30);
+                maxDate.setDate(maxDate.getDate() + 180);
+            }
+
             if(dateObj < minDate || dateObj > maxDate){
                 errorMessage('show');
                 return false;
