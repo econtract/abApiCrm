@@ -691,6 +691,12 @@ jQuery(document).ready(function ($) {
     setAnnualConnectionDate($('#annual_gas_meter_reading_month'), $('#connect_date_gas'), $('#annual_meter_reading_gas_switch_date'), $('#anb_suggested_gas_switch_date'), 'load');
     setSuggestedDate();
 
+    //Step 5 Apply suggestion for Electricity and GAS
+    $('.order-selected.grey').on('click','.applyLink',function(e){
+        e.preventDefault();
+        var $parent = $(this).parents('.order-selected.grey');
+        $parent.find('.applyField').val($parent.find('.eanNo').text());
+    });
 
 });
 /*** READY FUNCTION ENDS ***/
