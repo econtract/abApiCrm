@@ -341,13 +341,18 @@ jQuery(document).ready(function ($) {
         if(radioValue ===  '3'){
             jQuery('#'+dateFieldId)
                 .removeAttr('disabled');
+            $hiddenAnnualDate.val('');
+            $hiddenSuggestedDate.val('');
         }
         else{
             if(radioValue === '1'){
                 $hiddenAnnualDate.val('');
+                $hiddenSuggestedDate.val($this.parent().find('.actualText').text());
             }
             else if(radioValue === '2'){
                 $hiddenSuggestedDate.val('');
+                $hiddenAnnualDate.val($this.parent().find('.actualText').text());
+
             }
 
             jQuery('#'+dateFieldId)
@@ -372,12 +377,12 @@ jQuery(document).ready(function ($) {
         if(jQuery('#' + id ).is(':checked')){
             jQuery('.' + id+ '_content').removeClass('hide');
             jQuery('.' + id+ '_content').find('input:not([type=hidden])').removeAttr('disabled');
-            jQuery('.' + id+ '_content').find('input:not([type=hidden])').attr('required', 'required');
+            //jQuery('.' + id+ '_content').find('input:not([type=hidden])').attr('required', 'required');
         }
         else{
             jQuery('.' + id+ '_content').addClass('hide');
             jQuery('.' + id+ '_content').find('input:not([type=hidden])').attr('disabled', 'disabled');
-            jQuery('.' + id+ '_content').find('input:not([type=hidden])').removeAttr('required');
+            //jQuery('.' + id+ '_content').find('input:not([type=hidden])').removeAttr('required');
         }
 
         var inputForm = jQuery('#' + id ).parents('form');
@@ -671,19 +676,19 @@ jQuery(document).ready(function ($) {
 
     //Annual electricity meter reading
     $('#annual_electricity_meter_reading_month').on('change',function(){
-        setAnnualConnectionDate($(this), $('#connect_date'), $('#annual_meter_reading_electricity_switch_date'));
+        setAnnualConnectionDate($(this), $('#connect_date'), $('#annual_meter_reading_electricity_switch_date'), $('#anb_suggested_electricity_switch_date'), 'change');
     });
 
     //Annual gas meter reading
     $('#annual_gas_meter_reading_month').on('change',function(){
-        setAnnualConnectionDate($(this), $('#connect_date_gas'), $('#annual_meter_reading_gas_switch_date'));
+        setAnnualConnectionDate($(this), $('#connect_date_gas'), $('#annual_meter_reading_gas_switch_date'), $('#anb_suggested_gas_switch_date'), 'change');
     });
 
     //On page load
     setElectricityFlow();
     setGasFlow();
-    setAnnualConnectionDate($('#annual_electricity_meter_reading_month'), $('#connect_date'), $('#annual_meter_reading_electricity_switch_date'));
-    setAnnualConnectionDate($('#annual_gas_meter_reading_month'), $('#connect_date_gas'), $('#annual_meter_reading_gas_switch_date'));
+    setAnnualConnectionDate($('#annual_electricity_meter_reading_month'), $('#connect_date'), $('#annual_meter_reading_electricity_switch_date'), $('#anb_suggested_electricity_switch_date'), 'load');
+    setAnnualConnectionDate($('#annual_gas_meter_reading_month'), $('#connect_date_gas'), $('#annual_meter_reading_gas_switch_date'), $('#anb_suggested_gas_switch_date'), 'load');
     setSuggestedDate();
 
 
@@ -691,14 +696,17 @@ jQuery(document).ready(function ($) {
 /*** READY FUNCTION ENDS ***/
 
 //Step 3 Set connect date on based on Annual electricity/gas meter readying
-function setAnnualConnectionDate($this, $connectDate, $hiddenField){
+function setAnnualConnectionDate($this, $connectDate, $hiddenFieldAnnualMeter, $hiddenFieldSuggestedDate, eventType){
     var d = new Date(),
         currentMonth = d.getMonth(),
         currentYear = d.getFullYear(),
         annualYear,
         result,
         $connectParent = $connectDate.parents('label'),
-        $form = $this.parents('form');
+        $form = $this.parents('form'),
+        dateDiv = $form.find('.dateFieldWithLabelText'),
+        dateField = dateDiv.find('.actualText');
+
     if($this.val() <= currentMonth){
         currentYear = currentYear+1;
     }
@@ -706,27 +714,33 @@ function setAnnualConnectionDate($this, $connectDate, $hiddenField){
 
     if($this.val() ==""){
         $connectParent.hide();
-        if($connectParent.find('input[type=radio]').is(':checked')){
-            $connectParent.prev().find('input[type=radio]').attr('checked','checked');
+        if(eventType == 'change'){
+            var firstRadioElement = $connectParent.parent().children().first();
+            firstRadioElement.find('input[type=radio]').attr('checked','checked');
+            dateField.val("").attr('disabled', 'disabled');
+            $hiddenFieldSuggestedDate.val(firstRadioElement.find('.actualText').text());
         }
-        $hiddenField.val('');
+        $hiddenFieldAnnualMeter.val('');
         $connectDate.html('');
     }
     else{
         $connectParent.show();
-        $connectParent.find('input[type=radio]').attr('checked','checked');
-        $hiddenField.val(result);
+        if(eventType == 'change'){
+            $connectParent.find('input[type=radio]').attr('checked','checked');
+            dateField.val("").attr('disabled', 'disabled');
+        }
+        if(dateDiv.find('input[type=radio]:checked').length<=0 && eventType == 'load'){
+            dateField.val("").attr('disabled', 'disabled');
+        }
+
+        $hiddenFieldAnnualMeter.val(result);
         $connectDate.html(result);
+        $hiddenFieldSuggestedDate.val("");
     }
 
-    var dateDiv = $form.find('.dateFieldWithLabelText');
-    var dateField = dateDiv.find('.actualText');
-    if(dateDiv.find('input[type=radio]:checked').length<=0) {
-        dateField.val("").attr('disabled', 'disabled');
-        dateField.parents('.form-group.has-feedback').removeClass('has-error has-danger has-success');
-        dateDiv.find('.help-block.with-errors ul').empty();
-        dateDiv.find('.staricicon.form-control-feedback').removeClass('glyphicon-remove glyphicon-ok');
-    }
+    dateField.parents('.form-group.has-feedback').removeClass('has-error has-danger has-success');
+    dateDiv.find('.help-block.with-errors ul').empty();
+    dateDiv.find('.staricicon.form-control-feedback').removeClass('glyphicon-remove glyphicon-ok');
 
 }//setAnnualConnectionDate function ends
 
@@ -786,7 +800,7 @@ function customValidateDateField(moveDate){
                 errorMessage('show');
                 return false;
             }
-            var dateObj = new Date(valParts[2], valParts[1] - 1, valParts[0]),
+            var dateObj = new Date(valParts[2], valParts[1] - 1, valParts[0],0,0,0,0),
                 minDate =new Date(),
                 maxDate = new Date();
 
@@ -798,12 +812,14 @@ function customValidateDateField(moveDate){
                 var maxM = minDate.getMonth();
                 var maxY = minDate.getFullYear();
                 maxDate.setFullYear(maxY, maxM, maxD);
-                maxDate.setDate(maxDate.getDate() + 180);
+                maxDate.setMonth(maxDate.getMonth() + 6);
             }
             else{
-                minDate.setDate(minDate.getDate() - 30);
-                maxDate.setDate(maxDate.getDate() + 180);
+                minDate.setMonth(minDate.getMonth()-1);
+                maxDate.setMonth(maxDate.getMonth() + 6);
             }
+            minDate.setHours(0,0,0,0);
+            maxDate.setHours(0,0,0,0);
 
             if(dateObj < minDate || dateObj > maxDate){
                 errorMessage('show');
@@ -861,7 +877,7 @@ function setSuggestedDate() {
         sd_m='0'+sd_m;
     }
     var sd_Date = sd_d + '/' + sd_m + '/' + suggestedDate.getFullYear();
-    console.log(sd_Date);
+    //console.log(sd_Date);
 
     jQuery('#suggested_date, #suggested_date_gas').html(sd_Date);
     jQuery('#anb_suggested_electricity_switch_date, #anb_suggested_gas_switch_date').val(sd_Date);
@@ -890,13 +906,11 @@ function orderStepThreeQuestions($elq1, $elq2, $elq3, $elq4, $content, $ul, $for
 
     if($type == 'gas'){
         var gasSubContainer = jQuery('.replicateSection');
-        if($q4 == 0 || $q4 == undefined){
+        if($q4 == 1 || $q4 == undefined){
             gasSubContainer.addClass('hide');
             gasSubContainer.find('li').addClass('hide');
-           // gasSubContainer.find('input[type=radio]').attr('disabled','disabled').removeAttr('checked');
         }
-        else if($q4 == 1){
-           // gasSubContainer.find('input[type=radio]').removeAttr('disabled checked');
+        else if($q4 == 0){
             gasSubContainer.removeClass('hide');
             gasSubContainer.find('li').removeClass('hide');
         }
@@ -1008,7 +1022,7 @@ function orderStepThreeQuestions($elq1, $elq2, $elq3, $elq4, $content, $ul, $for
     else if($ul.html() == "" && $content.hasClass('hide') && $type == "gas"){
         whenSwitch.addClass('hide');
     }
-    else if( $type == 'gas' && ($q4 == 0 || $q4 == undefined) ){
+    else if( $type == 'gas' && ($q4 == 1 || $q4 == undefined) ){
         whenSwitch.addClass('hide');
     }
     else{

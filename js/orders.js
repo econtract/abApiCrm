@@ -832,15 +832,19 @@ function customValidateDateField(moveDate){
     if(!moveDate.is(':disabled')){
         if(value.length === 10){
             var valParts = value.split('/');
-            if(valParts[1] == "00") {
+            if(valParts[0] == "00" || valParts[1] == "00") {
                 errorMessage('show');
                 return false;
             }
-            var dateObj = new Date(valParts[2], valParts[1] - 1, valParts[0]);
-            var minDate = new Date();
-            var maxDate = new Date();
-            minDate.setDate(minDate.getDate() - 30);
-            maxDate.setDate(maxDate.getDate() + 180);
+            var dateObj = new Date(valParts[2], valParts[1] - 1, valParts[0],0,0,0,0),
+                minDate = new Date(),
+                maxDate = new Date();
+
+            minDate.setMonth(minDate.getMonth()-1);
+            maxDate.setMonth(maxDate.getMonth() + 6);
+            minDate.setHours(0,0,0,0);
+            maxDate.setHours(0,0,0,0);
+
             if(dateObj < minDate || dateObj > maxDate){
                 errorMessage('show');
                 return false;
