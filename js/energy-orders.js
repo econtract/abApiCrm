@@ -699,6 +699,11 @@ jQuery(document).ready(function ($) {
         $parent.find('.applyField').val($parent.find('.eanNo').text());
     });
 
+    //thankyou page
+    $('#contact_me_next_year_lnk_btn').on('click', function() {
+        $('#contact_me_next_year_sbmt_btn').trigger('click');
+    })
+
 });
 /*** READY FUNCTION ENDS ***/
 
