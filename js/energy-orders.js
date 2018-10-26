@@ -505,6 +505,7 @@ jQuery(document).ready(function ($) {
     $('.form-nextstep-energy').on('mouseover', function(e) {
         enableDisableEnergyFormNextStep($(this).find('a.btn'));
     });
+
     //To display order information summary on the filled forms
 
     //on chaning simple form values by ignoring hidden fields control the behavior of submit button
@@ -1044,3 +1045,7 @@ function orderStepThreeQuestions($elq1, $elq2, $elq3, $elq4, $content, $ul, $for
     $form.validator('destroy');
     $form.validator('update');
 }
+
+jQuery(window).on('load', function(){
+    enableDisableEnergyFormNextStep(jQuery('.form-nextstep-energy a.btn'));
+});
