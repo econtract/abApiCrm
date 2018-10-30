@@ -45,6 +45,16 @@ function requiredFieldsFilledEnergy(inputForm) {
         // console.log(reqField);
     });
 
+    if(inputForm.hasClass('radio-checkbox-energy')){
+        var allElements = inputForm.find(':input[required]:radio:not(:disabled), :input[required]:checkbox:not(:disabled)');
+        allElements.each(function(){
+            if(jQuery(':'+jQuery(this).attr('type')+'[name='+jQuery(this).attr('name')+']:checked').length == 0)
+            {
+                filled = false;
+            }
+        });
+    }
+
     inputForm.find('.requiredRadioGroup').each(function(){
         if(!jQuery(this).find('input:checked').length>0){
             if(!jQuery(this).parents('li').hasClass('hide')){
