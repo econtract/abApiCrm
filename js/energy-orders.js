@@ -223,7 +223,7 @@ function fillEnergyFormDynamicData(targetContainer) {
             //check if its a fancyRadio option
             if(input.parents('.fancy-radio').length > 0) {
                 var actualText = input.parent().find('.actualText');
-                if(actualText.length > 0){
+                if(actualText.length > 0 && !actualText.hasClass('skip')){
                     value = actualText.text() || actualText.val();
                 }
                 else{
@@ -679,10 +679,10 @@ jQuery(document).ready(function ($) {
     });
 
     $('.heating-working-gas, .threat-suspended-gas, .budget-meter-available-gas, .has-content-energy').on('change', function(){
-        setGasFlow();
+        setGasFlow('change');
     });
     $('.order-questions-lightening, .order-questions-threat, .order-questions-meter, .has_solar_question').on('change', function(){
-        setElectricityFlow();
+        setElectricityFlow('change');
     });
 
     //Annual electricity meter reading
@@ -696,8 +696,8 @@ jQuery(document).ready(function ($) {
     });
 
     //On page load
-    setElectricityFlow();
-    setGasFlow();
+    setElectricityFlow('load');
+    setGasFlow('load');
     setAnnualConnectionDate($('#annual_electricity_meter_reading_month'), $('#connect_date'), $('#annual_meter_reading_electricity_switch_date'), $('#anb_suggested_electricity_switch_date'), 'load');
     setAnnualConnectionDate($('#annual_gas_meter_reading_month'), $('#connect_date_gas'), $('#annual_meter_reading_gas_switch_date'), $('#anb_suggested_gas_switch_date'), 'load');
     setSuggestedDate();
@@ -768,7 +768,7 @@ function setAnnualConnectionDate($this, $connectDate, $hiddenFieldAnnualMeter, $
 
 
 //on load set electricty step 3 flow
-function setElectricityFlow(){
+function setElectricityFlow(eventType){
     var $q1 =jQuery('input[name="is_lightening_working"]:checked'),
         $q2 =jQuery('input[name="is_threat_suspended"]:checked'),
         $q3 = jQuery('input[name="is_budget_meter_available"]:checked'),
@@ -777,12 +777,12 @@ function setElectricityFlow(){
         $form = jQuery('.order-questions-lightening').parents('form'),
         $content =$form.find('.contents');
     if($form.length>0){
-        orderStepThreeQuestions($q1, $q2, $q3, $q4, $content, $ul, $form, stepTwoMoveDate, 'electricity');
+        orderStepThreeQuestions($q1, $q2, $q3, $q4, $content, $ul, $form, stepTwoMoveDate, 'electricity', eventType);
     }
 }
 
 //on load set gas step 3 flow
-function setGasFlow(){
+function setGasFlow(eventType){
     var $q1 =jQuery('input[name="is_heating_working"]:checked'),
         $q2 =jQuery('input[name="is_threat_gas_suspended"]:checked'),
         $q3 = jQuery('input[name="is_gas_budget_meter_available"]:checked'),
@@ -791,7 +791,7 @@ function setGasFlow(){
         $form = jQuery('.heating-working-gas').parents('form'),
         $content =$form.find('.contents-gas');
     if($form.length>0){
-        orderStepThreeQuestions($q1, $q2, $q3, $q4, $content, $ul, $form, stepTwoMoveDate, 'gas');
+        orderStepThreeQuestions($q1, $q2, $q3, $q4, $content, $ul, $form, stepTwoMoveDate, 'gas', eventType);
     }
 }
 
@@ -907,7 +907,7 @@ function setSuggestedDate() {
 }
 
 //Energy Step 3
-function orderStepThreeQuestions($elq1, $elq2, $elq3, $elq4, $content, $ul, $form, stepTwoMoveDate, $type){
+function orderStepThreeQuestions($elq1, $elq2, $elq3, $elq4, $content, $ul, $form, stepTwoMoveDate, $type, eventType){
     var formName = $form;
     var $q1 =$elq1.val(),
         $q2 =$elq2.val(),
@@ -1034,6 +1034,64 @@ function orderStepThreeQuestions($elq1, $elq2, $elq3, $elq4, $content, $ul, $for
             solarSection.removeClass('hide');
         }
     }
+
+    //RESET HIDDEN FIELDS IF IT IS OTHER THAN THE SCENARIO THAT SHOWS SWITCH DATE CONTENT
+    if(eventType == 'change'){
+        var dateField = $contentDv.find('input.actualText'),
+            dateDiv = dateField.parents('.dateFieldWithLabelText'),
+            hidden_suggested_date,
+            hidden_annual_date,
+            suggested_date_actualText,
+            connect_date_actualText,
+            input1 = $contentDv.find('.content_labelOne input[type=radio]'),
+            input2 = $contentDv.find('.content_labelTwo input[type=radio]'),
+            input3 = dateDiv.find('input[type=radio]');
+
+        dateField.parents('.form-group.has-feedback').removeClass('has-error has-danger has-success');
+        dateDiv.find('.help-block.with-errors ul').empty();
+        dateDiv.find('.staricicon.form-control-feedback').removeClass('glyphicon-remove glyphicon-ok');
+
+        if($type == 'electricity') {
+            hidden_suggested_date = jQuery('#anb_suggested_electricity_switch_date');
+            hidden_annual_date = jQuery('#annual_meter_reading_electricity_switch_date');
+            suggested_date_actualText = jQuery('#suggested_date');
+            connect_date_actualText = jQuery('#connect_date');
+        }
+        else if($type == 'gas') {
+            hidden_suggested_date = jQuery('#anb_suggested_gas_switch_date');
+            hidden_annual_date = jQuery('#annual_meter_reading_gas_switch_date');
+            suggested_date_actualText = jQuery('#suggested_date_gas');
+            connect_date_actualText = jQuery('#connect_date_gas');
+        }
+
+        if($q1 != 1 || $q2 != 0 || $q3 != 0) {
+            $contentDv.find('strong.actualText').addClass('skip');
+            $contentDv.find('input[type=hidden]').val('');
+            dateField.val('').attr('disabled', true);
+            input1.addClass('skip');
+            input2.addClass('skip');
+            input3.addClass('skip');
+            $form.find('.currentSupplier').removeClass('skip');
+        }
+        else if($q1 == 1 && $q2 == 0 && $q3 == 0) {
+            input1.removeClass('skip');
+            input2.removeClass('skip');
+            input3.removeClass('skip');
+            $form.find('.currentSupplier').addClass('skip');
+
+            $contentDv.find('strong.actualText').removeClass('skip');
+            if(input3.is(':checked')){
+                dateField.removeAttr('disabled');
+            }
+            else if(input1.is(':checked')){
+                hidden_suggested_date.val(suggested_date_actualText.text());
+            }
+            else if(input2.is(':checked')){
+                hidden_annual_date.val(connect_date_actualText.text());
+            }
+        }
+    }
+
 
     //whenSwitch Title hiding
     var whenSwitch = formName.find('.whenSwitch'),
