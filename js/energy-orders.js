@@ -1071,13 +1071,13 @@ function orderStepThreeQuestions($elq1, $elq2, $elq3, $elq4, $content, $ul, $for
             input1.addClass('skip');
             input2.addClass('skip');
             input3.addClass('skip');
-            $form.find('.currentSupplier').removeClass('skip');
+            // $form.find('.currentSupplier').removeClass('skip');
         }
         else if($q1 == 1 && $q2 == 0 && $q3 == 0) {
             input1.removeClass('skip');
             input2.removeClass('skip');
             input3.removeClass('skip');
-            $form.find('.currentSupplier').addClass('skip');
+            // $form.find('.currentSupplier').addClass('skip');
 
             $contentDv.find('strong.actualText').removeClass('skip');
             if(input3.is(':checked')){
@@ -1089,6 +1089,16 @@ function orderStepThreeQuestions($elq1, $elq2, $elq3, $elq4, $content, $ul, $for
             else if(input2.is(':checked')){
                 hidden_annual_date.val(connect_date_actualText.text());
             }
+        }
+    }
+    else if(eventType == 'load'){
+        if($q1 == 1 && $q2 == 0 && $q3 == 0) {
+            $contentDv.find('input[type=radio]').removeClass('skip');
+            // $form.find('.currentSupplier').addClass('skip');
+        }
+        else{
+            $contentDv.find('input[type=radio]').addClass('skip');
+            // $form.find('.currentSupplier').removeClass('skip');
         }
     }
 
