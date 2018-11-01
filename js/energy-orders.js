@@ -1076,7 +1076,7 @@ function orderStepThreeQuestions($elq1, $elq2, $elq3, $elq4, $content, $ul, $for
         else if($q1 == 1 && $q2 == 0 && $q3 == 0) {
             input1.removeClass('skip');
             input2.removeClass('skip');
-            input3.removeClass('skip');
+            input3.addClass('skip');
             // $form.find('.currentSupplier').addClass('skip');
 
             $contentDv.find('strong.actualText').removeClass('skip');
@@ -1092,12 +1092,24 @@ function orderStepThreeQuestions($elq1, $elq2, $elq3, $elq4, $content, $ul, $for
         }
     }
     else if(eventType == 'load'){
+
+        var dateDiv = $contentDv.find('.dateFieldWithLabelText'),
+            input1 = $contentDv.find('.content_labelOne input[type=radio]'),
+            input2 = $contentDv.find('.content_labelTwo input[type=radio]'),
+            input3 = dateDiv.find('input[type=radio]');
+
         if($q1 == 1 && $q2 == 0 && $q3 == 0) {
-            $contentDv.find('input[type=radio]').removeClass('skip');
+            input1.removeClass('skip');
+            input2.removeClass('skip');
+            input3.addClass('skip');
+            //$contentDv.find('input[type=radio]').removeClass('skip');
             // $form.find('.currentSupplier').addClass('skip');
         }
         else{
-            $contentDv.find('input[type=radio]').addClass('skip');
+            input1.addClass('skip');
+            input2.addClass('skip');
+            input3.addClass('skip');
+            // $contentDv.find('input[type=radio]').addClass('skip');
             // $form.find('.currentSupplier').removeClass('skip');
         }
     }
