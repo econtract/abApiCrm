@@ -53,6 +53,41 @@ jQuery(document).ready(function($){
 
     });
 
-
+    $('#remindMeLaterForm').validator().on('submit', function (event) {
+        var _self = $(this);
+        if (!event.isDefaultPrevented()) {
+            event.preventDefault();
+            var mailForm = _self.parents('.mailForm');
+            var values = {};
+            // get all the inputs into an array.
+            var inputs = $( this ).serializeArray();
+            $.each( inputs, function( key, obj ) {
+                values[obj.name] = obj.value;
+            });
+            var captchaData = {
+                'action'    : 'validateCaptcha',
+                'userInput' : values
+            };
+            var data = {
+                'action'    : 'saveSimpleOrder',
+                'userInput' : values
+            };
+            // We can also pass the url value separately from ajaxurl for front end AJAX implementations
+            jQuery.get(callmeback_obj.ajax_url, captchaData, function(response){
+                if(response == 'done'){
+                    jQuery.post(callmeback_obj.ajax_url, data, function(response){
+                        console.log('server side');
+                        console.log(response);
+                        mailForm.addClass('hide');
+                        $(this).siblings('input:text').val('');
+                        $('#CallBack').find('.error-recaptcha').empty();
+                    });
+                } else {
+                    $('#CallBack').find('.error-recaptcha').append('<span>'+main_js.error_recaptcha+'</span>');
+                    grecaptcha.reset(callUsBack);
+                }
+            });
+        }
+    });
 });
 

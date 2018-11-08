@@ -115,4 +115,14 @@ class abApiCrmEnergy extends abApiCrm{
 		echo json_encode( $response );
 		wp_die();
 	}
+
+	function validateCaptcha(){
+
+        $validCaptacha = isValidCaptcha($_REQUEST['userInput']['g-recaptcha-response']);
+
+        if($validCaptacha == 1) {
+            echo 'done';
+            wp_die();
+        }
+    }
 }
