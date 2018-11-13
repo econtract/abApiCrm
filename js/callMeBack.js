@@ -77,8 +77,8 @@ jQuery(document).ready(function($){
             jQuery.get(callmeback_obj.ajax_url, captchaData, function(response){
                 if(response == 'done'){
                     jQuery.post(callmeback_obj.ajax_url, data, function(response){
-                        console.log('server side');
-                        console.log(response);
+                        /*console.log('server side');
+                        console.log(response);*/
                         mailForm.addClass('hide');
                         thankYouPanel.addClass('show');
                         $(this).siblings('input:text').val('');
