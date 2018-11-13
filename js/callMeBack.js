@@ -58,6 +58,7 @@ jQuery(document).ready(function($){
         if (!event.isDefaultPrevented()) {
             event.preventDefault();
             var mailForm = _self.parents('.mailForm');
+            var thankYouPanel = mailForm.siblings('.mailThankYou');
             var values = {};
             // get all the inputs into an array.
             var inputs = $( this ).serializeArray();
@@ -76,13 +77,16 @@ jQuery(document).ready(function($){
             jQuery.get(callmeback_obj.ajax_url, captchaData, function(response){
                 if(response == 'done'){
                     jQuery.post(callmeback_obj.ajax_url, data, function(response){
-                        $('#reminderCallBackLater').toggle('hide');
+                        console.log('server side');
+                        console.log(response);
+                        mailForm.addClass('hide');
+                        thankYouPanel.addClass('show');
                         $(this).siblings('input:text').val('');
-                        $('#CallBack').find('.error-recaptcha').empty();
+                        $('#remindMeLaterForm').find('.error-recaptcha').empty();
                     });
                 } else {
-                    $('#CallBack').find('.error-recaptcha').append('<span>'+main_js.error_recaptcha+'</span>');
-                    grecaptcha.reset(callUsBack);
+                    $('#remindMeLaterForm').find('.error-recaptcha').append('<span>'+main_js.error_recaptcha+'</span>');
+                    grecaptcha.reset(reminderCallBackLater);
                 }
             });
         }
