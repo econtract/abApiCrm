@@ -208,6 +208,10 @@ function fillEnergyFormDynamicData(targetContainer) {
                 return true;//move on skip this step
             }
 
+            if(input.hasClass('multi-phone')){
+                value = $('#'+input.attr('id')+'_hidden').val();
+            }
+
             if(typeof input.attr('type') == 'undefined' || input.attr('type') == 'select') {
                 value = input.find(':selected').text();
             }

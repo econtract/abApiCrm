@@ -114,7 +114,8 @@ function requiredFieldsFilled(inputForm) {
     if(multiPhone.length>0){
         multiPhone.each(function () {
             $this = jQuery(this);
-            if(!libphonenumber.isValidNumber($this.val())){
+            var hiddenFieldValue = jQuery('#'+$this.attr('id')+'_hidden').val();
+            if(!libphonenumber.isValidNumber(hiddenFieldValue)){
                 filled = false;
             }
         });
