@@ -114,8 +114,9 @@ function requiredFieldsFilled(inputForm) {
     if(multiPhone.length>0){
         multiPhone.each(function () {
             $this = jQuery(this);
-            var hiddenFieldValue = jQuery('#'+$this.attr('id')+'_hidden').val();
-            if(!libphonenumber.isValidNumber(hiddenFieldValue)){
+            var countryData = $this.intlTelInput("getSelectedCountryData");
+            var thisData = '+'+countryData.dialCode + $this.val();
+            if(!libphonenumber.isValidNumber(thisData)){
                 filled = false;
             }
         });
@@ -290,6 +291,21 @@ jQuery(document).ready(function ($) {
         var changedProviderTxt = $(changedProviderObj).text();
         var changedProviderVal = $(changedProviderObj).val();
     });
+
+    //Multiphone value update to its hidden field on keyup
+    var multiPhone = jQuery(':input[type=tel]:not(:disabled)');
+    if(multiPhone.length>0){
+        $('body').on('keyup', multiPhone ,function(e){
+            if(jQuery('#'+e.target.id).hasClass('multi-phone')){
+                var $this = jQuery('#'+e.target.id);
+                var countryData = $this.intlTelInput("getSelectedCountryData");
+                var thisData = '+'+countryData.dialCode + $this.val();
+                if(libphonenumber.isValidNumber(thisData)){
+                    $('#'+$this.attr('id')+'_hidden').val(thisData);
+                }
+            }
+        });
+    }
 
     //Order steps, for the forms that are without array called as simple forms,
     //this means that the input variables are not this way e.g. form_input[], or form_input['order'][] etc
