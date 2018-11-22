@@ -55,6 +55,19 @@ function requiredFieldsFilledEnergy(inputForm) {
         });
     }
 
+    // Multi Phone validation
+    var multiPhone = inputForm.find(':input[type=tel]:not(:disabled)');
+    if(multiPhone.length>0){
+        multiPhone.each(function () {
+            $this = jQuery(this);
+            var countryData = $this.intlTelInput("getSelectedCountryData");
+            var thisData = '+'+countryData.dialCode + $this.val();
+            if(!libphonenumber.isValidNumber(thisData)){
+                filled = false;
+            }
+        });
+    }
+
     inputForm.find('.requiredRadioGroup').each(function(){
         if(!jQuery(this).find('input:checked').length>0){
             if(!jQuery(this).parents('li').hasClass('hide')){
@@ -208,6 +221,10 @@ function fillEnergyFormDynamicData(targetContainer) {
                 return true;//move on skip this step
             }
 
+            if(input.hasClass('multi-phone')){
+                value = $('#'+input.attr('id')+'_hidden').val();
+            }
+
             if(typeof input.attr('type') == 'undefined' || input.attr('type') == 'select') {
                 value = input.find(':selected').text();
             }
@@ -296,6 +313,18 @@ jQuery(document).ready(function ($) {
             var filled = requiredFieldsFilledEnergy(inputForm);
             if (filled === true) {
                 $('.btn.btn-default.disabled').removeClass("disabled");
+            }
+        });
+    }
+
+    //Multiphone value update to its hidden field on keyup
+    var multiPhone = jQuery(':input[type=tel]:not(:disabled)');
+    if(multiPhone.length>0){
+        multiPhone.on('keyup',function(){
+            var countryData = $(this).intlTelInput("getSelectedCountryData");
+            var thisData = '+'+countryData.dialCode + $(this).val();
+            if(libphonenumber.isValidNumber(thisData)){
+                $('#'+$(this).attr('id')+'_hidden').val(thisData);
             }
         });
     }
