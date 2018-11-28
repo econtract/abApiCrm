@@ -44,7 +44,7 @@ function requiredFieldsFilledEnergy(inputForm) {
             }
             else{
                 filled = false;
-                console.log(reqField.text(), reqField.attr('name'), "====>", reqField.val());
+               // console.log(reqField.text(), reqField.attr('name'), "====>", reqField.val());
             }
         }
 
