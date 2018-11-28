@@ -39,9 +39,15 @@ function requiredFieldsFilledEnergy(inputForm) {
         }
 
         if (_.isEmpty(reqField.val())) {
-            filled = false;
-            // console.log("Missing...", reqField);
+            if(reqField.data('validate') != undefined && reqField.data('validate') == false){
+                return true; //skip input field that is not required
+            }
+            else{
+                filled = false;
+                console.log(reqField.text(), reqField.attr('name'), "====>", reqField.val());
+            }
         }
+
         // console.log(reqField);
     });
 
@@ -68,13 +74,16 @@ function requiredFieldsFilledEnergy(inputForm) {
         });
     }
 
-    inputForm.find('.requiredRadioGroup').each(function(){
-        if(!jQuery(this).find('input:checked').length>0){
-            if(!jQuery(this).parents('li').hasClass('hide')){
-                filled = false;
+    var radioGroup = inputForm.find('.requiredRadioGroup');
+    if(radioGroup.length>0) {
+        radioGroup.each(function () {
+            if (!jQuery(this).find('input:checked').length > 0) {
+                if (!jQuery(this).parents('li').hasClass('hide')) {
+                    filled = false;
+                }
             }
-        }
-    });
+        });
+    }
 
     var moveDate = inputForm.find('#move_date');
     if(moveDate.length>0){
@@ -257,7 +266,7 @@ function fillEnergyFormDynamicData(targetContainer) {
             }
 
             if((typeof appendedFor[input.attr('name')] == 'undefined' || appendedFor[input.attr('name')] == false || input.attr('datatype') == 'json')
-                && !_.isEmpty(label)) {
+                && !_.isEmpty(label) && !_.isEmpty(value)) {
                 filledHtml += '<tr>' +
                     '<td>' + label + '</td>' +
                     '<td><strong>' + value + '</strong></td>' +
@@ -411,7 +420,7 @@ jQuery(document).ready(function ($) {
         var className = jQuery(key).attr('name');
         jQuery('.'+className).addClass('hide');
         jQuery('.'+className).find('input:not([type=hidden])').attr('disabled', 'disabled');
-
+        jQuery('.leavingCustomerDetailsWrap').addClass('hide');
 
         if(jQuery('#' + id ).is(':checked')){
             jQuery('.' + id+ '_content').removeClass('hide');
@@ -422,6 +431,21 @@ jQuery(document).ready(function ($) {
             jQuery('.' + id+ '_content').addClass('hide');
             jQuery('.' + id+ '_content').find('input:not([type=hidden])').attr('disabled', 'disabled');
             //jQuery('.' + id+ '_content').find('input:not([type=hidden])').removeAttr('required');
+        }
+
+        var _self = jQuery('input#leaving_customer_info'),
+            leavingCustomerCnt = jQuery('.leavingCustomerDetailsWrap'),
+            leavingFields = leavingCustomerCnt.find('input[type=text], input[type=email], input[type=tel]');
+
+        if (jQuery('#' + id ).is(':checked') && id =='moving_address' && _self.is(':checked') ){
+            leavingFields.removeAttr('disabled');
+            leavingFields.attr('required', 'required');
+            leavingCustomerCnt.removeClass('hide');
+        }
+        else if (jQuery('#' + id ).is(':checked') && id !='moving_address' && ( _self.is(':checked') || !_self.is(':checked')) ) {
+            leavingFields.attr('disabled', true);
+            leavingFields.removeAttr('required', 'required');
+            leavingCustomerCnt.addClass('hide');
         }
 
         var inputForm = jQuery('#' + id ).parents('form');
@@ -656,6 +680,9 @@ jQuery(document).ready(function ($) {
             else if($(current).attr('id') == "installation_address_invoice"){
                 zipCode = parseInt($('#location_invoice').val());
             }
+            else if($(current).attr('id') == "leaving_address"){
+                zipCode = parseInt($('#leaving_location').val());
+            }
             var ajaxUrl = orders_obj_energy.toolkit_api_url + 'streets?postcode=' + zipCode + '&toolbox_key=' + orders_obj_energy.toolkit_api_key; // url changed to get cities data direct from toolbox api
             return $.get(ajaxUrl, function (data) {
                 try { // if data is json object
@@ -749,10 +776,51 @@ jQuery(document).ready(function ($) {
     //thankyou page
     $('#contact_me_next_year_lnk_btn').on('click', function() {
         $('#contact_me_next_year_sbmt_btn').trigger('click');
-    })
+    });
+
+    // Step 2 - Leaving Customer fields show hide
+    if($('input#leaving_customer_info').length>0){
+        var validatorElem = $('input#leaving_customer_info').parents("form").data("bs.validator");
+
+        enableDisableLeavingCustomerFields();
+
+        validatorElem.update();
+    }
+
+    $('input#leaving_customer_info').on('change',function(){
+        var validatorElem = $('input#leaving_customer_info').parents("form").data("bs.validator"),
+            leavingCustomerCnt = jQuery('.leavingCustomerDetailsWrap'),
+            leavingFields = leavingCustomerCnt.find('input[type=text], input[type=email], input[type=tel]');
+
+        enableDisableLeavingCustomerFields();
+
+        $(leavingFields).each(function(){
+            validatorElem.clearErrors($(this));
+        });
+
+        validatorElem.update();
+        $('input#leaving_customer_info').parents('form').validator('update');
+    });
 
 });
 /*** READY FUNCTION ENDS ***/
+
+// Step 2 - Leaving Customer fields show hide
+function enableDisableLeavingCustomerFields(){
+    var _self = jQuery('input#leaving_customer_info'),
+        leavingCustomerCnt = jQuery('.leavingCustomerDetailsWrap'),
+        leavingFields = leavingCustomerCnt.find('input[type=text], input[type=email], input[type=tel]');
+
+    if(_self.is(':checked')){
+        leavingFields.removeAttr('disabled');
+        leavingFields.attr('required', 'required');
+        leavingCustomerCnt.removeClass('hide');
+    } else {
+        leavingFields.attr('disabled', true);
+        leavingFields.removeAttr('required', 'required');
+        leavingCustomerCnt.addClass('hide');
+    }
+}
 
 //Step 3 Set connect date on based on Annual electricity/gas meter readying
 function setAnnualConnectionDate($this, $connectDate, $hiddenFieldAnnualMeter, $hiddenFieldSuggestedDate, eventType){
