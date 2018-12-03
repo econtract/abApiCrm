@@ -834,6 +834,11 @@ function setAnnualConnectionDate($this, $connectDate, $hiddenFieldAnnualMeter, $
         dateDiv = $form.find('.dateFieldWithLabelText'),
         dateField = dateDiv.find('.actualText');
 
+    if($this.attr('id') == 'annual_electricity_meter_reading_month' && jQuery('#annual_gas_meter_reading_month').length>0){
+        jQuery('#annual_gas_meter_reading_month').val($this.val());
+        jQuery('#annual_gas_meter_reading_month').trigger('change');
+    }
+
     if($this.val() <= currentMonth){
         currentYear = currentYear+1;
     }
