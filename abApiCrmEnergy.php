@@ -125,4 +125,87 @@ class abApiCrmEnergy extends abApiCrm{
             wp_die();
         }
     }
+
+    public function checkAvailabilityEnergy() {
+        if ( ! defined( 'AB_CHK_AVL_URL' ) ) {
+            define( 'AB_CHK_AVL_URL', 'https://www.aanbieders.be/rpc' );
+        }
+        //Expected Params: ?pid=279&prt=internet&lang_mod=nl&zip=3500&action=check_availability
+        $zip       = intval( $_GET['zip'] );
+        $pid       = intval( $_GET['pid'] );
+        $pslug     = $_GET['pslug'];
+        $ptype     = trim( sanitize_text_field( $_GET['prt'] ) );
+        $pname     = trim( sanitize_text_field( $_GET['pname'] ) );
+        $lang      = trim( sanitize_text_field( $_GET['lang'] ) );
+        $prvname   = trim( sanitize_text_field( $_GET['prvname'] ) );
+        $prvslug   = trim( sanitize_text_field( $_GET['prvslug'] ) );
+        $prvid     = intval( $_GET['prvid'] );
+        $sg        = trim( sanitize_text_field( $_GET['sg'] ) );
+        $cats      = array_filter($_GET['cat']);
+        $sect      = array_filter($_GET['section']);
+        $cproducts = $_GET['cat_products'];
+        $action    = 'check_availability';
+        $response  = null;
+
+        if(empty($cats)) {
+            $cats = 'dualfuel_pack';
+        }
+        if ( empty( $zip ) || empty( $pid ) || empty( $lang ) || empty( $ptype ) ) {
+            $response = json_encode(
+                [
+                    'available' => false,
+                    'msg'       => pll__( 'Something is wrong! Make sure to check availability after filling data.' )
+                ]
+            );
+        } else {
+            //global $post;
+            $parentSegment = getSectorOnCats( $cats );
+            $response      = file_get_contents( AB_CHK_AVL_URL . "?pid=$pid&zip=$zip&lang_mod=$lang&prt=$ptype&action=$action&rand=" . mt_rand() );
+            $jsonDecRes    = json_decode( $response );
+            if ( $jsonDecRes->available === false ) {
+                $catUrlPart = 'cat='.$cats;
+                $urlParams             = "?$catUrlPart&zip=$zip&searchSubmit=&sg=$sg";
+                $urlParamsWithProvider = "$urlParams&pref_cs[]=$prvid";
+                $jsonDecRes->msg       = pll__("Sorry! The product is not available in your area.");
+                $jsonDecRes->html      = $this->availabilityErrorHtml( $parentSegment, $urlParamsWithProvider, $prvname, $urlParams );
+            }
+            if ( $jsonDecRes->available === true ) {
+                $checkoutParams = "&hidden_prodsel_cmp=yes&product_to_cart=yes&product_id=$pid&provider_id=$prvid&producttype=$ptype&sg=$sg&cat=$cats&zip=$zip";
+                $html             = $this->availabilitySuccessHtml( $parentSegment, $checkoutParams );
+                $jsonDecRes->msg  = pll__('Congratulations! The product is available in your area');//Ignore the API response message
+                $jsonDecRes->html = $html;
+            }
+            $response = json_encode( $jsonDecRes );
+        }
+        echo $response;
+        wp_die();
+    }
+
+    private function availabilityErrorHtml( $parentSegment, $urlParamsWithProvider, $prvname, $urlParams ) {
+        return '<div class="content-error">
+                        <p>' . pll__( 'We offer very similar deals in your area: - Energy ' ) . '</p>
+                        <a href="/' . $parentSegment . '/' . pll__( 'results' ) . $urlParamsWithProvider . '" class="btn btn-primary">' . sprintf( pll__( 'Alternative deals from %s - Energy' ), $prvname ) . '</a>
+                        <a href="/' . $parentSegment . '/' . pll__( 'results' ) . $urlParams . '" class="btn btn-primary">' . pll__( 'Alternative deals from all providers - Energy' ) . '</a>
+                        <a href="/' . pll__( 'contact' ) . '" class="modal-btm-link"><i class="fa fa-angle-right"></i> ' . pll__( 'Or contact us directly' ) . '</a>
+                    </div>';
+    }
+
+    /**
+     * @param $parentSegment
+     *
+     * @return string
+     */
+    private function availabilitySuccessHtml( $parentSegment, $checkoutParams = "" ) {
+        if(!empty($checkoutParams)) {
+            $checkoutParams = "?$checkoutParams";
+        }
+        return '<div class="modal-list">
+                    <p>' . pll__( 'Be sure to check your infrastructure: - Energy' ) . '</p>
+                    <ul class="list-unstyled bullet-list">
+                        <li>' . pll__( 'Check internet cable - Energy' ) . ' <span class="infoTip"><a href="#" data-toggle="availability-tooltip" title="' . pll__( 'Lorem ipsum for internet cable - Energy' ) . '">?</a></span></li>
+                        <li>' . pll__( 'Check phone line - Energy' ) . ' <span class="infoTip"><a href="#" data-toggle="availability-tooltip" title="' . pll__( 'Lorem ipsum for phone line - Energy' ) . '">?</a></span></li>
+                    </ul>
+                    <a href="/' . $parentSegment . '/' . pll__( 'checkout' ) . $checkoutParams . '" class="btn btn-primary">' . pll__( 'All good! Proceed' ) . '</a>
+                </div>';
+    }
 }
