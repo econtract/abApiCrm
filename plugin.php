@@ -56,5 +56,5 @@ add_action( 'wp_ajax_nopriv_saveSimpleOrderEnergy', array($resultEnergy, 'saveSi
 add_action('wp_ajax_validateCaptcha', array($resultEnergy, 'validateCaptcha'));
 add_action( 'wp_ajax_nopriv_validateCaptcha', array($resultEnergy, 'validateCaptcha'));
 
-add_action('wp_ajax_checkAvailabilityEnergy', array($resultEnergy, 'checkAvailabilityEnergy'));
-add_action( 'wp_ajax_nopriv_checkAvailabilityEnergy', array($resultEnergy, 'checkAvailabilityEnergy'));
+add_action('wp_ajax_checkAvailabilityEnergy', array($resultEnergy, 'checkAvailability'));
+add_action( 'wp_ajax_nopriv_checkAvailabilityEnergy', array($resultEnergy, 'checkAvailability'));

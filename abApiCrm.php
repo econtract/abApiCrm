@@ -240,11 +240,18 @@ class abApiCrm {
 				$jsonDecRes->html      = $this->availabilityErrorHtml( $parentSegment, $urlParamsWithProvider, $prvname, $urlParams );
 			}
 			if ( $jsonDecRes->available === true ) {
-				//$this->initSessionForProduct( $zip, $pid, $pslug, $pname, $ptype, $lang, $prvid, $prvslug, $prvname, $cats, $sg, $cproducts );
-				$checkoutParams   = "product_to_cart&product_id=$pid&provider_id=$prvid&sg=$sg&producttype=$ptype";
-				$html             = $this->availabilitySuccessHtml( $parentSegment, $checkoutParams );
-				$jsonDecRes->msg  = pll__('Congratulations! The product is available in your area');//Ignore the API response message
-				$jsonDecRes->html = $html;
+			    if($parentSegment == pll__('energy')) {
+                    $checkoutParams = "&hidden_prodsel_cmp=yes&product_to_cart=yes&product_id=$pid&provider_id=$prvid&producttype=$ptype&sg=$sg&cat=$cats&zip=$zip";
+                    $html             = $this->availabilitySuccessHtml( $parentSegment, $checkoutParams );
+                    $jsonDecRes->msg  = pll__('Congratulations! The product is available in your area');//Ignore the API response message
+                    $jsonDecRes->html = $html;
+                } else {
+                    //$this->initSessionForProduct( $zip, $pid, $pslug, $pname, $ptype, $lang, $prvid, $prvslug, $prvname, $cats, $sg, $cproducts );
+                    $checkoutParams   = "product_to_cart&product_id=$pid&provider_id=$prvid&sg=$sg&producttype=$ptype";
+                    $html             = $this->availabilitySuccessHtml( $parentSegment, $checkoutParams );
+                    $jsonDecRes->msg  = pll__('Congratulations! The product is available in your area');//Ignore the API response message
+                    $jsonDecRes->html = $html;
+                }
 			}
 			if ( isset( $_GET['debug'] ) ) {
 				$jsonDecRes->endpointUrl = AB_CHK_AVL_URL . "?pid=$pid&zip=$zip&lang_mod=$lang&action=$action&rand=" . mt_rand();
@@ -265,7 +272,7 @@ class abApiCrm {
 	 *
 	 * @return string
 	 */
-	private function availabilityErrorHtml( $parentSegment, $urlParamsWithProvider, $prvname, $urlParams ) {
+	public function availabilityErrorHtml( $parentSegment, $urlParamsWithProvider, $prvname, $urlParams ) {
 		return '<div class="content-error">
                         <p>' . pll__( 'We offer very similar deals in your area:' ) . '</p>
                         <a href="/' . $parentSegment . '/' . pll__( 'results' ) . $urlParamsWithProvider . '" class="btn btn-primary">' . sprintf( pll__( 'Alternative deals from %s' ), $prvname ) . '</a>
@@ -279,7 +286,7 @@ class abApiCrm {
 	 *
 	 * @return string
 	 */
-	private function availabilitySuccessHtml( $parentSegment, $checkoutParams = "" ) {
+    public function availabilitySuccessHtml( $parentSegment, $checkoutParams = "" ) {
 		if(!empty($checkoutParams)) {
 			$checkoutParams = "?$checkoutParams";
 		}

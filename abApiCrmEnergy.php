@@ -126,62 +126,7 @@ class abApiCrmEnergy extends abApiCrm{
         }
     }
 
-    public function checkAvailabilityEnergy() {
-        if ( ! defined( 'AB_CHK_AVL_URL' ) ) {
-            define( 'AB_CHK_AVL_URL', 'https://www.aanbieders.be/rpc' );
-        }
-        //Expected Params: ?pid=279&prt=internet&lang_mod=nl&zip=3500&action=check_availability
-        $zip       = intval( $_GET['zip'] );
-        $pid       = intval( $_GET['pid'] );
-        $pslug     = $_GET['pslug'];
-        $ptype     = trim( sanitize_text_field( $_GET['prt'] ) );
-        $pname     = trim( sanitize_text_field( $_GET['pname'] ) );
-        $lang      = trim( sanitize_text_field( $_GET['lang'] ) );
-        $prvname   = trim( sanitize_text_field( $_GET['prvname'] ) );
-        $prvslug   = trim( sanitize_text_field( $_GET['prvslug'] ) );
-        $prvid     = intval( $_GET['prvid'] );
-        $sg        = trim( sanitize_text_field( $_GET['sg'] ) );
-        $cats      = array_filter($_GET['cat']);
-        $sect      = array_filter($_GET['section']);
-        $cproducts = $_GET['cat_products'];
-        $action    = 'check_availability';
-        $response  = null;
-
-        if(empty($cats)) {
-            $cats = 'dualfuel_pack';
-        }
-        if ( empty( $zip ) || empty( $pid ) || empty( $lang ) || empty( $ptype ) ) {
-            $response = json_encode(
-                [
-                    'available' => false,
-                    'msg'       => pll__( 'Something is wrong! Make sure to check availability after filling data.' )
-                ]
-            );
-        } else {
-            //global $post;
-            $parentSegment = getSectorOnCats( $cats );
-            $response      = file_get_contents( AB_CHK_AVL_URL . "?pid=$pid&zip=$zip&lang_mod=$lang&prt=$ptype&action=$action&rand=" . mt_rand() );
-            $jsonDecRes    = json_decode( $response );
-            if ( $jsonDecRes->available === false ) {
-                $catUrlPart = 'cat='.$cats;
-                $urlParams             = "?$catUrlPart&zip=$zip&searchSubmit=&sg=$sg";
-                $urlParamsWithProvider = "$urlParams&pref_cs[]=$prvid";
-                $jsonDecRes->msg       = pll__("Sorry! The product is not available in your area.");
-                $jsonDecRes->html      = $this->availabilityErrorHtml( $parentSegment, $urlParamsWithProvider, $prvname, $urlParams );
-            }
-            if ( $jsonDecRes->available === true ) {
-                $checkoutParams = "&hidden_prodsel_cmp=yes&product_to_cart=yes&product_id=$pid&provider_id=$prvid&producttype=$ptype&sg=$sg&cat=$cats&zip=$zip";
-                $html             = $this->availabilitySuccessHtml( $parentSegment, $checkoutParams );
-                $jsonDecRes->msg  = pll__('Congratulations! The product is available in your area');//Ignore the API response message
-                $jsonDecRes->html = $html;
-            }
-            $response = json_encode( $jsonDecRes );
-        }
-        echo $response;
-        wp_die();
-    }
-
-    private function availabilityErrorHtml( $parentSegment, $urlParamsWithProvider, $prvname, $urlParams ) {
+    public function availabilityErrorHtml( $parentSegment, $urlParamsWithProvider, $prvname, $urlParams ) {
         return '<div class="content-error">
                         <p>' . pll__( 'We offer very similar deals in your area: - Energy ' ) . '</p>
                         <a href="/' . $parentSegment . '/' . pll__( 'results' ) . $urlParamsWithProvider . '" class="btn btn-primary">' . sprintf( pll__( 'Alternative deals from %s - Energy' ), $prvname ) . '</a>
@@ -195,7 +140,7 @@ class abApiCrmEnergy extends abApiCrm{
      *
      * @return string
      */
-    private function availabilitySuccessHtml( $parentSegment, $checkoutParams = "" ) {
+    public function availabilitySuccessHtml( $parentSegment, $checkoutParams = "" ) {
         if(!empty($checkoutParams)) {
             $checkoutParams = "?$checkoutParams";
         }
