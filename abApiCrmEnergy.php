@@ -125,4 +125,32 @@ class abApiCrmEnergy extends abApiCrm{
             wp_die();
         }
     }
+
+    public function availabilityErrorHtml( $parentSegment, $urlParamsWithProvider, $prvname, $urlParams ) {
+        return '<div class="content-error">
+                        <p>' . pll__( 'We offer very similar deals in your area: - Energy ' ) . '</p>
+                        <a href="/' . $parentSegment . '/' . pll__( 'results' ) . $urlParamsWithProvider . '" class="btn btn-primary">' . sprintf( pll__( 'Alternative deals from %s - Energy' ), $prvname ) . '</a>
+                        <a href="/' . $parentSegment . '/' . pll__( 'results' ) . $urlParams . '" class="btn btn-primary">' . pll__( 'Alternative deals from all providers - Energy' ) . '</a>
+                        <a href="/' . pll__( 'contact' ) . '" class="modal-btm-link"><i class="fa fa-angle-right"></i> ' . pll__( 'Or contact us directly' ) . '</a>
+                    </div>';
+    }
+
+    /**
+     * @param $parentSegment
+     *
+     * @return string
+     */
+    public function availabilitySuccessHtml( $parentSegment, $checkoutParams = "" ) {
+        if(!empty($checkoutParams)) {
+            $checkoutParams = "?$checkoutParams";
+        }
+        return '<div class="modal-list">
+                    <p>' . pll__( 'Be sure to check your infrastructure: - Energy' ) . '</p>
+                    <ul class="list-unstyled bullet-list">
+                        <li>' . pll__( 'Check internet cable - Energy' ) . ' <span class="infoTip"><a href="#" data-toggle="availability-tooltip" title="' . pll__( 'Lorem ipsum for internet cable - Energy' ) . '">?</a></span></li>
+                        <li>' . pll__( 'Check phone line - Energy' ) . ' <span class="infoTip"><a href="#" data-toggle="availability-tooltip" title="' . pll__( 'Lorem ipsum for phone line - Energy' ) . '">?</a></span></li>
+                    </ul>
+                    <a href="/' . $parentSegment . '/' . pll__( 'checkout' ) . $checkoutParams . '" class="btn btn-primary">' . pll__( 'All good! Proceed' ) . '</a>
+                </div>';
+    }
 }
