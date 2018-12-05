@@ -241,7 +241,8 @@ class abApiCrm {
 			}
 			if ( $jsonDecRes->available === true ) {
 			    if($parentSegment == pll__('energy')) {
-                    $checkoutParams = "&hidden_prodsel_cmp=yes&product_to_cart=yes&product_id=$pid&provider_id=$prvid&producttype=$ptype&sg=$sg&cat=$cats&zip=$zip";
+                    $catUrlPart = "cat=$cats[0]";
+                    $checkoutParams = "&hidden_prodsel_cmp=yes&product_to_cart=yes&product_id=$pid&provider_id=$prvid&producttype=$ptype&sg=$sg&zip=$zip&$catUrlPart";
                     $html             = $this->availabilitySuccessHtml( $parentSegment, $checkoutParams );
                     $jsonDecRes->msg  = pll__('Congratulations! The product is available in your area');//Ignore the API response message
                     $jsonDecRes->html = $html;
