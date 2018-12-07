@@ -111,7 +111,8 @@ class abApiCrm {
 					'toolkit_api_url'                 => TOOLKIT_API_URL,
 					'toolkit_api_key'                 => TOOLKIT_API_KEY,
 					'change_zip_trans'                => pll__( 'Change zip code' ),
-					'no_provider'                     => pll__( 'No Provider' )
+					'no_provider'                     => pll__( 'No Provider' ),
+					'trans_mth'                       => pll__('mth')
 				)
 			);
 		}
