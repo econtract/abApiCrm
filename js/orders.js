@@ -716,7 +716,8 @@ jQuery(document).ready(function ($) {
             '&trans_first_month=' + site_obj.trans_first_month +
             '&trans_monthly_total_tooltip_txt=' + site_obj.trans_monthly_total_tooltip_txt +
             '&trans_ontime_costs=' + site_obj.trans_ontime_costs +
-            '&trans_ontime_total=' + site_obj.trans_ontime_total;
+            '&trans_ontime_total=' + site_obj.trans_ontime_total +
+            '&trans_mth='+site_obj.trans_mth;
 
         //appending remaining variables which are required to grab the updated cart
         allAttrs += '&prt=' + $('#prt').val();
