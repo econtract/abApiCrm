@@ -35,6 +35,7 @@ if ( ! defined( 'WPINC' ) ) {
 
 
 $result = wpal_create_instance(abApiCrm::class);
+
 add_action('wp_ajax_callMeBack', array($result, 'callMeBack'));
 add_action( 'wp_ajax_nopriv_callMeBack', array($result, 'callMeBack'));
 
@@ -48,8 +49,12 @@ add_action('wp_ajax_removeSubOrder', array($result, 'removeSubOrder'));
 add_action( 'wp_ajax_nopriv_removeSubOrder', array($result, 'removeSubOrder'));
 
 $resultEnergy = wpal_create_instance(abApiCrmEnergy::class);
+
 add_action('wp_ajax_saveSimpleOrderEnergy', array($resultEnergy, 'saveSimpleOrder'));
 add_action( 'wp_ajax_nopriv_saveSimpleOrderEnergy', array($resultEnergy, 'saveSimpleOrder'));
 
 add_action('wp_ajax_validateCaptcha', array($resultEnergy, 'validateCaptcha'));
 add_action( 'wp_ajax_nopriv_validateCaptcha', array($resultEnergy, 'validateCaptcha'));
+
+add_action('wp_ajax_checkAvailabilityEnergy', array($resultEnergy, 'checkAvailability'));
+add_action( 'wp_ajax_nopriv_checkAvailabilityEnergy', array($resultEnergy, 'checkAvailability'));
