@@ -77,9 +77,11 @@ function requiredFieldsFilledEnergy(inputForm) {
     var radioGroup = inputForm.find('.requiredRadioGroup');
     if(radioGroup.length>0) {
         radioGroup.each(function () {
-            if (!jQuery(this).find('input:checked').length > 0) {
-                if (!jQuery(this).parents('li').hasClass('hide')) {
-                    filled = false;
+            if(jQuery(this).find('input:disabled').length == 0){
+                if (jQuery(this).find('input:checked').length == 0) {
+                    if (!jQuery(this).parents('li').hasClass('hide')) {
+                        filled = false;
+                    }
                 }
             }
         });
@@ -757,14 +759,6 @@ jQuery(document).ready(function ($) {
     setAnnualConnectionDate($('#annual_electricity_meter_reading_month'), $('#connect_date'), $('#annual_meter_reading_electricity_switch_date'), $('#anb_suggested_electricity_switch_date'), 'load');
     setAnnualConnectionDate($('#annual_gas_meter_reading_month'), $('#connect_date_gas'), $('#annual_meter_reading_gas_switch_date'), $('#anb_suggested_gas_switch_date'), 'load');
     setSuggestedDate();
-    if( $('#annual_electricity_meter_reading_month').length>0 ){
-        $('.annualGasWrap').hide();
-    }
-    else{
-        $('.energyOrder.replicateSection').removeClass('hide');
-        $('.energyOrder.replicateSection li').removeClass('hide');
-    }
-
 
     //Step 5 Apply suggestion for Electricity and GAS
     $('.order-selected.grey').on('click','.applyLink',function(e){
@@ -1032,23 +1026,37 @@ function orderStepThreeQuestions($elq1, $elq2, $elq3, $elq4, $content, $ul, $for
         $q2Inputs = $q2li.find('input'),
         $q3Inputs = $q3li.find('input');
 
-
     $q3li.addClass('hide');
     $q3Inputs.attr('disabled','disabled');
 
     if($type == 'gas'){
-        var gasSubContainer = jQuery('.replicateSection');
+        var gasSubContainer = jQuery('.replicateSection'),
+            gasSubInputs =  gasSubContainer.find('input[type=radio]'),
+            selectMonth = jQuery('#annual_gas_meter_reading_month');
         if( jQuery('#annual_electricity_meter_reading_month').length>0 ){
+            jQuery('.annualGasWrap').addClass('hide');
+            selectMonth.addClass('hidden');
             if($q4 == 1 || $q4 == undefined){
-                gasSubContainer.addClass('hide');
+                gasSubInputs.removeAttr('checked');
+                gasSubInputs.attr('disabled',true);
                 gasSubContainer.find('li').addClass('hide');
+                gasSubContainer.addClass('hide');
+
             }
             else if($q4 == 0){
-                gasSubContainer.removeClass('hide');
+                gasSubInputs.removeAttr('disabled');
                 gasSubContainer.find('li').removeClass('hide');
+                gasSubContainer.removeClass('hide');
             }
+
+            $q1 = jQuery('input[name="is_heating_working"]:checked').val();
+            $q2 = jQuery('input[name="is_threat_gas_suspended"]:checked').val();
+            $q3 = jQuery('input[name="is_gas_budget_meter_available"]:checked').val();
+            $q4 = jQuery('input[name="similar_option_for_gas_as_electricity"]:checked').val();
+
         }
         else{
+            selectMonth.removeClass('hidden');
             $q4 = 0;
             gasSubContainer.removeClass('hide');
             gasSubContainer.find('li').removeClass('hide');
@@ -1060,7 +1068,6 @@ function orderStepThreeQuestions($elq1, $elq2, $elq3, $elq4, $content, $ul, $for
     if(stepTwoMoveDate == ''){
 
         if( $q1 == 0){
-
             $q2li.addClass('hide');
             $q2Inputs.attr('disabled','disabled');
             $q2Inputs.removeAttr('checked');
@@ -1230,7 +1237,6 @@ function orderStepThreeQuestions($elq1, $elq2, $elq3, $elq4, $content, $ul, $for
             // $form.find('.currentSupplier').removeClass('skip');
         }
     }
-
 
     //whenSwitch Title hiding
     var whenSwitch = formName.find('.whenSwitch'),
