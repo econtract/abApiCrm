@@ -134,7 +134,18 @@ function requiredFieldsFilled(inputForm) {
 
     var moveDate = inputForm.find('#move_date');
     if(moveDate.length>0){
-        filled = customValidateDateField(moveDate);
+        var fill = customValidateDateField(moveDate);
+        if(!fill){
+            filled =  false;
+        }
+    }
+
+    if (filled === true) {
+        inputForm.find('input[type=submit]').removeClass('disabled');
+        inputForm.find('.next-step-btn a, .btnWrapper a.btn').removeClass('disabled');
+    } else {
+        inputForm.find('.next-step-btn a, .btnWrapper a.btn').addClass('disabled');
+        inputForm.find('input[type=submit]').addClass('disabled');
     }
 
     return filled;
@@ -403,8 +414,8 @@ jQuery(document).ready(function ($) {
         enableDisableFormNextStep($('.form-nextstep a.btn-default'));
     });
 
-    $('.form-nextstep .btn-default').on('mouseover', function(e) {
-        enableDisableFormNextStep($(this));
+    $('.form-nextstep').on('mouseover', function(e) {
+        enableDisableFormNextStep($(this).find('.btn'));
     });
 
     //on changing mobile product set other required variables
@@ -894,3 +905,8 @@ function customValidateDateField(moveDate){
     }
 
 }//customValidateDateField Ends
+
+
+jQuery(window).on('load', function(){
+    enableDisableFormNextStep(jQuery('.form-nextstep .btn-default'));
+});
