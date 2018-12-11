@@ -132,6 +132,19 @@ function requiredFieldsFilled(inputForm) {
         });
     }
 
+    var radioGroup = inputForm.find('.requiredRadioGroup');
+    if(radioGroup.length>0) {
+        radioGroup.each(function () {
+            if(jQuery(this).find('input:disabled').length == 0){
+                if (jQuery(this).find('input:checked').length == 0) {
+                    if (!jQuery(this).parents('li').hasClass('hide')) {
+                        filled = false;
+                    }
+                }
+            }
+        });
+    }
+
     var moveDate = inputForm.find('#move_date');
     if(moveDate.length>0){
         var fill = customValidateDateField(moveDate);
