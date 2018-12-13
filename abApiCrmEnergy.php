@@ -141,9 +141,24 @@ class abApiCrmEnergy extends abApiCrm{
      * @return string
      */
     public function availabilitySuccessHtml( $parentSegment, $checkoutParams = "" ) {
+
         if(!empty($checkoutParams)) {
-            $checkoutParams = "?$checkoutParams";
+            //$checkoutParams = "?$checkoutParams";
+            $params = explode('&' , $checkoutParams);
+
+            foreach ($params as $key => $val){
+                if(!empty($val)) {
+                    $thisParam = explode('=', $val);
+                    if ($thisParam[0] == 'hidden_prodsel_cmp' || $thisParam[0] == 'zip' || $thisParam[0] == 'cat') {
+                        continue;
+                    } else {
+                        $nParams[] = $val;
+                    }
+                }
+            }
+            $checkoutParams = '?'.implode('&' , $nParams);
         }
+
         return '<div class="modal-list">
                     <p>' . pll__( 'Be sure to check your infrastructure: - Energy' ) . '</p>
                     <ul class="list-unstyled bullet-list">
