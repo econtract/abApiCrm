@@ -226,22 +226,28 @@ class abApiCrm {
 			//global $post;
 			$parentSegment = getSectorOnCats( $cats );
 			$response      = file_get_contents( AB_CHK_AVL_URL . "?pid=$pid&zip=$zip&lang_mod=$lang&prt=$ptype&action=$action&rand=" . mt_rand() );
-			$jsonDecRes    = json_decode( $response );
-			if ( $jsonDecRes->available === false ) {
-				$catUrlPart = '';
-				foreach ( $cats as $cat ) {
-					if($catUrlPart) {
-						$catUrlPart .= '&';
-					}
-					$catUrlPart .= "cat[]=$cat";
-				}
-				$urlParams             = "?$catUrlPart&zip=$zip&searchSubmit=&sg=$sg";
-				$urlParamsWithProvider = "$urlParams&pref_cs[]=$prvid";
-				$jsonDecRes->msg       = pll__("Sorry! The product is not available in your area.");
-				$jsonDecRes->html      = $this->availabilityErrorHtml( $parentSegment, $urlParamsWithProvider, $prvname, $urlParams );
-			}
-			if ( $jsonDecRes->available === true ) {
-			    if($parentSegment == pll__('energy')) {
+
+			if(empty($response)){
+                $response['available'] = false;
+                $response = json_encode($response);
+            }
+
+            $jsonDecRes = json_decode($response);
+            if ($jsonDecRes->available === false) {
+                $catUrlPart = '';
+                foreach ($cats as $cat) {
+                    if ($catUrlPart) {
+                        $catUrlPart .= '&';
+                    }
+                    $catUrlPart .= "cat[]=$cat";
+                }
+                $urlParams = "?$catUrlPart&zip=$zip&searchSubmit=&sg=$sg";
+                $urlParamsWithProvider = "$urlParams&pref_cs[]=$prvid";
+                $jsonDecRes->msg = pll__("Sorry! The product is not available in your area.");
+                $jsonDecRes->html = $this->availabilityErrorHtml($parentSegment, $urlParamsWithProvider, $prvname, $urlParams);
+            }
+            if ($jsonDecRes->available === true) {
+                if ($parentSegment == pll__('energy')) {
                     $catUrlPart = "cat=$cats[0]";
                     $checkoutParams = "&hidden_prodsel_cmp=yes&product_to_cart=yes&product_id=$pid&provider_id=$prvid&producttype=$ptype&sg=$sg&zip=$zip&$catUrlPart";
                     $html             = $this->availabilitySuccessHtml( $parentSegment, $checkoutParams );
