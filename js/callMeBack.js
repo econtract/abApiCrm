@@ -4,7 +4,7 @@ jQuery(document).ready(function($){
     $('#callMeBackSuccess').hide();
 
     // $( "#callMeLater" ).submit(function( event ) {
-    $('#callMeLater').validator().on('submit', function (event) {
+    $('#callMeLater, #remindMeLaterForm').validator().on('submit', function (event) {
 
         var _self = $(this);
 
