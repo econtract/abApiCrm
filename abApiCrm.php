@@ -171,20 +171,36 @@ class abApiCrm {
 		$explodeName = explode( " ", $data['name'] );
 		$date        = date( 'Y-m-d', strtotime( str_replace( '/', '-', $data['callDate'] ) ) );
 
+        $remarksData = '';
+		if($data['remarks'] == 'custom'){
+            $remarksData .= $data['contact_option'];
+            if($data['save_energy_comparison'] == 1){
+                $remarksData .= ', User wants to save his/her energy comparison';
+            }
+            if($data['save_personal_data'] == 1){
+                $remarksData .= ', User wants to save his/her personal data';
+            }
+            if($data['time_to_remind_me'] == 'Remind before winter help text'){
+                $remarksData .= ', User wants to remind him before winter';
+            } else if($data['time_to_remind_me'] == 'Remind specific date help text'){
+                $remarksData .= ', User wants to remind him on specific date : '. $data['remind_me_later_date'];
+            }
+        }
+
 		return [
 			'first_name'     => $explodeName[0],
 			'last_name'      => isset( $explodeName[1] ) ? $explodeName[1] : ' ',
 			'phone'          => $data['phoneNumber'],
+            'email'          => $data['email'],
 			'call_at'        => $date . " " . trim( $explodeTime[0] ) . ":00",
 			'call_until'     => $date . " " . trim( $explodeTime[1] ) . ":00",
-			// statid data for now
-			'producttype_id' => 3,
-			'product_id'     => 4,
-			'supplier_id'    => 5,
-			'affiliate_id'   => 6,
-			'subject'        => 'Call me back lead',
-			'remarks'        => '',
-			'deal_closed'    => false
+			'producttype_id' => $data['producttype_id'],
+			'product_id'     => $data['product_id'],
+			'supplier_id'    => $data['supplier_id'],
+			'affiliate_id'   => 6, // need to change as it is static
+			'subject'        => 'Call me back lead', // need to change as it is static or custom
+			'remarks'        => $remarksData,
+			'deal_closed'    => false // need to change as it is static
 		];
 	}
 
