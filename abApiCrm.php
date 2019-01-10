@@ -93,7 +93,7 @@ class abApiCrm {
 				'jquery',
 				'jquery-bootstrap-typeahead',
 				'aanbieder_default_script'
-			), '2.2.0', true );
+			), '2.2.1', true );
 
 			wp_localize_script( 'crm-script-orders', 'site_obj',
 				array(
@@ -112,7 +112,8 @@ class abApiCrm {
 					'toolkit_api_key'                 => TOOLKIT_API_KEY,
 					'change_zip_trans'                => pll__( 'Change zip code' ),
 					'no_provider'                     => pll__( 'No Provider' ),
-					'trans_mth'                       => pll__('mth')
+					'trans_mth'                       => pll__('mth'),
+                    'trans_loading_dots'              => pll__('Loading...')
 				)
 			);
 		}

@@ -692,7 +692,7 @@ jQuery(document).ready(function ($) {
     //code to update cart
     $("body").on('change', '.update-price', function () {
         var allAttrs = '';
-        $('.newCostCalc').html('<div class="ajaxIconWrapper"><div class="ajaxIcon"><img src="'+site_obj.template_uri+'/images/common/icons/ajaxloader.png" alt="Loading..."></div></div>');
+        $('.newCostCalc').html('<div class="ajaxIconWrapper"><div class="ajaxIcon"><img src="'+site_obj.template_uri+'/images/common/icons/ajaxloader.png" alt="'+site_obj.trans_loading_dots+'"></div></div>');
         //getting all applicable variable's values to update the cart
         $('.update-price:not(.hidden):not(:radio):not(:checkbox):not(:disabled), ' +
             '.update-price:input:radio:checked:not(:disabled), ' +
