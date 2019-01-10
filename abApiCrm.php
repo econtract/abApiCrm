@@ -197,10 +197,10 @@ class abApiCrm {
 			'producttype_id' => $data['producttype_id'],
 			'product_id'     => $data['product_id'],
 			'supplier_id'    => $data['supplier_id'],
-			'affiliate_id'   => 6, // need to change as it is static
+			'affiliate_id'   => ( getLanguage() == 'nl') ? '1' : '4',
 			'subject'        => 'Call me back lead', // need to change as it is static or custom
 			'remarks'        => $remarksData,
-			'deal_closed'    => false // need to change as it is static
+			'deal_closed'    => false // will be true if this is triggered after a order has been succesfully placed. In most cases, this will be false.
 		];
 	}
 
