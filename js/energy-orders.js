@@ -62,7 +62,7 @@ function requiredFieldsFilledEnergy(inputForm) {
     }
 
     // Multi Phone validation
-    var multiPhone = inputForm.find(':input[type=tel]:not(:disabled)');
+    var multiPhone = inputForm.find(':input[type=tel]:not(:disabled):not(.optional)');
     if(multiPhone.length>0){
         multiPhone.each(function () {
             $this = jQuery(this);
@@ -72,6 +72,22 @@ function requiredFieldsFilledEnergy(inputForm) {
                 filled = false;
             }
         });
+    }
+
+    var optionalPhone = inputForm.find('input.optional[type=tel]');
+    if(optionalPhone.length>0 && optionalPhone.val()!= ''){
+        var countryData = optionalPhone.intlTelInput("getSelectedCountryData");
+        var thisData = '+'+countryData.dialCode + optionalPhone.val();
+        var hasFeedback = optionalPhone.closest('.has-feedback');
+        if(!libphonenumber.isValidNumber(thisData)){
+            filled = false;
+            hasFeedback.addClass('has-error has-danger');
+            hasFeedback.find('.with-errors').html('<ul class="list-unstyled"><li>' + optionalPhone.attr('data-error') +'</li></ul>');
+        }
+        else{
+            hasFeedback.removeClass('has-error has-danger');
+            hasFeedback.find('.with-errors').html('');
+        }
     }
 
     var radioGroup = inputForm.find('.requiredRadioGroup');
@@ -248,6 +264,10 @@ function fillEnergyFormDynamicData(targetContainer) {
                 }
             }
 
+            if( (input.hasClass('multi-phone optional') || input.hasClass('emailOptional')) && input.val() == ''){
+                return true;
+            }
+
             //check if its a fancyRadio option
             if(input.parents('.fancy-radio').length > 0) {
                 var actualText = input.parent().find('.actualText');
@@ -334,7 +354,10 @@ jQuery(document).ready(function ($) {
         multiPhone.on('keyup',function(){
             var countryData = $(this).intlTelInput("getSelectedCountryData");
             var thisData = '+'+countryData.dialCode + $(this).val();
-            if(libphonenumber.isValidNumber(thisData)){
+            if($(this).val() == '' && $(this).hasClass('optional')){
+                $('#'+$(this).attr('id')+'_hidden').val('');
+            }
+            else if(libphonenumber.isValidNumber(thisData)){
                 $('#'+$(this).attr('id')+'_hidden').val(thisData);
             }
         });
@@ -436,17 +459,17 @@ jQuery(document).ready(function ($) {
         }
 
         var _self = jQuery('input#leaving_customer_info'),
-            leavingCustomerCnt = jQuery('.leavingCustomerDetailsWrap'),
-            leavingFields = leavingCustomerCnt.find('input[type=text], input[type=email], input[type=tel]');
+            leavingCustomerCnt = jQuery('.leavingCustomerDetailsWrap');
+            //leavingFields = leavingCustomerCnt.find('input[type=text], input[type=email], input[type=tel]');
 
         if (jQuery('#' + id ).is(':checked') && id =='moving_address' && _self.is(':checked') ){
-            leavingFields.removeAttr('disabled');
-            leavingFields.attr('required', 'required');
+            //leavingFields.removeAttr('disabled');
+            //leavingFields.attr('required', 'required');
             leavingCustomerCnt.removeClass('hide');
         }
         else if (jQuery('#' + id ).is(':checked') && id !='moving_address' && ( _self.is(':checked') || !_self.is(':checked')) ) {
-            leavingFields.attr('disabled', true);
-            leavingFields.removeAttr('required', 'required');
+            //leavingFields.attr('disabled', true);
+            //leavingFields.removeAttr('required', 'required');
             leavingCustomerCnt.addClass('hide');
         }
 
@@ -802,16 +825,16 @@ jQuery(document).ready(function ($) {
 // Step 2 - Leaving Customer fields show hide
 function enableDisableLeavingCustomerFields(){
     var _self = jQuery('input#leaving_customer_info'),
-        leavingCustomerCnt = jQuery('.leavingCustomerDetailsWrap'),
-        leavingFields = leavingCustomerCnt.find('input[type=text], input[type=email], input[type=tel]');
+        leavingCustomerCnt = jQuery('.leavingCustomerDetailsWrap');
+        //leavingFields = leavingCustomerCnt.find('input[type=email], input[type=tel]');
 
     if(_self.is(':checked')){
-        leavingFields.removeAttr('disabled');
-        leavingFields.attr('required', 'required');
+       // leavingFields.removeAttr('disabled');
+        //leavingFields.attr('required', 'required');
         leavingCustomerCnt.removeClass('hide');
     } else {
-        leavingFields.attr('disabled', true);
-        leavingFields.removeAttr('required', 'required');
+       // leavingFields.attr('disabled', true);
+        //leavingFields.removeAttr('required', 'required');
         leavingCustomerCnt.addClass('hide');
     }
 }
