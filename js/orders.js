@@ -742,6 +742,8 @@ jQuery(document).ready(function ($) {
             '&trans_monthly_total_tooltip_txt=' + site_obj.trans_monthly_total_tooltip_txt +
             '&trans_ontime_costs=' + site_obj.trans_ontime_costs +
             '&trans_ontime_total=' + site_obj.trans_ontime_total +
+            '&trans_yearly_total=' + site_obj.trans_yearly_total +
+            '&trans_your_advantage=' + site_obj.trans_your_advantage +
             '&trans_mth='+site_obj.trans_mth;
 
         //appending remaining variables which are required to grab the updated cart
