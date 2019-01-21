@@ -37,13 +37,12 @@ class CreateOrder extends baseApi {
 
         $crmBaseUrl = $_SERVER['AB_CRM_URL'];
         $client = new \GuzzleHttp\Client(['base_uri' => $crmBaseUrl]);
-        $request = new Request('POST', '/api/orders');
 
         $data = $this->parameters;
-        $data[ 'crm_api_id' ] = AB_CRM_ID;
-        $data[ 'crm_api_key' ] = AB_CRM_KEY;
-        $request->setBody($data);
+        $data[ 'crm_api_id' ] = $_SERVER['AB_CRM_ID'];
+        $data[ 'crm_api_key' ] = $_SERVER['AB_CRM_KEY'];
 
+        $request = new Request('POST', '/api/orders',[], $data);
         $this->response = $client->send($request, ['timeout' => 2]);
 		#$this->response = $this->crmService->createOrder(  );
 
