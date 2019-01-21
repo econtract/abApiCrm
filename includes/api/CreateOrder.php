@@ -42,7 +42,12 @@ class CreateOrder extends baseApi {
         $data[ 'crm_api_id' ] = $_SERVER['AB_CRM_ID'];
         $data[ 'crm_api_key' ] = $_SERVER['AB_CRM_KEY'];
 
-        $request = new Request('POST', '/api/orders',[], $data);
+        $request = new Request(
+            'POST',
+            '/api/orders',
+            ['content-type' => 'application/json'],
+            json_encode($data)
+        );
         $this->response = $client->send($request, ['timeout' => 2]);
 		#$this->response = $this->crmService->createOrder(  );
 
