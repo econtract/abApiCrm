@@ -58,7 +58,7 @@ class CreateOrder extends baseApi {
 	 * @return mixed
 	 */
 	public function getResponse() {
-		return $this->response;
+		return $this->response->json();
 	}
 
 }
