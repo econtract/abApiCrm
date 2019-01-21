@@ -31,11 +31,11 @@ class CreateOrder extends baseApi {
 			$this->parameters = $params;
 		}
 
-        if(!defined(AB_CRM_URL)) {
-            throw new \Exception('Constant AB_CRM_URL is not defined');
+        if(!$_SERVER['AB_CRM_URL']) {
+            throw new \Exception('"AB_CRM_URL" is not defined');
         }
 
-        $crmBaseUrl = getenv( 'AB_CRM_URL' );
+        $crmBaseUrl = $_SERVER['AB_CRM_URL'];
         $client = new \GuzzleHttp\Client(['base_uri' => $crmBaseUrl]);
         $request = new Request('POST', '/api/orders');
 
