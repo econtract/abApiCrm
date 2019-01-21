@@ -590,9 +590,14 @@ jQuery(document).ready(function ($) {
         display: 'name',
         delay: 300,//will ensure that the request goes after 300 ms delay so that there are no multipe ajax calls while user is typing
         source: function (query, process) {
-            var zipCode = parseInt($('#location').val()); // aquiring zip code to be sent to toolbox api
+            var zipCode = ''; // aquiring zip code to be sent to toolbox api
             //console.log("Another ajax***");
             var current = $(document.activeElement);
+            if(current.attr('id') == 'invoice_street'){
+                zipCode = parseInt($('#invoice_postal_code').val());
+            } else {
+                zipCode = parseInt($('#location').val());
+            }
 
             /*if(current.val() == query) {//if field value and new query have same input don't send ajax request
                 console.log("Blocking new request*****");
