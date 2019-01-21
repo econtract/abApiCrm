@@ -93,7 +93,7 @@ class abApiCrm {
 				'jquery',
 				'jquery-bootstrap-typeahead',
 				'aanbieder_default_script'
-			), '2.2.2', true );
+			), '2.2.3', true );
 
 			wp_localize_script( 'crm-script-orders', 'site_obj',
 				array(
