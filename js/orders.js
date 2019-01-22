@@ -834,7 +834,7 @@ jQuery(document).ready(function ($) {
     }
 
     //Telecom step 2 on the basis of current internet provider display phone number
-    if(jQuery('.clientNumberCnt').length>0){
+    if(jQuery('.select_provider_content').length>0){
         clientNumberShowHide();
 
         jQuery('#select_provider').on('change',function(){
@@ -848,14 +848,13 @@ jQuery(document).ready(function ($) {
 //Telecom step 2 on the basis of current internet provider display phone number
 function clientNumberShowHide(){
     var elVal = jQuery('#select_provider').find('option:selected').val();
-    var clientContainer = jQuery('.clientNumberCnt');
-    var clientNumber = jQuery('#client_number');
+    var clientContainer = jQuery('.select_provider_content');
+    var inputField = clientContainer.find('input');
     if(elVal == '' || elVal == site_obj.no_provider){
-        clientNumber.attr('disabled',true);
+        inputField.val('');
         clientContainer.hide();
     }
     else{
-        clientNumber.removeAttr('disabled');
         clientContainer.show();
     }
 }
