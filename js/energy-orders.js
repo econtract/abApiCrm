@@ -859,7 +859,15 @@ function setAnnualConnectionDate($this, $connectDate, $hiddenFieldAnnualMeter, $
     if($this.val() <= currentMonth){
         currentYear = currentYear+1;
     }
-    result = $this.find('option:selected').text()+' '+currentYear;
+
+    var dontKnowSituation = jQuery('.dontKnowAnnualReading');
+    if($this.val() =="0"){
+        result = $this.find('option:selected').text();
+        dontKnowSituation.addClass('hide');
+    } else {
+        result = $this.find('option:selected').text()+' '+currentYear;
+        dontKnowSituation.removeClass('hide');
+    }
 
     if($this.val() ==""){
         $connectParent.hide();
