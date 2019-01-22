@@ -42,13 +42,7 @@ class CreateOrder extends baseApi {
         $data[ 'crm_api_id' ] = $_SERVER['AB_CRM_ID'];
         $data[ 'crm_api_key' ] = $_SERVER['AB_CRM_KEY'];
 
-        $request = new Request(
-            'POST',
-            '/api/orders',
-            ['content-type' => 'application/json'],
-            json_encode($data)
-        );
-        $this->response = $client->send($request, ['timeout' => 2]);
+        $this->response = $client->request('POST','/api/orders', ['body' => json_encode($data),'headers' => ['content-type' => 'application/json'] ]);
 		#$this->response = $this->crmService->createOrder(  );
 
 		return $this;
@@ -58,7 +52,7 @@ class CreateOrder extends baseApi {
 	 * @return mixed
 	 */
 	public function getResponse() {
-		return $this->response->json();
+		return $this->response;
 	}
 
 }
