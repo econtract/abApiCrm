@@ -517,11 +517,12 @@ jQuery(document).ready(function ($) {
     //Order steps, for the forms that are without array called as simple forms,
     //this means that the input variables are not this way e.g. form_input[], or form_input['order'][] etc
     $("body").on('submit', '.energy-order-simple-form', function (e) {
-        e.preventDefault();
-        var self = $(this);
         var inputForm = $(this);
+        if(!inputForm.hasClass('enery-order-step5-class')) {
+            e.preventDefault();
+        }
+        var self = $(this);
         var formInputs = $(inputForm).serialize() + '&action=saveSimpleOrderEnergy&' + $('#orderCommon').serialize();
-
         var filled = requiredFieldsFilledEnergy(inputForm);
 
         if (filled === false) {
