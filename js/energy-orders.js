@@ -709,7 +709,7 @@ jQuery(document).ready(function ($) {
             else if($(current).attr('id') == "leaving_address"){
                 zipCode = parseInt($('#leaving_location').val());
             }
-            var ajaxUrl = orders_obj_energy.toolkit_api_url + 'streets?postcode=' + zipCode + '&toolbox_key=' + orders_obj_energy.toolkit_api_key; // url changed to get cities data direct from toolbox api
+            var ajaxUrl = orders_obj_energy.toolkit_api_url + 'streets?postcode=' + zipCode + '&toolbox_key=' + orders_obj_energy.toolkit_api_key+'&name='+ current.val(); // url changed to get cities data direct from toolbox api
             return $.get(ajaxUrl, function (data) {
                 try { // if data is json object
                     var jsonData = JSON.parse(data);

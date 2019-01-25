@@ -619,7 +619,7 @@ jQuery(document).ready(function ($) {
             // console.log("current***", current);
 
             //old url => var ajaxUrl = site_obj.ajax_url + '?action=ajaxQueryToolboxApi&query_method=' + current.attr('query_method') + "&query_params[" + current.attr('query_key') + "]=" + query;
-            var ajaxUrl = site_obj.toolkit_api_url + 'streets?postcode=' + zipCode + '&toolbox_key=' + site_obj.toolkit_api_key; // url changed to get cities data direct from toolbox api
+            var ajaxUrl = site_obj.toolkit_api_url + 'streets?postcode=' + zipCode + '&toolbox_key=' + site_obj.toolkit_api_key +'&name='+ current.val(); // url changed to get cities data direct from toolbox api
 
             /** Old code commented out in order to get data from toolbox api directly **/
             /*
