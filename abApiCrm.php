@@ -103,7 +103,7 @@ class abApiCrm {
 				'jquery',
 				'jquery-bootstrap-typeahead',
 				'aanbieder_default_script'
-			), '2.2.4', true );
+			), '2.2.5', true );
 
 			wp_localize_script( 'crm-script-orders', 'site_obj',
 				array(
@@ -125,7 +125,9 @@ class abApiCrm {
 					'trans_mth'                       => pll__('mth'),
                     'trans_loading_dots'              => pll__('Loading...'),
                     'trans_yearly_total'              => pll__( 'Year profit' ),
-                    'trans_your_advantage'            => pll__( 'Your advantage' )
+                    'trans_your_advantage'            => pll__( 'Your advantage' ),
+                    'trans_nationality_be_tooltip'    => pll__('Your Belgium ID card Number'),
+                    'trans_nationality_other_tooltip' => pll__('Your Other ID card Number')
 				)
 			);
 		}
