@@ -1,5 +1,87 @@
+var sectionEditTriggered = false;
+
+function formatMoney(amount, decimalCount = 2, decimal = ".", thousands = ",") {
+    try {
+        decimalCount = Math.abs(decimalCount);
+        decimalCount = isNaN(decimalCount) ? 2 : decimalCount;
+
+        const negativeSign = amount < 0 ? "-" : "";
+
+        let i = parseInt(amount = Math.abs(Number(amount) || 0).toFixed(decimalCount)).toString();
+        let j = (i.length > 3) ? i.length % 3 : 0;
+
+        return negativeSign + (j ? i.substr(0, j) + thousands : '') + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thousands) + (decimalCount ? decimal + Math.abs(amount - i).toFixed(decimalCount).slice(2) : "");
+    } catch (e) {
+        console.log(e)
+    }
+}
+
+function formatPrice(price, numDecimals = 2, preFix = "")
+{
+    //check if the digits already has comma instead of dot
+    if(_.includes(price.toString(), ',')) {
+        price = price.toString().replace(',', '.');
+    }
+
+    // Set thousand separator to ., and decimal separator to a ,
+    number = formatMoney(price, numDecimals, ',', '.');
+
+    // remove trailing ,00 from a price
+    price = preFix + number + "";
+
+    return price;
+}
+
+function formatPriceInParts(price, numDecimals = 2) {
+    price = formatPrice(price, numDecimals, '');
+    priceArr = price.toString().split(',');
+
+    if (!_.isEmpty(priceArr[1]) || priceArr[1].length == 0) {
+        priceArr[1] = '00';
+    }
+    else if(strlen(priceArr[1]) == 1)
+    {
+        priceArr[1] = '0'.priceArr[1];
+    }
+
+    return [priceArr[0], priceArr[1]];
+}
+
+function applyDiyPriceOnPbs(diyPrice) {
+    if(!_.isEmpty(jQuery('.newCostCalc')) && !_.isEmpty(diyPrice.toString())) {
+        //apply if further conditions are matched
+        //No need to apply if both prices are same
+        var instTarget = jQuery('.ident-inst .ident-applied-price');
+        var oneTimeTotalRarget = jQuery('.ident-onetime-total');
+
+        var appliedPrice = instTarget.attr('applied-price');
+        if(diyPrice != appliedPrice) {
+            var diyPriceInParts = formatPriceInParts(diyPrice);
+            //console.log('diyPriceInParts***', diyPriceInParts);
+            instTarget.find('.amount').text(diyPriceInParts[0]);
+            instTarget.find('.cents').text(diyPriceInParts[1]);
+
+            var diffPrice = appliedPrice - diyPrice;//to subtruct from total
+            //console.log('diffPrice***', diffPrice);
+            var oneTimeTotal = oneTimeTotalRarget.attr('onetime-total');
+            //console.log('oneTimeTotal', oneTimeTotal);
+            var oneTimeTotalDiff = oneTimeTotal - diffPrice;
+            //console.log('oneTimeTotalDiff', oneTimeTotalDiff);
+            var diffOnetimeInParts = formatPriceInParts(oneTimeTotalDiff);
+            //console.log('diffOnetimeInParts***', diffOnetimeInParts);
+            //console.log('diffOnetimeInParts[0]', diffOnetimeInParts[0]);
+            oneTimeTotalRarget.find('.amount').text(diffOnetimeInParts[0]);
+            oneTimeTotalRarget.find('.cents').text(diffOnetimeInParts[1]);
+        }
+    }
+}
+
 function requiredFieldsFilled(inputForm) {
     var filled = true;
+    if ((inputForm.attr('id') == "mc4wp-form-1") || inputForm.hasClass('mc4wp-form') || inputForm.data('name') == "Newsletter Subscription"){
+        return true;
+    }
+
     //check all required fields if they are filled submit the form
     inputForm.find(':input[required]:not(:radio):not(:checkbox):not(:disabled):not([type=hidden]), ' +
         ':input[required]:radio:checked:not(:disabled), :input[required]:checkbox:checked:not(:disabled), select[required]:not(:disabled), ' +
@@ -21,10 +103,63 @@ function requiredFieldsFilled(inputForm) {
         }
 
         if (_.isEmpty(reqField.val())) {
-            /*console.log(reqField.text(), reqField.attr('name'), "====>", reqField.val());*/
+            //console.log(reqField.text(), reqField.attr('name'), "====>", reqField.val());
             filled = false;
         }
+
     });
+
+    // Multi Phone validation
+    var multiPhone = inputForm.find(':input[type=tel]:not(:disabled)');
+    if(multiPhone.length>0){
+        multiPhone.each(function () {
+            $this = jQuery(this);
+            var countryData = $this.intlTelInput("getSelectedCountryData");
+            var thisData = '+'+countryData.dialCode + $this.val();
+            if(!libphonenumber.isValidNumber(thisData)){
+                filled = false;
+            }
+        });
+    }
+
+    if(inputForm.hasClass('simple-form-radio-checkbox')){
+        var allElements = inputForm.find(':input[required]:radio:not(:disabled), :input[required]:checkbox:not(:disabled)');
+        allElements.each(function(){
+            if(jQuery(':'+jQuery(this).attr('type')+'[name='+jQuery(this).attr('name')+']:checked').length == 0)
+            {
+                filled = false;
+            }
+        });
+    }
+
+    var radioGroup = inputForm.find('.requiredRadioGroup');
+    if(radioGroup.length>0) {
+        radioGroup.each(function () {
+            if(jQuery(this).find('input:disabled').length == 0){
+                if (jQuery(this).find('input:checked').length == 0) {
+                    if (!jQuery(this).parents('li').hasClass('hide')) {
+                        filled = false;
+                    }
+                }
+            }
+        });
+    }
+
+    var moveDate = inputForm.find('#move_date');
+    if(moveDate.length>0){
+        var fill = customValidateDateField(moveDate);
+        if(!fill){
+            filled =  false;
+        }
+    }
+
+    if (filled === true) {
+        inputForm.find('input[type=submit]').removeClass('disabled');
+        inputForm.find('.next-step-btn a, .btnWrapper a.btn').removeClass('disabled');
+    } else {
+        inputForm.find('.next-step-btn a, .btnWrapper a.btn').addClass('disabled');
+        inputForm.find('input[type=submit]').addClass('disabled');
+    }
 
     return filled;
 }
@@ -127,12 +262,17 @@ function submitValidValuesWrapper(inputForm, activeLinkHash) {
 
 //The following code will make sure if someone comes back from confirmation step for editing data he see that portion in edit mode instead of summary
 function triggerSectionEdit() {
+    if(sectionEditTriggered === true) {
+        return true;
+    }
+
     var url = window.location.href;
     var urlArr = url.split('#');
     if(urlArr.length === 2) {
         var editSection = urlArr[1];
         var targetEditLink = jQuery('#'+editSection).find('a.edit-data');
         if(targetEditLink) {
+            sectionEditTriggered = true;
             targetEditLink.trigger('click');
             return true;
         }
@@ -149,71 +289,47 @@ function initAvailabilityToggle(){
     });
 }
 
+function updateOnInstallationSituation($this){
+    var moveDateSection = jQuery('#move_date_section'),
+        moveDate = moveDateSection.find('#move_date'),
+        parentForm = moveDateSection.parents('form');
+    if(moveDateSection.length>0 && moveDate.length>0){
+        if($this.val() == 2){
+            moveDate.removeAttr('disabled');
+            moveDateSection.removeClass('hidden');
+        }
+        else{
+            moveDate.attr('disabled',true);
+            moveDateSection.addClass('hidden');
+            moveDate.val('');
+        }
+    }
+}
+
 jQuery(document).ready(function ($) {
     var activeLink = location.pathname;
     var activeLinkHash = activeLink.split('/').join('-')+'-last-active-form-id';
-
-    $("body").on('submit', '#ModalCheckAvailability form', function (e) {
-
-        e.preventDefault();
-        // get all the inputs into an array.
-        var inputs = $(this).serialize();
-        var data = {
-            'action': 'checkAvailability',
-        };
-
-        $('#ModalCheckAvailability').find('.modal-body').prepend('<div class="ajaxIconWrapper" style="margin:0; padding-top:0; padding-bottom:0;"><div class="ajaxIcon"><img src="'+site_obj.template_uri+'/images/common/icons/ajaxloader.png" alt="Loading..."></div></div>');
-
-        // We can also pass the url value separately from ajaxurl for front end AJAX implementations
-        $.get(site_obj.ajax_url + '?' + inputs, data, function (response) {
-            var html;
-            //Remove any existing messages success/errors
-            $('#ModalCheckAvailability .alert').remove();
-            $('#ModalCheckAvailability .contact-lnk').remove();
-            $('#ModalCheckAvailability .modal-list').remove();
-            $('#ModalCheckAvailability .content-error').remove();
-            $('#ModalCheckAvailability .ajaxIconWrapper').remove();
-            var jsonRes = false;
-            if (response.length > 0) {
-                jsonRes = JSON.parse(response);
-                $("#checkAvailabilityForm").toggle();
-                $('#ModalCheckAvailability .desc').toggle();
-                if (jsonRes.available == false) {
-                    html = '<div class="alert alert-danger">' +
-                        '<p>' + jsonRes.msg + '</p>' +
-                        '<a href="#change-zip" onclick="jQuery(\'#checkAvailabilityForm\').toggle();jQuery(\'#ModalCheckAvailability .desc\').toggle();jQuery(\'#ModalCheckAvailability .content-error\').toggle();jQuery(\'#ModalCheckAvailability .contact-lnk\').toggle();jQuery(\'#ModalCheckAvailability  .alert.alert-danger\').toggle();">(' + site_obj.change_zip_trans + ')</a>' +
-                        '</div>';
-                    //html += '<a href="'+site_obj.contact_uri+'" class="modal-btm-link contact-lnk"><i class="fa fa-angle-right"></i> '+site_obj.contact_trans+'</a>';
-                    html += jsonRes.html;//append any HTML returned by AJAX response this includes form and submit button
-                }
-                else if (jsonRes.available == true) {
-                    html = '<div class="alert alert-success">' +
-                        '<p>' + jsonRes.msg + '</p>' +
-                        '<a href="#change-zip" onclick="jQuery(\'#ModalCheckAvailability form\').toggle();jQuery(\'#ModalCheckAvailability .desc\').toggle();jQuery(\'#ModalCheckAvailability .modal-list\').toggle();jQuery(\'#ModalCheckAvailability  .alert.alert-success\').toggle();">(' + site_obj.change_zip_trans + ')</a>' +
-                        '</div>';
-                    html += jsonRes.html;//append any HTML returned by AJAX response this includes form and submit button
-
-                } else {
-                    html = '<div class="alert alert-danger">' +
-                        '<p>' + jsonRes.api_resp_trans + '</p>' +
-                        '</div>';
-                }
-            } else {
-                html = '<div class="alert alert-danger">' +
-                    '<p>' + jsonRes.api_resp_trans + '</p>' +
-                    '</div>';
-            }
-            hideAlertMessages();
-            $('#ModalCheckAvailability .modal-body').append(html);
-            initAvailabilityToggle();
-        });
-    });
 
     $("#select_provider").on('change', function () {
         var changedProviderObj = $(this).find('option:selected');
         var changedProviderTxt = $(changedProviderObj).text();
         var changedProviderVal = $(changedProviderObj).val();
     });
+
+    //Multiphone value update to its hidden field on keyup
+    var multiPhone = jQuery(':input[type=tel]:not(:disabled)');
+    if(multiPhone.length>0){
+        $('body').on('keyup', multiPhone ,function(e){
+            if(jQuery('#'+e.target.id).hasClass('multi-phone')){
+                var $this = jQuery('#'+e.target.id);
+                var countryData = $this.intlTelInput("getSelectedCountryData");
+                var thisData = '+'+countryData.dialCode + $this.val();
+                if(libphonenumber.isValidNumber(thisData)){
+                    $('#'+$this.attr('id')+'_hidden').val(thisData);
+                }
+            }
+        });
+    }
 
     //Order steps, for the forms that are without array called as simple forms,
     //this means that the input variables are not this way e.g. form_input[], or form_input['order'][] etc
@@ -311,8 +427,8 @@ jQuery(document).ready(function ($) {
         enableDisableFormNextStep($('.form-nextstep a.btn-default'));
     });
 
-    $('.form-nextstep .btn-default').on('mouseover', function(e) {
-        enableDisableFormNextStep($(this));
+    $('.form-nextstep').on('mouseover', function(e) {
+        enableDisableFormNextStep($(this).find('.btn'));
     });
 
     //on changing mobile product set other required variables
@@ -354,6 +470,7 @@ jQuery(document).ready(function ($) {
             //reset its value to empty so that it may not get submitted
         }
 
+        targetForm.validator('destroy');
         targetForm.validator('update');
         /*mobileDonorNr.trigger('input');*/
     });
@@ -431,6 +548,7 @@ jQuery(document).ready(function ($) {
             $('#iban').parents('li').addClass('hidden');
             $('#iban').attr('disabled', true);
         }
+        selectedField.parents('form').validator('destroy');
         selectedField.parents('form').validator('update');
     });
 
@@ -438,55 +556,73 @@ jQuery(document).ready(function ($) {
         $(this).attr('required', true);
     });
 
-    $("input[name=client_nationality]").on('change', function() {
-        var nat = $(this).val();
-        var natParent = $('#client_idnr').parents('div.form-group');
-        var prevIdnrVal = $('#client_idnr').val();
-
-        if(nat == 'BE') {
-            $('#client_idnr').remove();
-            natParent.prepend('<input type="text" class="form-control hasMask" ' +
-                'id="client_idnr" name="client_idnr" placeholder="591-0123456-78" data-idcard=""' +
-                'value="' + prevIdnrVal + '" data-error="' + site_obj.idcard_error + '" required>');
-            // $('#client_idnr').addClass('hasMask');
-            //$('#client_idnr').attr('data-mask', '999-9999999-99');
-            $('#client_idnr').mask("999-9999999-99");
-        } else {
-            $('#client_idnr').remove();//Removing because unmask doesn't work well, as all of unmasking methods don't work reliably
-            /*$('#client_idnr').removeClass('hasMask');
-            $('#client_idnr').removeAttr('data-mask');
-            $('#client_idnr').mask();
-            $('#client_idnr').unmask("999-9999999-99");
-            $('#client_idnr').unmask();
-            $('#client_idnr').trigger("unmask");
-
-            $('#client_idnr').trigger('unmask.bs.inputmask');*/
-
-            natParent.prepend('<input type="text" class="form-control" ' +
-                'id="client_idnr" name="client_idnr" placeholder="" ' +
-                'value="" data-error="' + site_obj.idcard_error + '" required>');
-            //console.log(natParent);
+    if($('#client_idnr').length > 0) {
+        if($("input[name=client_nationality]").val() == 'BE'){
+            $('#client_idnr').parent().find('[data-toggle=tooltip]').attr('data-original-title','<p>'+ site_obj.trans_nationality_be_tooltip +'</p>');
         }
+        else {
+            $('#client_idnr').parent().find('[data-toggle=tooltip]').attr('data-original-title','<p>'+ site_obj.trans_nationality_other_tooltip +'</p>');
+        }
+
+    }
+
+    $("input[name=client_nationality]").on('change', function(e) {
+        e.stopPropagation();
+        if($('#client_idnr').length > 0) {
+            var idcardEl = $('#client_idnr'),
+                nat = $(this).val();
+            var natParent = $('#client_idnr').parents('div.form-group');
+            var prevIdnrVal = $('#client_idnr').val();
+            idcardEl.val('');
+
+            if (nat == 'BE') {
+                idcardEl.remove();
+                natParent.prepend('<input type="text" class="form-control telecom-order4-idcard" ' +
+                    'id="client_idnr" name="client_idnr" placeholder="591-0123456-78" data-idcard=""' +
+                    'value="' + prevIdnrVal + '" data-error="' + site_obj.idcard_error + '" required>');
+                idcardEl.mask("000-0000000-00");
+                natParent.find('[data-toggle=tooltip]').attr('data-original-title','<p>BE title</p>');
+                natParent.find('[data-toggle=tooltip]').attr('data-original-title','<p>'+ site_obj.trans_nationality_be_tooltip +'</p>');
+            } else {
+                idcardEl.remove();//Removing because unmask doesn't work well, as all of unmasking methods don't work reliably
+                natParent.prepend('<input type="text" class="form-control" ' +
+                    'id="client_idnr" name="client_idnr" placeholder="" ' +
+                    'value="" data-error="' + site_obj.idcard_error + '" required>');
+                idcardEl.unmask();
+                natParent.find('[data-toggle=tooltip]').attr('data-original-title','<p>'+ site_obj.trans_nationality_other_tooltip +'</p>');
+            }
+        }
+        $(this).parents('form').validator('destroy');
         $(this).parents('form').validator('update');
     });
 
     //autocomplete
+    //on September 14, 2018 - the funcationlity has been implemented to fetch data directly from Toolbox API.
     $('#personal_info_form .typeahead.complex-typeahead').typeahead({//only apply to complex typeaheads the zipcode one is same across whole site.
         name: 'id',
         display: 'name',
         delay: 300,//will ensure that the request goes after 300 ms delay so that there are no multipe ajax calls while user is typing
         source: function (query, process) {
+            var zipCode = ''; // aquiring zip code to be sent to toolbox api
             //console.log("Another ajax***");
             var current = $(document.activeElement);
+            if(current.attr('id') == 'invoice_street'){
+                zipCode = parseInt($('#invoice_postal_code').val());
+            } else {
+                zipCode = parseInt($('#location').val());
+            }
 
             /*if(current.val() == query) {//if field value and new query have same input don't send ajax request
                 console.log("Blocking new request*****");
                 return false;
             }*/
-            console.log("current***", current);
-            var ajaxUrl = site_obj.ajax_url + '?action=ajaxQueryToolboxApi&query_method=' + current.attr('query_method') +
-                "&query_params[" + current.attr('query_key') + "]=" + query;
+            // console.log("current***", current);
 
+            //old url => var ajaxUrl = site_obj.ajax_url + '?action=ajaxQueryToolboxApi&query_method=' + current.attr('query_method') + "&query_params[" + current.attr('query_key') + "]=" + query;
+            var ajaxUrl = site_obj.toolkit_api_url + 'streets?postcode=' + zipCode + '&toolbox_key=' + site_obj.toolkit_api_key +'&name='+ current.val(); // url changed to get cities data direct from toolbox api
+
+            /** Old code commented out in order to get data from toolbox api directly **/
+            /*
             //check if there are any parent params to be included
             var extraQueryParams = '';
             if(!_.isEmpty(current.attr('parent_query_key1'))) {
@@ -497,17 +633,21 @@ jQuery(document).ready(function ($) {
                 }
                 extraQueryParams += '&query_params[' + current.attr('parent_query_key1') + ']=' + extraFirstVal;
             }
-
             if(!_.isEmpty(current.attr('parent_query_key2'))) {
                 extraQueryParams += '&query_params[' + current.attr('parent_query_key2') + ']=' +
                     $('#' + current.attr('parent_query_key2_id')).val();
             }
-
             ajaxUrl += extraQueryParams;
+            */
+            /** Old code commented out in order to get data from toolbox api directly **/
 
             return $.get(ajaxUrl, function (data) {
-                var jsonData = JSON.parse(data);
-
+                try { // if data is json object
+                    var jsonData = JSON.parse(data);
+                }
+                catch (error){ // if data is already json
+                    var jsonData = data;
+                }
                 /**
                  * Preparing data in following format
                  * [
@@ -570,7 +710,7 @@ jQuery(document).ready(function ($) {
     //code to update cart
     $("body").on('change', '.update-price', function () {
         var allAttrs = '';
-        $('.newCostCalc').html('<div class="ajaxIconWrapper"><div class="ajaxIcon"><img src="'+site_obj.template_uri+'/images/common/icons/ajaxloader.png" alt="Loading..."></div></div>');
+        $('.newCostCalc').html('<div class="ajaxIconWrapper"><div class="ajaxIcon"><img src="'+site_obj.template_uri+'/images/common/icons/ajaxloader.png" alt="'+site_obj.trans_loading_dots+'"></div></div>');
         //getting all applicable variable's values to update the cart
         $('.update-price:not(.hidden):not(:radio):not(:checkbox):not(:disabled), ' +
             '.update-price:input:radio:checked:not(:disabled), ' +
@@ -607,11 +747,28 @@ jQuery(document).ready(function ($) {
 
             allAttrs += attrName + '=' + attrVal;
         });
+        //if diy is checked include its price as well
+        if($('#by_diy').is(':checked')) {
+            allAttrs += '&tmp_diy_inst_price='+$('#tmp_diy_inst_price').val();
+        }
+
+        var transLabelsUri = '';
+
+        transLabelsUri = 'trans_monthly_cost=' + site_obj.trans_monthly_cost +
+            '&trans_monthly_total=' + site_obj.trans_monthly_total +
+            '&trans_first_month=' + site_obj.trans_first_month +
+            '&trans_monthly_total_tooltip_txt=' + site_obj.trans_monthly_total_tooltip_txt +
+            '&trans_ontime_costs=' + site_obj.trans_ontime_costs +
+            '&trans_ontime_total=' + site_obj.trans_ontime_total +
+            '&trans_yearly_total=' + site_obj.trans_yearly_total +
+            '&trans_your_advantage=' + site_obj.trans_your_advantage +
+            '&trans_mth='+site_obj.trans_mth;
 
         //appending remaining variables which are required to grab the updated cart
         allAttrs += '&prt=' + $('#prt').val();
         allAttrs += '&pid=' + $('#pid').val();
-        allAttrs += '&action=ajaxProductPriceBreakdownHtml';
+        allAttrs += '&lang='+site_obj.lang;
+        allAttrs += '&'+transLabelsUri;
 
         //data is now ready time to send an AJAX request
         /*$.post(site_obj.ajax_url, allAttrs, function (response) {
@@ -620,7 +777,7 @@ jQuery(document).ready(function ($) {
 
         pbsAjaxCall = $.ajax({
             type: 'POST',
-            url: site_obj.ajax_url,
+            url: site_obj.site_url+'/api/?action=ajaxProductPriceBreakdownHtml&load=product',
             data: allAttrs,
             beforeSend : function() {
                 if(pbsAjaxCall != null) {
@@ -629,6 +786,10 @@ jQuery(document).ready(function ($) {
             },
             success: function (response) {
                 $('.newCostCalc').replaceWith(response);
+                //Time to fix DIY price problem, TODO remove it once DIY problem is fixed in PBS API
+                if($('#by_diy').is(':checked')) {
+                    applyDiyPriceOnPbs($('#tmp_diy_inst_price').val());
+                }
             },
             dataType: 'text',//handle response as raw text without validating :)
             async:true//do not block coming calls
@@ -671,4 +832,114 @@ jQuery(document).ready(function ($) {
 
     //The following code will make sure if someone comes back from confirmation step for editing data he see that portion in edit mode instead of summary
     triggerSectionEdit();
+
+    if(!_.isEmpty($('.newCostCalc')) && !_.isEmpty($('#diy_inst_price')) && !_.isEmpty($('.diy-requested'))) {
+        applyDiyPriceOnPbs($('#diy_inst_price').val());
+    }
+
+
+
+    //TELECOME Step 4 Move date section validation and show hide
+    if(jQuery('#move_date').length>0 && jQuery('#move_date_section').length>0){
+        $('input[name=situation]').on('change',function(){
+            updateOnInstallationSituation(jQuery(this));
+        });
+    }
+
+    //Telecom step 2 on the basis of current internet provider display phone number
+    if(jQuery('.select_provider_content').length>0){
+        clientNumberShowHide();
+
+        jQuery('#select_provider').on('change',function(){
+            clientNumberShowHide();
+        });
+
+    }
+
+});//Ready Ends
+
+//Telecom step 2 on the basis of current internet provider display phone number
+function clientNumberShowHide(){
+    var elVal = jQuery('#select_provider').find('option:selected').val();
+    var clientContainer = jQuery('.select_provider_content');
+    var inputField = clientContainer.find('input');
+    if(elVal == '' || elVal == site_obj.no_provider){
+        inputField.val('');
+        clientContainer.hide();
+    }
+    else{
+        clientContainer.show();
+    }
+}
+
+//TELECOME Step 4 Move date section validation and show hide - Core Function
+function customValidateDateField(moveDate){
+    var hasFeedback = moveDate.parents('.has-feedback'),
+        iconSpan = hasFeedback.find('.form-control-feedback'),
+        parentForm = moveDate.parents('form'),
+        blockWithErrors = hasFeedback.find('.help-block.with-errors'),
+        errorMsg = '',
+        html ='',
+        value = moveDate.val();
+
+    function errorMessage(type){
+        if(type == 'show'){
+            errorMsg = moveDate.data('error');
+            html = '<ul class="list-unstyled"><li>'+ errorMsg +'</li></ul></div>';
+            hasFeedback.removeClass('has-success').addClass('has-error has-danger');
+            iconSpan.removeClass('glyphicon-ok').addClass('glyphicon-remove');
+            blockWithErrors.html(html);
+        }
+    }
+    if(!moveDate.is(':disabled')){
+        if(value.length === 10){
+            var valParts = value.split('/');
+            if(valParts[0] == "00" || valParts[1] == "00") {
+                errorMessage('show');
+                return false;
+            }
+            var dateObj = new Date(valParts[2], valParts[1] - 1, valParts[0],0,0,0,0),
+                minDate = new Date(),
+                maxDate = new Date();
+
+            minDate.setMonth(minDate.getMonth()-1);
+            maxDate.setMonth(maxDate.getMonth() + 6);
+            minDate.setHours(0,0,0,0);
+            maxDate.setHours(0,0,0,0);
+
+            if(dateObj < minDate || dateObj > maxDate){
+                errorMessage('show');
+                return false;
+            }
+            else{
+                errorMsg = '';
+                hasFeedback.removeClass('has-error has-danger').addClass('has-success');
+                iconSpan.removeClass('glyphicon-remove').addClass('glyphicon-ok');
+                blockWithErrors.html('');
+                return true;
+            }
+        }
+        else {
+            errorMsg = moveDate.data('error');
+            html = '<ul class="list-unstyled"><li>'+ errorMsg +'</li></ul></div>';
+            hasFeedback.removeClass('has-success').addClass('has-error has-danger');
+            iconSpan.removeClass('glyphicon-ok').addClass('glyphicon-remove');
+            blockWithErrors.html(html);
+            return false;
+        }
+
+    }
+    else{
+        errorMsg = '';
+        hasFeedback.removeClass('has-error has-danger has-success');
+        iconSpan.removeClass('glyphicon-remove glyphicon-ok');
+        blockWithErrors.html('');
+        return true;
+    }
+
+}//customValidateDateField Ends
+
+
+jQuery(window).on('load', function(){
+    enableDisableFormNextStep(jQuery('.form-nextstep .btn-default'));
 });

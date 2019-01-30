@@ -9,11 +9,29 @@
 
 namespace abApiCrm;
 
+use AnbApiClient\Aanbieders;
 use abApiCrm\includes\controller\callMeBackLeadController;
 use abApiCrm\includes\controller\CreateOrderController;
 
 if ( ! defined( 'AP_ABI_CRM_DIR' ) ) {
 	define( 'AP_ABI_CRM_DIR', ABSPATH . '../../' );
+}
+
+if(!function_exists('getLanguage')) {
+	function getLanguage() {
+		$locale = function_exists('pll_current_language') ? pll_current_language() : Locale::getPrimaryLanguage(get_locale());
+
+		return $locale;
+	}
+}
+
+if(!function_exists('getUriSegment')) {
+	function getUriSegment($n)
+	{
+		$segment = explode("/", parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
+
+		return count($segment) > 0 && count($segment) >= ($n - 1) ? $segment[$n] : '';
+	}
 }
 
 class abApiCrm {
@@ -38,10 +56,22 @@ class abApiCrm {
      */
     protected $createFullOrderResponse;
 
+    public $sector;
+
+    public $anbApi;
+
+    public $apiConf = [
+        'staging'  => ANB_API_STAGING,
+        'key'      => ANB_API_KEY,
+        'secret'   => ANB_API_SECRET
+    ];
 
 	public function __construct() {
+		$this->sector = getUriSegment(1);
 		//enqueue JS scripts
 		add_action( 'init', array( $this, 'enqueueScripts' ) );
+
+        $this->anbApi = new Aanbieders ($this->apiConf);
 
 	}
 
@@ -50,17 +80,10 @@ class abApiCrm {
 	 */
 	function enqueueScripts() {
 
-		wp_enqueue_script( 'crm-script-callMeBack', plugins_url( '/js/callMeBack.js', __FILE__ ), array( 'jquery', 'aanbieder_bootstrap_validate' ), '1.0.3', true );
-		wp_enqueue_script( 'utils');
-		wp_enqueue_script( 'crm-script-orders', plugins_url( '/js/orders.js', __FILE__ ), array(
-			'jquery',
-			'jquery-bootstrap-typeahead',
-			'aanbieder_default_script'
-		), '1.9.1', true );
-
+		wp_enqueue_script( 'crm-script-callMeBack', plugins_url( '/js/callMeBack.js', __FILE__ ), array( 'jquery', 'aanbieder_bootstrap_validate' ), '1.0.9', true );
 		// in JavaScript, object properties are accessed as ajax_object.ajax_url, ajax_object.we_value
 		//The object will be created before including callMeBack.js so its sufficient for orders.js too, there is no need to include it again
-		wp_localize_script( 'crm-script-callMeBack', 'site_obj',
+		wp_localize_script( 'crm-script-callMeBack', 'callmeback_obj',
 			array(
 				'ajax_url'          => admin_url( 'admin-ajax.php' ),
 				'contact_uri'       => "/" . pll__( 'contact' ),
@@ -68,28 +91,75 @@ class abApiCrm {
 				'change_zip_trans'  => pll__( 'Change zip code' ),
 				'api_resp_trans'    => pll__( 'Something went wrong as API is not responding!' ),
 				'req_fields_filled' => pll__( 'Make sure all required fields are filled' ),
-				'idcard_error'      => pll__('Please enter your ID card number'),
+				'idcard_error'      => pll__( 'Please enter your ID card number' ),
 				'template_uri'      => get_template_directory_uri()
 			)
 		);
+
+		wp_enqueue_script( 'utils');
+
+		if($this->sector == pll__('telecom')) {
+			wp_enqueue_script( 'crm-script-orders', plugins_url( '/js/orders.js', __FILE__ ), array(
+				'jquery',
+				'jquery-bootstrap-typeahead',
+				'aanbieder_default_script'
+			), '2.2.6', true );
+
+			wp_localize_script( 'crm-script-orders', 'site_obj',
+				array(
+					'ajax_url'                        => admin_url( 'admin-ajax.php' ),
+					'site_url'                        => pll_home_url(),
+					'lang'                            => getLanguage(),
+					'trans_monthly_cost'              => pll__( 'Monthly costs' ),
+					'trans_monthly_total'             => pll__( 'Monthly total' ),
+					'trans_first_month'               => pll__( 'First month' ),
+					'trans_monthly_total_tooltip_txt' => pll__( 'PBS: Monthly total tooltip text' ),
+					'trans_ontime_costs'              => pll__( 'One-time costs' ),
+					'trans_ontime_total'              => pll__( 'One-time total' ),
+					'template_uri'                    => get_template_directory_uri(),
+					'idcard_error'                    => pll__('Please enter valid ID card number'),
+					'toolkit_api_url'                 => TOOLKIT_API_URL,
+					'toolkit_api_key'                 => TOOLKIT_API_KEY,
+					'change_zip_trans'                => pll__( 'Change zip code' ),
+					'no_provider'                     => pll__( 'No Provider' ),
+					'trans_mth'                       => pll__('mth'),
+                    'trans_loading_dots'              => pll__('Loading...'),
+                    'trans_yearly_total'              => pll__( 'Year profit' ),
+                    'trans_your_advantage'            => pll__( 'Your advantage' ),
+                    'trans_nationality_be_tooltip'    => pll__('Your Belgium ID card Number'),
+                    'trans_nationality_other_tooltip' => pll__('Your Other ID card Number')
+				)
+			);
+		}
 	}
 
     /**
      * @return bool
      */
 	public function callMeBack() {
-		$params = $this->prepareParametersCallMeBack( $_REQUEST['userInput'] );
 
-		$this->callMeBack = new callMeBackLeadController( $params );
-		$this->callMeBack->send();
-		$this->callMeBackResponse = $this->callMeBack->getResponse();
+        $validCaptacha = isValidCaptcha($_REQUEST['userInput']['g-recaptcha-response']);
 
-		if ( $this->callMeBackResponse->status == 200 ) {
-			//$this->address_id = $this->callMeBackResponse->data;
-			return true;
-		}
+        if($validCaptacha == 1) {
 
-		return false;
+            $params = $this->prepareParametersCallMeBack($_REQUEST['userInput']);
+
+            $this->callMeBack = new callMeBackLeadController($params);
+            $this->callMeBack->send();
+            $this->callMeBackResponse = $this->callMeBack->getResponse();
+
+            if ($this->callMeBackResponse->status == 200) {
+                //$this->address_id = $this->callMeBackResponse->data;
+                echo 'done';
+                exit();
+            } else {
+                echo 'cmrerror';
+                exit();
+            }
+        } else {
+            echo 'error';
+            exit();
+        }
 	}
 
     /**
@@ -116,20 +186,36 @@ class abApiCrm {
 		$explodeName = explode( " ", $data['name'] );
 		$date        = date( 'Y-m-d', strtotime( str_replace( '/', '-', $data['callDate'] ) ) );
 
+        $remarksData = '';
+		if($data['remarks'] == 'custom'){
+            $remarksData .= $data['contact_option'];
+            if($data['save_energy_comparison'] == 1){
+                $remarksData .= ', User wants to save his/her energy comparison';
+            }
+            if($data['save_personal_data'] == 1){
+                $remarksData .= ', User wants to save his/her personal data';
+            }
+            if($data['time_to_remind_me'] == 'Remind before winter help text'){
+                $remarksData .= ', User wants to remind him before winter';
+            } else if($data['time_to_remind_me'] == 'Remind specific date help text'){
+                $remarksData .= ', User wants to remind him on specific date : '. $data['remind_me_later_date'];
+            }
+        }
+
 		return [
 			'first_name'     => $explodeName[0],
 			'last_name'      => isset( $explodeName[1] ) ? $explodeName[1] : ' ',
 			'phone'          => $data['phoneNumber'],
+            'email'          => $data['email'],
 			'call_at'        => $date . " " . trim( $explodeTime[0] ) . ":00",
 			'call_until'     => $date . " " . trim( $explodeTime[1] ) . ":00",
-			// statid data for now
-			'producttype_id' => 3,
-			'product_id'     => 4,
-			'supplier_id'    => 5,
-			'affiliate_id'   => 6,
-			'subject'        => 'Call me back lead',
-			'remarks'        => '',
-			'deal_closed'    => false
+			'producttype_id' => $data['producttype_id'],
+			'product_id'     => $data['product_id'],
+			'supplier_id'    => $data['supplier_id'],
+			'affiliate_id'   => ( getLanguage() == 'nl') ? '1' : '4',
+			'subject'        => 'Call me back lead', // need to change as it is static or custom
+			'remarks'        => $remarksData,
+			'deal_closed'    => false // will be true if this is triggered after a order has been succesfully placed. In most cases, this will be false.
 		];
 	}
 
@@ -138,7 +224,8 @@ class abApiCrm {
 	 */
 	public function checkAvailability() {
 		if ( ! defined( 'AB_CHK_AVL_URL' ) ) {
-			define( 'AB_CHK_AVL_URL', 'https://www.aanbieders.be/rpc' );
+			//define( 'AB_CHK_AVL_URL', 'https://www.aanbieders.be/rpc' );
+            define( 'AB_CHK_AVL_URL', 'http://api.econtract.be/products/is_available_at/' );
 		}
 		//Expected Params: ?pid=279&prt=internet&lang_mod=nl&zip=3500&action=check_availability
 		$zip       = intval( $_GET['zip'] );
@@ -170,27 +257,46 @@ class abApiCrm {
 		} else {
 			//global $post;
 			$parentSegment = getSectorOnCats( $cats );
-			$response      = file_get_contents( AB_CHK_AVL_URL . "?pid=$pid&zip=$zip&lang_mod=$lang&prt=$ptype&action=$action&rand=" . mt_rand() );
-			$jsonDecRes    = json_decode( $response );
-			if ( $jsonDecRes->available === false ) {
-				$catUrlPart = '';
-				foreach ( $cats as $cat ) {
-					if($catUrlPart) {
-						$catUrlPart .= '&';
-					}
-					$catUrlPart .= "cat[]=$cat";
-				}
-				$urlParams             = "?$catUrlPart&zip=$zip&searchSubmit=&sg=$sg";
-				$urlParamsWithProvider = "$urlParams&pref_cs[]=$prvid";
-				$jsonDecRes->msg       = pll__("Sorry! The product is not available in your area.");
-				$jsonDecRes->html      = $this->availabilityErrorHtml( $parentSegment, $urlParamsWithProvider, $prvname, $urlParams );
-			}
-			if ( $jsonDecRes->available === true ) {
-				//$this->initSessionForProduct( $zip, $pid, $pslug, $pname, $ptype, $lang, $prvid, $prvslug, $prvname, $cats, $sg, $cproducts );
-				$checkoutParams   = "product_to_cart&product_id=$pid&provider_id=$prvid&sg=$sg&producttype=$ptype";
-				$html             = $this->availabilitySuccessHtml( $parentSegment, $checkoutParams );
-				$jsonDecRes->msg  = pll__('Congratulations! The product is available in your area');//Ignore the API response message
-				$jsonDecRes->html = $html;
+			//$response      = file_get_contents( AB_CHK_AVL_URL . "?pid=$pid&zip=$zip&lang_mod=$lang&prt=$ptype&action=$action&rand=" . mt_rand() );
+            $params['pid'] = $pid;
+            $params['prt'] = $ptype;
+            $params['zip'] = $zip;
+            $params['lang'] = $lang;
+            $response = $this->anbApi->checkAvailabilityRPC($params);
+
+			if(empty($response)){
+                $response['available'] = false;
+                $response = json_encode($response);
+            }
+
+            $jsonDecRes = json_decode($response);
+            if ($jsonDecRes->available === false) {
+                $catUrlPart = '';
+                foreach ($cats as $cat) {
+                    if ($catUrlPart) {
+                        $catUrlPart .= '&';
+                    }
+                    $catUrlPart .= "cat[]=$cat";
+                }
+                $urlParams = "?$catUrlPart&zip=$zip&searchSubmit=&sg=$sg";
+                $urlParamsWithProvider = "$urlParams&pref_cs[]=$prvid";
+                $jsonDecRes->msg = pll__("Sorry! The product is not available in your area.");
+                $jsonDecRes->html = $this->availabilityErrorHtml($parentSegment, $urlParamsWithProvider, $prvname, $urlParams);
+            }
+            if ($jsonDecRes->available === true) {
+                if ($parentSegment == pll__('energy')) {
+                    $catUrlPart = "cat=$cats[0]";
+                    $checkoutParams = "&hidden_prodsel_cmp=yes&product_to_cart=yes&product_id=$pid&provider_id=$prvid&producttype=$ptype&sg=$sg&zip=$zip&$catUrlPart";
+                    $html             = $this->availabilitySuccessHtml( $parentSegment, $checkoutParams );
+                    $jsonDecRes->msg  = pll__('Congratulations! The product is available in your area');//Ignore the API response message
+                    $jsonDecRes->html = $html;
+                } else {
+                    //$this->initSessionForProduct( $zip, $pid, $pslug, $pname, $ptype, $lang, $prvid, $prvslug, $prvname, $cats, $sg, $cproducts );
+                    $checkoutParams   = "product_to_cart&product_id=$pid&provider_id=$prvid&sg=$sg&producttype=$ptype";
+                    $html             = $this->availabilitySuccessHtml( $parentSegment, $checkoutParams );
+                    $jsonDecRes->msg  = pll__('Congratulations! The product is available in your area');//Ignore the API response message
+                    $jsonDecRes->html = $html;
+                }
 			}
 			if ( isset( $_GET['debug'] ) ) {
 				$jsonDecRes->endpointUrl = AB_CHK_AVL_URL . "?pid=$pid&zip=$zip&lang_mod=$lang&action=$action&rand=" . mt_rand();
@@ -211,7 +317,7 @@ class abApiCrm {
 	 *
 	 * @return string
 	 */
-	private function availabilityErrorHtml( $parentSegment, $urlParamsWithProvider, $prvname, $urlParams ) {
+	public function availabilityErrorHtml( $parentSegment, $urlParamsWithProvider, $prvname, $urlParams ) {
 		return '<div class="content-error">
                         <p>' . pll__( 'We offer very similar deals in your area:' ) . '</p>
                         <a href="/' . $parentSegment . '/' . pll__( 'results' ) . $urlParamsWithProvider . '" class="btn btn-primary">' . sprintf( pll__( 'Alternative deals from %s' ), $prvname ) . '</a>
@@ -225,7 +331,7 @@ class abApiCrm {
 	 *
 	 * @return string
 	 */
-	private function availabilitySuccessHtml( $parentSegment, $checkoutParams = "" ) {
+    public function availabilitySuccessHtml( $parentSegment, $checkoutParams = "" ) {
 		if(!empty($checkoutParams)) {
 			$checkoutParams = "?$checkoutParams";
 		}

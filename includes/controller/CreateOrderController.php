@@ -183,10 +183,18 @@ class CreateOrderController
      */
     private function extractOptions()
     {
-        if (isset($this->params['telephone_option_json']) || isset($this->params['idtv_option_json'])) {
-            $telOptions = $idtvOptions = [];
+        if (isset($this->params['internet_option_json']) || isset($this->params['telephone_option_json']) || isset($this->params['idtv_option_json'])) {
+            $intOptions = $telOptions = $idtvOptions = [];
+	        $internet = (!empty($this->params['internet_option_json'])) ? json_decode($this->params['internet_option_json'], true) : null;
             $telephone = (!empty($this->params['telephone_option_json'])) ? json_decode($this->params['telephone_option_json'], true) : null;
             $idtv = (!empty($this->params['idtv_option_json'])) ? json_decode($this->params['idtv_option_json'], true) : null;
+
+	        if ($internet && !is_null($internet['options'])) {
+		        $intOptions = $internet['options'];
+		        if(isset($internet['groups'])) {
+			        $intOptions = array_merge($intOptions, $internet['groups']);
+		        }
+	        }
 
             if ($telephone && !is_null($telephone['options'])) {
                 $telOptions = $telephone['options'];
@@ -202,7 +210,7 @@ class CreateOrderController
 	            }
             }
 
-            return $this->data['options'] = array_merge($telOptions, $idtvOptions);
+            return $this->data['options'] = array_merge($intOptions, $telOptions, $idtvOptions);
         }
     }
 
