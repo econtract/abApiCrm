@@ -870,7 +870,7 @@ function setAnnualConnectionDate($this, $connectDate, $hiddenFieldAnnualMeter, $
         dontKnowSituation.removeClass('hide');
     }
 
-    if($this.val() ==""){
+    if($this.val() =="" || $this.val() =="0"){
         $connectParent.hide();
         if(eventType == 'change'){
             var firstRadioElement = $connectParent.parent().children().first();
