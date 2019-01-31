@@ -103,13 +103,6 @@ function requiredFieldsFilledEnergy(inputForm) {
         });
     }
 
-    var moveDate = inputForm.find('#move_date');
-    if(moveDate.length>0){
-        var fill = customValidateDateField(moveDate);
-        if(!fill){
-            filled =  false;
-        }
-    }
     var elswitchDate = inputForm.find('.energy-order3-switchDate1');
     if(elswitchDate.length>0 && elswitchDate.is(':not(:disabled)')){
         var fill = customValidateDateField(elswitchDate);
@@ -446,16 +439,19 @@ jQuery(document).ready(function ($) {
         jQuery('.'+className).addClass('hide');
         jQuery('.'+className).find('input:not([type=hidden])').attr('disabled', 'disabled');
         jQuery('.leavingCustomerDetailsWrap').addClass('hide');
+        var movingAddressContent = jQuery('.moving_address_content');
+        movingAddressContent.find('#move_date').removeAttr('required');
 
-        if(jQuery('#' + id ).is(':checked')){
-            jQuery('.' + id+ '_content').removeClass('hide');
-            jQuery('.' + id+ '_content').find('input:not([type=hidden])').removeAttr('disabled');
-            //jQuery('.' + id+ '_content').find('input:not([type=hidden])').attr('required', 'required');
+
+        if(jQuery('#' + id ).is(':checked') && id =='moving_address'){
+            movingAddressContent.removeClass('hide');
+            movingAddressContent.find('input:not([type=hidden])').removeAttr('disabled');
+            movingAddressContent.find('#move_date').attr('required', 'required');
         }
-        else{
-            jQuery('.' + id+ '_content').addClass('hide');
-            jQuery('.' + id+ '_content').find('input:not([type=hidden])').attr('disabled', 'disabled');
-            //jQuery('.' + id+ '_content').find('input:not([type=hidden])').removeAttr('required');
+        else if(id !='moving_address'){
+            movingAddressContent.addClass('hide');
+            movingAddressContent.find('input:not([type=hidden])').attr('disabled', 'disabled');
+            movingAddressContent.find('#move_date').removeAttr('required');
         }
 
         var _self = jQuery('input#leaving_customer_info'),
@@ -474,6 +470,7 @@ jQuery(document).ready(function ($) {
         }
 
         var inputForm = jQuery('#' + id ).parents('form');
+        inputForm.validator('destroy');
         inputForm.validator('update');
 
     }
