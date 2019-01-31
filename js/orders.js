@@ -145,14 +145,6 @@ function requiredFieldsFilled(inputForm) {
         });
     }
 
-    var moveDate = inputForm.find('#move_date');
-    if(moveDate.length>0){
-        var fill = customValidateDateField(moveDate);
-        if(!fill){
-            filled =  false;
-        }
-    }
-
     if (filled === true) {
         inputForm.find('input[type=submit]').removeClass('disabled');
         inputForm.find('.next-step-btn a, .btnWrapper a.btn').removeClass('disabled');
@@ -295,11 +287,11 @@ function updateOnInstallationSituation($this){
         parentForm = moveDateSection.parents('form');
     if(moveDateSection.length>0 && moveDate.length>0){
         if($this.val() == 2){
-            moveDate.removeAttr('disabled');
+            moveDate.removeAttr('disabled').attr('required', 'required');
             moveDateSection.removeClass('hidden');
         }
         else{
-            moveDate.attr('disabled',true);
+            moveDate.attr('disabled',true).removeAttr('required');
             moveDateSection.addClass('hidden');
             moveDate.val('');
         }
