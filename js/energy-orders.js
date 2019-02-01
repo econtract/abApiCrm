@@ -103,21 +103,6 @@ function requiredFieldsFilledEnergy(inputForm) {
         });
     }
 
-    var elswitchDate = inputForm.find('.energy-order3-switchDate1');
-    if(elswitchDate.length>0 && elswitchDate.is(':not(:disabled)')){
-        var fill = customValidateDateField(elswitchDate);
-        if(!fill){
-            filled =  false;
-        }
-    }
-    var gasswitchDate = inputForm.find('.energy-order3-switchDate2');
-    if(gasswitchDate.length>0 && gasswitchDate.is(':not(:disabled)')){
-        var fill = customValidateDateField(gasswitchDate);
-        if(!fill){
-            filled =  false;
-        }
-    }
-
     if (filled === true) {
         inputForm.find('input[type=submit]').removeClass('disabled');
         inputForm.find('.next-step-btn-energy a').removeClass('disabled');
@@ -406,7 +391,7 @@ jQuery(document).ready(function ($) {
             inputForm = $this.parents('form');
         if(radioValue ===  '3'){
             jQuery('#'+dateFieldId)
-                .removeAttr('disabled');
+                .removeAttr('disabled').attr('required','required');
             $hiddenAnnualDate.val('');
             $hiddenSuggestedDate.val('');
         }
@@ -423,12 +408,9 @@ jQuery(document).ready(function ($) {
 
             jQuery('#'+dateFieldId)
                 .val("")
-                .attr('disabled','disabled');
-            jQuery('#'+dateFieldId)
-                .parents('.form-group.has-feedback')
-                .removeClass('has-error has-danger has-success');
+                .attr('disabled','disabled').removeAttr('required');
         }
-
+        inputForm.validator('destroy');
         inputForm.validator('update');
     }
 
@@ -817,22 +799,55 @@ jQuery(document).ready(function ($) {
         $('input#leaving_customer_info').parents('form').validator('update');
     });
 
+    // Electricity Switch Date Fields on Energy Order Step 3
+    if( $('.energy-order3-switchDate1').length>0 ) {
+        setSwitchDatePickerCalendar($( ".energy-order3-switchDate1" ), jQuery('#suggested_date'));
+    }
+    if( $('.energy-order3-switchDate2').length>0 ) {
+        setSwitchDatePickerCalendar($( ".energy-order3-switchDate2" ), jQuery('#suggested_date_gas'));
+    }
+
 });
 /*** READY FUNCTION ENDS ***/
+
+//Step 3 Switch date
+function setSwitchDatePickerCalendar(date_field, suggested_date_text){
+    var date_string, min_date , max_date;
+    if( stepTwoMoveDate == '' ){
+        date_string = suggested_date_text.text();
+        date_string = date_string.split('/');
+        min_date = new Date(date_string[1]+ '/' + date_string[0] + '/' + date_string[2]);
+        var month = date_string[1];
+        var year = date_string[2];
+        month  =  parseInt(month) + 6;
+        if(month > 12){
+            month = 1;
+            year = parseInt(year) + 1;
+        }
+        max_date = new Date(month +'/01/'+year);
+    }
+    else{
+        min_date = '-1M';
+        max_date = '6M';
+    }
+    date_field.datepicker({
+        minDate: min_date,
+        maxDate: max_date,
+        changeMonth: true,
+        changeYear: true,
+        dateFormat: 'dd/mm/yy'
+    });
+
+}
 
 // Step 2 - Leaving Customer fields show hide
 function enableDisableLeavingCustomerFields(){
     var _self = jQuery('input#leaving_customer_info'),
         leavingCustomerCnt = jQuery('.leavingCustomerDetailsWrap');
-        //leavingFields = leavingCustomerCnt.find('input[type=email], input[type=tel]');
 
     if(_self.is(':checked')){
-       // leavingFields.removeAttr('disabled');
-        //leavingFields.attr('required', 'required');
         leavingCustomerCnt.removeClass('hide');
     } else {
-       // leavingFields.attr('disabled', true);
-        //leavingFields.removeAttr('required', 'required');
         leavingCustomerCnt.addClass('hide');
     }
 }
@@ -849,7 +864,7 @@ function setAnnualConnectionDate($this, $connectDate, $hiddenFieldAnnualMeter, $
         dateDiv = $form.find('.dateFieldWithLabelText'),
         dateField = dateDiv.find('.actualText');
 
-    if($this.attr('id') == 'annual_electricity_meter_reading_month' && jQuery('#annual_gas_meter_reading_month').length>0){
+    if($this.attr('id') == 'annual_electricity_meter_reading_month' && jQuery('#annual_gas_meter_reading_month').length>0 && eventType == 'change'){
         jQuery('#annual_gas_meter_reading_month').val($this.val());
         jQuery('#annual_gas_meter_reading_month').trigger('change');
     }
@@ -928,86 +943,6 @@ function setGasFlow(eventType){
     }
 }
 
-
-//Energy Step 2 Move date section validation and show hide - Core Function
-function customValidateDateField(moveDate){
-    var hasFeedback = moveDate.parents('.has-feedback'),
-        iconSpan = hasFeedback.find('.form-control-feedback'),
-        parentForm = moveDate.parents('form'),
-        blockWithErrors = hasFeedback.find('.help-block.with-errors'),
-        errorMsg = '',
-        html ='',
-        value = moveDate.val();
-
-    function errorMessage(type){
-        if(type == 'show'){
-            errorMsg = moveDate.data('error');
-            html = '<ul class="list-unstyled"><li>'+ errorMsg +'</li></ul></div>';
-            hasFeedback.removeClass('has-success').addClass('has-error has-danger');
-            iconSpan.removeClass('glyphicon-ok').addClass('glyphicon-remove');
-            blockWithErrors.html(html);
-        }
-    }
-    if(!moveDate.is(':disabled')){
-        if(value.length === 10){
-            var valParts = value.split('/');
-            if(valParts[0] == "00" || valParts[1] == "00") {
-                errorMessage('show');
-                return false;
-            }
-            var dateObj = new Date(valParts[2], valParts[1] - 1, valParts[0],0,0,0,0),
-                minDate =new Date(),
-                maxDate = new Date();
-
-            if( stepTwoMoveDate == '' && (moveDate.hasClass('energy-order3-switchDate1') || moveDate.hasClass('energy-order3-switchDate2') ) ){
-                 var suggestedValue = jQuery('#suggested_date').text();
-                var minParts = suggestedValue.split('/');
-                minDate.setFullYear(minParts[2], minParts[1] - 1, minParts[0]);
-                var maxD = minDate.getDate();
-                var maxM = minDate.getMonth();
-                var maxY = minDate.getFullYear();
-                maxDate.setFullYear(maxY, maxM, maxD);
-                maxDate.setMonth(maxDate.getMonth() + 6);
-            }
-            else{
-                minDate.setMonth(minDate.getMonth()-1);
-                maxDate.setMonth(maxDate.getMonth() + 6);
-            }
-            minDate.setHours(0,0,0,0);
-            maxDate.setHours(0,0,0,0);
-
-            if(dateObj < minDate || dateObj > maxDate){
-                errorMessage('show');
-                return false;
-            }
-            else{
-                errorMsg = '';
-                hasFeedback.removeClass('has-error has-danger').addClass('has-success');
-                iconSpan.removeClass('glyphicon-remove').addClass('glyphicon-ok');
-                blockWithErrors.html('');
-                return true;
-            }
-        }
-        else {
-            errorMsg = moveDate.data('error');
-            html = '<ul class="list-unstyled"><li>'+ errorMsg +'</li></ul></div>';
-            hasFeedback.removeClass('has-success').addClass('has-error has-danger');
-            iconSpan.removeClass('glyphicon-ok').addClass('glyphicon-remove');
-            blockWithErrors.html(html);
-            return false;
-        }
-
-    }
-    else{
-        errorMsg = '';
-        hasFeedback.removeClass('has-error has-danger has-success');
-        iconSpan.removeClass('glyphicon-remove glyphicon-ok');
-        blockWithErrors.html('');
-        return true;
-    }
-
-}//customValidateDateField Ends
-
 //Energy Step 3
 function setSuggestedDate() {
     var suggestedDate = new Date();
@@ -1020,7 +955,6 @@ function setSuggestedDate() {
             sd_yy =sd_yy + 1;
         }
         suggestedDate.setFullYear(sd_yy, sd_mm-1, 1);
-
     }
 
     var sd_d = suggestedDate.getDate();
@@ -1255,15 +1189,11 @@ function orderStepThreeQuestions($elq1, $elq2, $elq3, $elq4, $content, $ul, $for
             input1.removeClass('skip');
             input2.removeClass('skip');
             input3.addClass('skip');
-            //$contentDv.find('input[type=radio]').removeClass('skip');
-            // $form.find('.currentSupplier').addClass('skip');
         }
         else{
             input1.addClass('skip');
             input2.addClass('skip');
             input3.addClass('skip');
-            // $contentDv.find('input[type=radio]').addClass('skip');
-            // $form.find('.currentSupplier').removeClass('skip');
         }
     }
 
