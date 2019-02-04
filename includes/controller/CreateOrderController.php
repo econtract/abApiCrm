@@ -130,6 +130,20 @@ class CreateOrderController
         $this->order = new CreateOrder($this->data);
     }
 
+    private function getIp()
+    {
+        if ( isset( $_SERVER['HTTP_CF_CONNECTING_IP'] ) ) {
+            $ip = $_SERVER['HTTP_CF_CONNECTING_IP'];
+        } elseif ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+            $ip = explode( ',', $_SERVER['HTTP_X_FORWARDED_FOR'] );
+            $ip = array_shift( $ip );
+        } elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
+
+        return $ip;
+    }
+
     protected function prepareParameters()
     {
 
@@ -139,7 +153,7 @@ class CreateOrderController
 
 	    $this->data = $this->params;//TODO params can be cleaned at this point
 
-        $this->data['ip_address'] = get_ip();
+        $this->data['ip_address'] = $this->getIp();
         $this->data['send_confirmation_mail'] = true;
         $this->data['comparison_id'] = !empty($this->params['comparison_id']) ? $this->params['comparison_id'] : 0;
 
