@@ -71,6 +71,14 @@ class abApiCrmEnergy extends abApiCrm{
 	    $_SESSION['product_energy']['type'] = $_SESSION['product_energy']['cat'];
 	    $_SESSION['product_energy']['into_cart'] = true;
 
+        if(!$_SESSION['product_energy']['supplier'] && $_SESSION['product_energy']['cmp_sid']) {
+            $_SESSION['product_energy']['supplier'] = $_SESSION['product_energy']['cmp_sid'];
+        }
+
+        if(!$_SESSION['product_energy']['cmp_sid'] && $_SESSION['product_energy']['supplier']) {
+            $_SESSION['product_energy']['cmp_sid'] = $_SESSION['product_energy']['supplier'];
+        }
+
         //create a refferer link
         $_SESSION['HTTP_REFERER'] = isset($_SERVER['HTTP_REFERER']) || !empty($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
     }
