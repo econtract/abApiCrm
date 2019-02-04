@@ -145,14 +145,6 @@ function requiredFieldsFilled(inputForm) {
         });
     }
 
-    var moveDate = inputForm.find('#move_date');
-    if(moveDate.length>0){
-        var fill = customValidateDateField(moveDate);
-        if(!fill){
-            filled =  false;
-        }
-    }
-
     if (filled === true) {
         inputForm.find('input[type=submit]').removeClass('disabled');
         inputForm.find('.next-step-btn a, .btnWrapper a.btn').removeClass('disabled');
@@ -295,11 +287,11 @@ function updateOnInstallationSituation($this){
         parentForm = moveDateSection.parents('form');
     if(moveDateSection.length>0 && moveDate.length>0){
         if($this.val() == 2){
-            moveDate.removeAttr('disabled');
+            moveDate.removeAttr('disabled').attr('required', 'required');
             moveDateSection.removeClass('hidden');
         }
         else{
-            moveDate.attr('disabled',true);
+            moveDate.attr('disabled',true).removeAttr('required');
             moveDateSection.addClass('hidden');
             moveDate.val('');
         }
@@ -556,6 +548,16 @@ jQuery(document).ready(function ($) {
         $(this).attr('required', true);
     });
 
+    if($('#client_idnr').length > 0) {
+        if($("input[name=client_nationality]").val() == 'BE'){
+            $('#client_idnr').parent().find('[data-toggle=tooltip]').attr('data-original-title','<p>'+ site_obj.trans_nationality_be_tooltip +'</p>');
+        }
+        else {
+            $('#client_idnr').parent().find('[data-toggle=tooltip]').attr('data-original-title','<p>'+ site_obj.trans_nationality_other_tooltip +'</p>');
+        }
+
+    }
+
     $("input[name=client_nationality]").on('change', function(e) {
         e.stopPropagation();
         if($('#client_idnr').length > 0) {
@@ -571,12 +573,15 @@ jQuery(document).ready(function ($) {
                     'id="client_idnr" name="client_idnr" placeholder="591-0123456-78" data-idcard=""' +
                     'value="' + prevIdnrVal + '" data-error="' + site_obj.idcard_error + '" required>');
                 idcardEl.mask("000-0000000-00");
+                natParent.find('[data-toggle=tooltip]').attr('data-original-title','<p>BE title</p>');
+                natParent.find('[data-toggle=tooltip]').attr('data-original-title','<p>'+ site_obj.trans_nationality_be_tooltip +'</p>');
             } else {
                 idcardEl.remove();//Removing because unmask doesn't work well, as all of unmasking methods don't work reliably
                 natParent.prepend('<input type="text" class="form-control" ' +
                     'id="client_idnr" name="client_idnr" placeholder="" ' +
                     'value="" data-error="' + site_obj.idcard_error + '" required>');
                 idcardEl.unmask();
+                natParent.find('[data-toggle=tooltip]').attr('data-original-title','<p>'+ site_obj.trans_nationality_other_tooltip +'</p>');
             }
         }
         $(this).parents('form').validator('destroy');
@@ -606,7 +611,7 @@ jQuery(document).ready(function ($) {
             // console.log("current***", current);
 
             //old url => var ajaxUrl = site_obj.ajax_url + '?action=ajaxQueryToolboxApi&query_method=' + current.attr('query_method') + "&query_params[" + current.attr('query_key') + "]=" + query;
-            var ajaxUrl = site_obj.toolkit_api_url + 'streets?postcode=' + zipCode + '&toolbox_key=' + site_obj.toolkit_api_key; // url changed to get cities data direct from toolbox api
+            var ajaxUrl = site_obj.toolkit_api_url + 'streets?postcode=' + zipCode + '&toolbox_key=' + site_obj.toolkit_api_key +'&name='+ current.val(); // url changed to get cities data direct from toolbox api
 
             /** Old code commented out in order to get data from toolbox api directly **/
             /*

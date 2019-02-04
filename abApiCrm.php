@@ -9,6 +9,7 @@
 
 namespace abApiCrm;
 
+use AnbApiClient\Aanbieders;
 use abApiCrm\includes\controller\callMeBackLeadController;
 use abApiCrm\includes\controller\CreateOrderController;
 
@@ -57,11 +58,20 @@ class abApiCrm {
 
     public $sector;
 
+    public $anbApi;
+
+    public $apiConf = [
+        'staging'  => ANB_API_STAGING,
+        'key'      => ANB_API_KEY,
+        'secret'   => ANB_API_SECRET
+    ];
 
 	public function __construct() {
 		$this->sector = getUriSegment(1);
 		//enqueue JS scripts
 		add_action( 'init', array( $this, 'enqueueScripts' ) );
+
+        $this->anbApi = new Aanbieders ($this->apiConf);
 
 	}
 
@@ -93,7 +103,7 @@ class abApiCrm {
 				'jquery',
 				'jquery-bootstrap-typeahead',
 				'aanbieder_default_script'
-			), '2.2.4', true );
+			), '2.2.8', true );
 
 			wp_localize_script( 'crm-script-orders', 'site_obj',
 				array(
@@ -115,7 +125,9 @@ class abApiCrm {
 					'trans_mth'                       => pll__('mth'),
                     'trans_loading_dots'              => pll__('Loading...'),
                     'trans_yearly_total'              => pll__( 'Year profit' ),
-                    'trans_your_advantage'            => pll__( 'Your advantage' )
+                    'trans_your_advantage'            => pll__( 'Your advantage' ),
+                    'trans_nationality_be_tooltip'    => pll__('Your Belgium ID card Number'),
+                    'trans_nationality_other_tooltip' => pll__('Your Other ID card Number')
 				)
 			);
 		}
@@ -212,7 +224,8 @@ class abApiCrm {
 	 */
 	public function checkAvailability() {
 		if ( ! defined( 'AB_CHK_AVL_URL' ) ) {
-			define( 'AB_CHK_AVL_URL', 'https://www.aanbieders.be/rpc' );
+			//define( 'AB_CHK_AVL_URL', 'https://www.aanbieders.be/rpc' );
+            define( 'AB_CHK_AVL_URL', 'http://api.econtract.be/products/is_available_at/' );
 		}
 		//Expected Params: ?pid=279&prt=internet&lang_mod=nl&zip=3500&action=check_availability
 		$zip       = intval( $_GET['zip'] );
@@ -244,7 +257,12 @@ class abApiCrm {
 		} else {
 			//global $post;
 			$parentSegment = getSectorOnCats( $cats );
-			$response      = file_get_contents( AB_CHK_AVL_URL . "?pid=$pid&zip=$zip&lang_mod=$lang&prt=$ptype&action=$action&rand=" . mt_rand() );
+			//$response      = file_get_contents( AB_CHK_AVL_URL . "?pid=$pid&zip=$zip&lang_mod=$lang&prt=$ptype&action=$action&rand=" . mt_rand() );
+            $params['pid'] = $pid;
+            $params['prt'] = $ptype;
+            $params['zip'] = $zip;
+            $params['lang'] = $lang;
+            $response = $this->anbApi->checkAvailabilityRPC($params);
 
 			if(empty($response)){
                 $response['available'] = false;
