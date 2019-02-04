@@ -139,9 +139,7 @@ class CreateOrderController
 
 	    $this->data = $this->params;//TODO params can be cleaned at this point
 
-        $this->data['ip_address'] = $_SERVER['REMOTE_ADDR'];
-        $this->data['affiliate_id'] = $this->params['client_language'] == 'nl' ? 1 : 4;
-        $this->data['sales_channel_id'] = 1;
+        $this->data['ip_address'] = get_ip();
         $this->data['send_confirmation_mail'] = true;
         $this->data['comparison_id'] = !empty($this->params['comparison_id']) ? $this->params['comparison_id'] : 0;
 
