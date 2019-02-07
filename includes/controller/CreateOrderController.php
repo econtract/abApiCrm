@@ -154,7 +154,6 @@ class CreateOrderController
 	    $this->data = $this->params;//TODO params can be cleaned at this point
 
         $this->data['ip_address'] = $this->getIp();
-        $this->data['send_confirmation_mail'] = true;
         $this->data['comparison_id'] = !empty($this->params['comparison_id']) ? $this->params['comparison_id'] : 0;
 
         // Format client data fields
