@@ -226,6 +226,11 @@ function fillEnergyFormDynamicData(targetContainer) {
                 return true;//move on skip this step
             }
 
+            if(input.parents('li.leavingCustomerDetailsWrap').length>0 && input.parents('li.leavingCustomerDetailsWrap').hasClass('hide'))
+            {
+                return true; // skip if leaving customer is not checked
+            }
+
             if(input.hasClass('multi-phone')){
                 value = $('#'+input.attr('id')+'_hidden').val();
             }
@@ -777,26 +782,22 @@ jQuery(document).ready(function ($) {
 
     // Step 2 - Leaving Customer fields show hide
     if($('input#leaving_customer_info').length>0){
-        var validatorElem = $('input#leaving_customer_info').parents("form").data("bs.validator");
+       var validatorElem = $('input#leaving_customer_info').parents("form");
 
         enableDisableLeavingCustomerFields();
-
-        validatorElem.update();
+        validatorElem.validator('destroy');
+        validatorElem.validator('update');
     }
 
     $('input#leaving_customer_info').on('change',function(){
-        var validatorElem = $('input#leaving_customer_info').parents("form").data("bs.validator"),
+        var validatorElem = $('input#leaving_customer_info').parents("form"),
             leavingCustomerCnt = jQuery('.leavingCustomerDetailsWrap'),
             leavingFields = leavingCustomerCnt.find('input[type=text], input[type=email], input[type=tel]');
 
         enableDisableLeavingCustomerFields();
 
-        $(leavingFields).each(function(){
-            validatorElem.clearErrors($(this));
-        });
-
-        validatorElem.update();
-        $('input#leaving_customer_info').parents('form').validator('update');
+        validatorElem.validator('destroy');
+        validatorElem.validator('update');
     });
 
     // Electricity Switch Date Fields on Energy Order Step 3
