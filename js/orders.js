@@ -563,19 +563,21 @@ jQuery(document).ready(function ($) {
         if($('#client_idnr').length > 0) {
             var idcardEl = $('#client_idnr'),
                 nat = $(this).val();
-            var natParent = $('#client_idnr').parents('div.form-group');
+            var natParent = $('#client_idnr').parents('div.form-group'),
+                fieldLabel = natParent.parents('li').find('label[for=id_card]');
             var prevIdnrVal = $('#client_idnr').val();
             idcardEl.val('');
 
             if (nat == 'BE') {
+                fieldLabel.html(site_obj.client_idnr);
                 idcardEl.remove();
                 natParent.prepend('<input type="text" class="form-control telecom-order4-idcard" ' +
                     'id="client_idnr" name="client_idnr" placeholder="591-0123456-78" data-idcard=""' +
                     'value="' + prevIdnrVal + '" data-error="' + site_obj.idcard_error + '" required>');
                 idcardEl.mask("000-0000000-00");
-                natParent.find('[data-toggle=tooltip]').attr('data-original-title','<p>BE title</p>');
                 natParent.find('[data-toggle=tooltip]').attr('data-original-title','<p>'+ site_obj.trans_nationality_be_tooltip +'</p>');
             } else {
+                fieldLabel.html(site_obj.client_residencenr);
                 idcardEl.remove();//Removing because unmask doesn't work well, as all of unmasking methods don't work reliably
                 natParent.prepend('<input type="text" class="form-control" ' +
                     'id="client_idnr" name="client_idnr" placeholder="" ' +
