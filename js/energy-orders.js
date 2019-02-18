@@ -219,7 +219,7 @@ function fillEnergyFormDynamicData(targetContainer) {
         'form input:radio:checked, form input:checkbox:not(:disabled):checked, form select:not(".hidden"):not(:disabled)').each(
         function (index) {
             var input = $(this);
-            var label = $("label[for='" + input.attr('id') + "']").text();
+            var label = $("label[for='" + input.attr('id') + "']").first().text();
             var value = input.val();
 
             if(input.hasClass('hidden') || input.hasClass('skip')) {
@@ -761,6 +761,12 @@ jQuery(document).ready(function ($) {
         setAnnualConnectionDate($(this), $('#connect_date_gas'), $('#annual_meter_reading_gas_switch_date'), $('#anb_suggested_gas_switch_date'), 'change');
     });
 
+    //Current supplier electricity - Step 3
+    $('.currentSupplierElectricity').on('change',function(){
+        setCurrentSupplier($(this), $('.currentSupplierGas'));
+    });
+
+
     //On page load
     setElectricityFlow('load');
     setGasFlow('load');
@@ -915,6 +921,13 @@ function setAnnualConnectionDate($this, $connectDate, $hiddenFieldAnnualMeter, $
 
 }//setAnnualConnectionDate function ends
 
+//Step 3 Current supplier change
+function setCurrentSupplier($this, $gasSupplier){
+    if($this.length>0 && $gasSupplier.length>0){
+        $gasSupplier.val($this.val());
+        $gasSupplier.trigger('change');
+    }
+}
 
 //on load set electricty step 3 flow
 function setElectricityFlow(eventType){
