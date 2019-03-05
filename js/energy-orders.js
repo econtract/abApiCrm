@@ -768,8 +768,13 @@ jQuery(document).ready(function ($) {
     });
 
     //Current supplier electricity - Step 3
-    $('.currentSupplierElectricity').on('change',function(){
-        setCurrentSupplier($(this), $('.currentSupplierGas'));
+    $('input[name=similar_option_for_gas_as_electricity]').on('change',function(){
+        $('.currentSupplierGasCnt').addClass('hide');
+        if($(this).is(':checked') && $(this).val() == 1){
+            setCurrentSupplier($('.currentSupplierElectricity'), $('.currentSupplierGas'));
+        } else if ($(this).is(':checked') && $(this).val() == 0){
+            $('.currentSupplierGasCnt').removeClass('hide');
+        }
     });
 
 
@@ -818,6 +823,13 @@ jQuery(document).ready(function ($) {
     }
     if( $('.energy-order3-switchDate2').length>0 ) {
         setSwitchDatePickerCalendar($( ".energy-order3-switchDate2" ), jQuery('#suggested_date_gas'));
+    }
+
+    if(jQuery('input[name=similar_option_for_gas_as_electricity]').length == 0 && jQuery('.currentSupplierGasCnt').length>0){
+        jQuery('.currentSupplierGasCnt').removeClass('hide');
+    }
+    else if(jQuery('input[name=similar_option_for_gas_as_electricity]').length > 0 && jQuery('.currentSupplierGasCnt').length>0 && jQuery('input[name=similar_option_for_gas_as_electricity]:checked').val() == 0){
+        jQuery('.currentSupplierGasCnt').removeClass('hide');
     }
 
 });
@@ -932,9 +944,9 @@ function setAnnualConnectionDate($this, $connectDate, $hiddenFieldAnnualMeter, $
 }//setAnnualConnectionDate function ends
 
 //Step 3 Current supplier change
-function setCurrentSupplier($this, $gasSupplier){
-    if($this.length>0 && $gasSupplier.length>0){
-        $gasSupplier.val($this.val());
+function setCurrentSupplier($electricitySupplier, $gasSupplier){
+    if($electricitySupplier.length>0 && $gasSupplier.length>0){
+        $gasSupplier.val($electricitySupplier.val());
         $gasSupplier.trigger('change');
     }
 }
