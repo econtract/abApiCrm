@@ -832,8 +832,26 @@ jQuery(document).ready(function ($) {
         jQuery('.currentSupplierGasCnt').removeClass('hide');
     }
 
+    //step 3 exclisive night meter EAN show/hide
+    if($('input[name=eclusive_night_meter]').length>0){
+        var exMeter = $('input[name=eclusive_night_meter]');
+        exMeter.on('change',function(){
+            handleChangeExNightMeter($(this), $('.exclusiveNightCnt'));
+
+        });
+        handleChangeExNightMeter($('input[name=eclusive_night_meter]'), $('.exclusiveNightCnt'));
+    }
+
 });
 /*** READY FUNCTION ENDS ***/
+
+//step 3 exclisive night meter EAN show/hide
+function handleChangeExNightMeter(exMeter, content){
+    content.addClass('hide');
+    if(exMeter.is(':checked')){
+        content.removeClass('hide');
+    }
+}
 
 //Step 3 Switch date
 function setSwitchDatePickerCalendar(date_field, suggested_date_text){
