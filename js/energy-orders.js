@@ -251,8 +251,12 @@ function fillEnergyFormDynamicData(targetContainer) {
                 return true;
             }
 
+            if(input.hasClass('ean-optional') && input.val() == ''){
+                return true;
+            }
+
             //check if its a fancyRadio option
-            if(input.parents('.fancy-radio').length > 0) {
+            if(input.parents('.fancy-radio').length > 0 && (!input.hasClass('currentSupplier')) ) {
                 var actualText = input.parent().find('.actualText');
                 if(actualText.length > 0 && !actualText.hasClass('skip')){
                     value = actualText.text() || actualText.val();
@@ -490,7 +494,9 @@ jQuery(document).ready(function ($) {
         showContentsOnCheck(jQuery(this));
     });
 
-    hideContentsOnCheck('.has-content-inverse');
+    $('.has-content-inverse').each(function(){
+        hideContentsOnCheck($(this));
+    });
     $('.has-content-inverse').on('change', function(e){
         hideContentsOnCheck(jQuery(this));
     });
@@ -842,8 +848,29 @@ jQuery(document).ready(function ($) {
         handleChangeExNightMeter($('input[name=eclusive_night_meter]'), $('.exclusiveNightCnt'));
     }
 
+    //Step 3 Do not have these numbers
+    if($('input[type=checkbox].ean-optional').length>0){
+        var $EanOptCheck = $('input[type=checkbox].ean-optional');
+        $EanOptCheck.each(function(){
+            doNotHaveTheseNoCheck($(this));
+        });
+
+        $EanOptCheck.on('change',function(){
+            doNotHaveTheseNoCheck($(this));
+        });
+    }
+
 });
 /*** READY FUNCTION ENDS ***/
+
+//Step 3 Do not have these numbers
+function doNotHaveTheseNoCheck($el){
+    if($el.is(':checked')){
+        $el.parents('.eanMeterStep3').find('.dont_know_code_content input[type=input]').addClass('skip');
+    } else {
+        $el.parents('.eanMeterStep3').find('.dont_know_code_content input[type=input]').removeClass('skip');
+    }
+}
 
 //step 3 exclisive night meter EAN show/hide
 function handleChangeExNightMeter(exMeter, content){
@@ -1248,6 +1275,25 @@ function orderStepThreeQuestions($elq1, $elq2, $elq3, $elq4, $content, $ul, $for
             input1.addClass('skip');
             input2.addClass('skip');
             input3.addClass('skip');
+        }
+    }
+
+    if($type == 'electricity'){
+        //enable/disable month
+        if( ($q1 == 1 && $q2 == 0 && $q3 == 0) || (stepTwoMoveDate != '' && $q1 == 1 && $q3 == 0) ){
+            jQuery('#annual_electricity_meter_reading_month').removeAttr('disabled').attr('required','required');
+        } else{
+            jQuery('#annual_electricity_meter_reading_month').removeAttr('required').attr('disabled','disabled');
+        }
+    }
+
+
+    if($type == 'gas'){
+        //enable/disable month
+        if( ($q1 == 1 && $q2 == 0 && $q3 == 0) || (stepTwoMoveDate == '' && $q1 == 1 && $q3 == 0) ){
+            jQuery('#annual_gas_meter_reading_month').removeAttr('disabled').attr('required','required');
+        } else{
+            jQuery('#annual_gas_meter_reading_month').removeAttr('required').attr('disabled','disabled');
         }
     }
 
