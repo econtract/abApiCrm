@@ -61,26 +61,36 @@ class abApiCrmEnergy extends abApiCrm{
 	    }
     }
 
-    public function initSessionForProduct( $getParams ) {
-        unset( $_SESSION['product_energy'] );
-	    unset( $_SESSION['order_energy'] );
-        foreach ($getParams as $key => $val){
-            $_SESSION['product_energy'][$key] = $val;
-        }
-	    $_SESSION['product_energy']['id'] = $_SESSION['product_energy']['product_id'];
-	    $_SESSION['product_energy']['type'] = $_SESSION['product_energy']['cat'];
-	    $_SESSION['product_energy']['into_cart'] = true;
+    public function initSessionForProduct($getParams)
+    {
+        unset($_SESSION[ 'product_energy' ]);
+        unset($_SESSION[ 'order_energy' ]);
 
-        if(!$_SESSION['product_energy']['supplier'] && $_SESSION['product_energy']['cmp_sid']) {
-            $_SESSION['product_energy']['supplier'] = $_SESSION['product_energy']['cmp_sid'];
+        foreach( $getParams as $key => $val ) {
+            $_SESSION[ 'product_energy' ][ $key ] = $val;
         }
 
-        if(!$_SESSION['product_energy']['cmp_sid'] && $_SESSION['product_energy']['supplier']) {
-            $_SESSION['product_energy']['cmp_sid'] = $_SESSION['product_energy']['supplier'];
+        $productType = $_SESSION[ 'product_energy' ][ 'cat' ];
+        if( empty($productType) ) {
+            $productType = $_SESSION[ 'product_energy' ][ 'producttype' ];
         }
 
-        //create a refferer link
-        $_SESSION['HTTP_REFERER'] = isset($_SERVER['HTTP_REFERER']) || !empty($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
+        $_SESSION[ 'product_energy' ][ 'id' ] = $_SESSION[ 'product_energy' ][ 'product_id' ];
+        $_SESSION[ 'product_energy' ][ 'type' ] = $productType;
+        $_SESSION[ 'product_energy' ][ 'cat' ] = $productType;
+        $_SESSION[ 'product_energy' ][ 'producttype' ] = $productType;
+        $_SESSION[ 'product_energy' ][ 'into_cart' ] = true;
+
+        if( !$_SESSION[ 'product_energy' ][ 'supplier' ] && $_SESSION[ 'product_energy' ][ 'cmp_sid' ] ) {
+            $_SESSION[ 'product_energy' ][ 'supplier' ] = $_SESSION[ 'product_energy' ][ 'cmp_sid' ];
+        }
+
+        if( !$_SESSION[ 'product_energy' ][ 'cmp_sid' ] && $_SESSION[ 'product_energy' ][ 'supplier' ] ) {
+            $_SESSION[ 'product_energy' ][ 'cmp_sid' ] = $_SESSION[ 'product_energy' ][ 'supplier' ];
+        }
+
+        // Create a referer link
+        $_SESSION[ 'HTTP_REFERER' ] = isset($_SERVER[ 'HTTP_REFERER' ]) || !empty($_SERVER[ 'HTTP_REFERER' ]) ? $_SERVER[ 'HTTP_REFERER' ] : '';
     }
 
 	/**
