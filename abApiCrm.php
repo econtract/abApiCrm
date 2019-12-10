@@ -140,38 +140,37 @@ class abApiCrm {
     /**
      * @return bool
      */
-	public function callMeBack() {
+    public function callMeBack()
+    {
+        $validCaptacha = isValidCaptcha($_REQUEST[ 'userInput' ][ 'g-recaptcha-response' ]);
 
-        $validCaptacha = isValidCaptcha($_REQUEST['userInput']['g-recaptcha-response']);
-
-        if($validCaptacha == 1) {
-
-            $params = $this->prepareParametersCallMeBack($_REQUEST['userInput']);
+        if( $validCaptacha == 1 ) {
+            $params = $this->prepareParametersCallMeBack($_REQUEST[ 'userInput' ]);
 
             $this->callMeBack = new callMeBackLeadController($params);
             $this->callMeBack->send();
             $this->callMeBackResponse = $this->callMeBack->getResponse();
 
-            if ($this->callMeBackResponse->status == 200) {
-                //$this->address_id = $this->callMeBackResponse->data;
+            if( $this->callMeBackResponse->status == 200 ) {
+//                $this->address_id = $this->callMeBackResponse->data;
                 echo 'done';
                 exit();
-            } else {
-                echo 'cmrerror';
-                exit();
             }
-        } else {
-            echo 'error';
+
+            echo 'cmrerror';
             exit();
         }
-	}
+
+        echo 'error';
+        exit();
+    }
 
     /**
      * @param $data
      * @return mixed
      */
-	public function createFullOrder($data) {
-
+    public function createFullOrder($data)
+    {
         $this->createFullOrderObj = new CreateOrderController($data);
 
         $this->createFullOrderObj->send();
@@ -185,43 +184,55 @@ class abApiCrm {
 	 *
 	 * @return mixed
 	 */
-	public function prepareParametersCallMeBack( $data ) {
-		$explodeTime = explode( " - ", $data['callTime'] );
-		$explodeName = explode( " ", $data['name'] );
-		$date        = date( 'Y-m-d', strtotime( str_replace( '/', '-', $data['callDate'] ) ) );
+    public function prepareParametersCallMeBack($data)
+    {
+        $explodeName = explode(" ", $data[ 'name' ]);
+
+        $date = date('Y-m-d');
+        if( array_key_exists('callDate', $data) ) {
+            $date = date('Y-m-d', strtotime(str_replace('/', '-', $data[ 'callDate' ])));
+        }
+
+        $time = '13:00 - 17:00';
+        if( array_key_exists('callTime', $data) ) {
+            $time = $data[ 'callTime' ];
+        }
+        $explodeTime = explode(" - ", $time);
 
         $remarksData = '';
-		if($data['remarks'] == 'custom'){
-            $remarksData .= $data['contact_option'];
-            if($data['save_energy_comparison'] == 1){
+        if( $data[ 'remarks' ] === 'custom' ) {
+            $remarksData .= $data[ 'contact_option' ];
+            if( $data[ 'save_energy_comparison' ] == 1 ) {
                 $remarksData .= ', User wants to save his/her energy comparison';
             }
-            if($data['save_personal_data'] == 1){
+
+            if( $data[ 'save_personal_data' ] == 1 ) {
                 $remarksData .= ', User wants to save his/her personal data';
             }
-            if($data['time_to_remind_me'] == 'Remind before winter help text'){
+
+            if( $data[ 'time_to_remind_me' ] === 'Remind before winter help text' ) {
                 $remarksData .= ', User wants to remind him before winter';
-            } else if($data['time_to_remind_me'] == 'Remind specific date help text'){
-                $remarksData .= ', User wants to remind him on specific date : '. $data['remind_me_later_date'];
+            } else if( $data[ 'time_to_remind_me' ] === 'Remind specific date help text' ) {
+                $remarksData .= ', User wants to remind him on specific date : ' . $data[ 'remind_me_later_date' ];
             }
         }
 
-		return [
-			'first_name'     => $explodeName[0],
-			'last_name'      => isset( $explodeName[1] ) ? $explodeName[1] : ' ',
-			'phone'          => $data['phoneNumber'],
-            'email'          => $data['email'],
-			'call_at'        => $date . " " . trim( $explodeTime[0] ) . ":00",
-			'call_until'     => $date . " " . trim( $explodeTime[1] ) . ":00",
-			'producttype_id' => $data['producttype_id'],
-			'product_id'     => $data['product_id'],
-			'supplier_id'    => $data['supplier_id'],
-			'affiliate_id'   => ( getLanguage() == 'nl') ? '1' : '4',
-			'subject'        => 'Call me back lead', // need to change as it is static or custom
-			'remarks'        => $remarksData,
-			'deal_closed'    => false // will be true if this is triggered after a order has been succesfully placed. In most cases, this will be false.
-		];
-	}
+        return array(
+            'first_name'     => $explodeName[ 0 ],
+            'last_name'      => isset($explodeName[ 1 ]) ? $explodeName[ 1 ] : ' ',
+            'phone'          => '+32'. $data[ 'phoneNumber' ],
+            'email'          => $data[ 'email' ],
+            'call_at'        => $date . " " . trim($explodeTime[ 0 ]) . ":00",
+            'call_until'     => $date . " " . trim($explodeTime[ 1 ]) . ":00",
+            'producttype_id' => $data[ 'producttype_id' ],
+            'product_id'     => $data[ 'product_id' ],
+            'supplier_id'    => $data[ 'supplier_id' ],
+            'affiliate_id'   => ( getLanguage() == 'nl' ) ? '1' : '4',
+            'subject'        => 'Call me back lead', // need to change as it is static or custom
+            'remarks'        => $remarksData,
+            'deal_closed'    => false,
+        );
+    }
 
 	/**
 	 * Checks product availability
