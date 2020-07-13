@@ -217,17 +217,30 @@ class abApiCrm {
             }
         }
 
+        $phoneNumber = $data[ 'phoneNumber' ];
+        if( strpos($phoneNumber, '0') === 0 ) {
+            $phoneNumber = substr($phoneNumber, 1);
+        }
+
+        $language = 'nl';
+        $affiliateId = 1;
+        if( getLanguage() === 'fr' ) {
+            $language = 'fr';
+            $affiliateId = 4;
+        }
+
         return array(
-            'first_name'     => $explodeName[ 0 ],
-            'last_name'      => isset($explodeName[ 1 ]) ? $explodeName[ 1 ] : ' ',
-            'phone'          => '+32'. $data[ 'phoneNumber' ],
+            'first_name'     => array_shift($explodeName),
+            'last_name'      => implode(' ', $explodeName),
+            'language'       => $language,
+            'phone'          => '+32'. $phoneNumber,
             'email'          => $data[ 'email' ],
             'call_at'        => $date . " " . trim($explodeTime[ 0 ]) . ":00",
             'call_until'     => $date . " " . trim($explodeTime[ 1 ]) . ":00",
             'producttype_id' => $data[ 'producttype_id' ],
             'product_id'     => $data[ 'product_id' ],
             'supplier_id'    => $data[ 'supplier_id' ],
-            'affiliate_id'   => ( getLanguage() == 'nl' ) ? '1' : '4',
+            'affiliate_id'   => $affiliateId,
             'subject'        => 'Call me back lead', // need to change as it is static or custom
             'remarks'        => $remarksData,
             'deal_closed'    => false,
