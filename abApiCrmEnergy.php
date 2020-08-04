@@ -183,7 +183,7 @@ class abApiCrmEnergy extends abApiCrm{
                         <li>' . pll__( 'Check internet cable - Energy' ) . ' <span class="infoTip"><a href="#" data-toggle="availability-tooltip" title="' . pll__( 'Tooltip for check internet cable - Energy' ) . '">?</a></span></li>
                         <li>' . pll__( 'Check phone line - Energy' ) . ' <span class="infoTip"><a href="#" data-toggle="availability-tooltip" title="' . pll__( 'Tooltip for check phone line - Energy' ) . '">?</a></span></li>
                     </ul>
-                    <a href="/' . $parentSegment . '/' . pll__( 'checkout' ) . $checkoutParams . '" class="btn btn-primary">' . pll__( 'All good! Proceed - Energy' ) . '</a>
+                    <a href="/' . $parentSegment . '/' . pll__( 'checkout' ) . $checkoutParams . '" class="btn btn-primary" data-checkout>' . pll__( 'All good! Proceed - Energy' ) . '</a>
                 </div>';
     }
 }

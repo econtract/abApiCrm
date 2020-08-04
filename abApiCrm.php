@@ -379,7 +379,7 @@ class abApiCrm {
 	                                </div-->
 	                            </li>
 	                        </ul>
-	                        <a href="/' . $parentSegment . '/' . pll__( 'checkout' ) . $checkoutParams . '" class="btn btn-primary">' . pll__( 'All good! Proceed' ) . '</a>
+	                        <a href="/' . $parentSegment . '/' . pll__( 'checkout' ) . $checkoutParams . '" class="btn btn-primary" data-checkout>' . pll__( 'All good! Proceed' ) . '</a>
 	                    </div>';
 	}
 
