@@ -857,21 +857,11 @@ function clientNumberShowHide(){
     var elVal = jQuery('#select_provider').find('option:selected').val();
     var clientContainer = jQuery('.select_provider_content');
     var inputField = clientContainer.find('input');
-    var clientNumber = jQuery('#client_number');
-    var targetForm = clientContainer.parents('.order-simple-form');
-
     if(elVal == '' || elVal == site_obj.no_provider){
         inputField.val('');
-        clientContainer.val('');
-        clientNumber.prop('required',false);
-        targetForm.validator('destroy');
-        targetForm.validator('update');
         clientContainer.hide();
     }
     else{
-        clientNumber.prop('required',true);
-        targetForm.validator('destroy');
-        targetForm.validator('update');
         clientContainer.show();
     }
 }
