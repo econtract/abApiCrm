@@ -98,43 +98,6 @@ class abApiCrm {
 		);
 
 		wp_enqueue_script( 'utils');
-
-		if($this->sector == pll__('telecom')) {
-			wp_enqueue_script( 'crm-script-orders', plugins_url( '/js/orders.js', __FILE__ ), array(
-				'jquery',
-				'jquery-bootstrap-typeahead',
-				'aanbieder_default_script'
-			), '2.2.9', true );
-
-			wp_localize_script( 'crm-script-orders', 'site_obj',
-				array(
-					'ajax_url'                        => admin_url( 'admin-ajax.php' ),
-					'site_url'                        => pll_home_url(),
-					'lang'                            => getLanguage(),
-					'trans_monthly_cost'              => pll__( 'Monthly costs' ),
-					'trans_monthly_total'             => pll__( 'Monthly total' ),
-					'trans_first_month'               => pll__( 'First month' ),
-					'trans_monthly_total_tooltip_txt' => pll__( 'PBS: Monthly total tooltip text' ),
-					'trans_ontime_costs'              => pll__( 'One-time costs' ),
-					'trans_ontime_total'              => pll__( 'One-time total' ),
-					'template_uri'                    => get_template_directory_uri(),
-					'idcard_error'                    => pll__('Please enter valid ID card number'),
-					'toolkit_api_url'                 => TOOLKIT_API_URL,
-					'toolkit_api_key'                 => TOOLKIT_API_KEY,
-					'change_zip_trans'                => pll__( 'Change zip code' ),
-					'no_provider'                     => pll__( 'No Provider' ),
-					'trans_mth'                       => pll__('mth'),
-                    'trans_loading_dots'              => pll__('Loading...'),
-                    'trans_yearly_total'              => pll__( 'Year profit' ),
-                    'trans_your_advantage'            => pll__( 'Your advantage' ),
-                    'trans_nationality_be_tooltip'    => pll__('Your Belgium ID card Number'),
-                    'trans_nationality_other_tooltip' => pll__('Your Other ID card Number'),
-                    'client_idnr'                     => pll__('ID Card number'),
-                    'client_residencenr'              => pll__('Residence card number'),
-
-				)
-			);
-		}
 	}
 
     /**
