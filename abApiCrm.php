@@ -247,58 +247,67 @@ class abApiCrm {
         );
     }
 
-	/**
-	 * Checks product availability
-	 */
-	public function checkAvailability() {
-		if ( ! defined( 'AB_CHK_AVL_URL' ) ) {
-			//define( 'AB_CHK_AVL_URL', 'https://www.aanbieders.be/rpc' );
-            define( 'AB_CHK_AVL_URL', 'http://api.econtract.be/products/is_available_at/' );
-		}
-		//Expected Params: ?pid=279&prt=internet&lang_mod=nl&zip=3500&action=check_availability
-		$zip       = intval( $_GET['zip'] );
-		$pid       = intval( $_GET['pid'] );
-		$pslug     = $_GET['pslug'];
-		$ptype     = trim( sanitize_text_field( $_GET['prt'] ) );
-		$pname     = trim( sanitize_text_field( $_GET['pname'] ) );
-		$lang      = trim( sanitize_text_field( $_GET['lang'] ) );
-		$prvname   = trim( sanitize_text_field( $_GET['prvname'] ) );
-		$prvslug   = trim( sanitize_text_field( $_GET['prvslug'] ) );
-		$prvid     = intval( $_GET['prvid'] );
-		$sg        = trim( sanitize_text_field( $_GET['sg'] ) );
-		$cats      = array_filter($_GET['cat']);
-		$cproducts = $_GET['cat_products'];
-		$action    = 'check_availability';
-		$response  = null;
+    /**
+     * Checks product availability
+     *
+     * @param array $params If empty, $_GET will be used
+     * @param bool  $output Indicates if the response should be directly outputted
+     * @return array|void
+     */
+    public function checkAvailability($params = [], $output = true)
+    {
+        if (empty($params)) {
+            $params = $_GET;
+        }
 
-		if(empty($cats)) {
-			$cats[] = 'packs';
-		}
+        $defaults = [
+            'cat'     => [],
+            'sg'      => 'consumer',
+            'zip'     => 0,
+            'pid'     => 0,
+            'prt'     => '',
+            'lang'    => getLanguage(),
+            'prvname' => '',
+            'prvid'   => '',
+        ];
 
-		if ( empty( $zip ) || empty( $pid ) || empty( $lang ) || empty( $ptype ) ) {
-			$response = json_encode(
-				[
-					'available' => false,
-					'msg'       => pll__( 'Something is wrong! Make sure to check availability after filling data.' )
-				]
-			);
-		} else {
-			//global $post;
-			$parentSegment = getSectorOnCats( $cats );
-			//$response      = file_get_contents( AB_CHK_AVL_URL . "?pid=$pid&zip=$zip&lang_mod=$lang&prt=$ptype&action=$action&rand=" . mt_rand() );
-            $params['pid'] = $pid;
-            $params['prt'] = $ptype;
-            $params['zip'] = $zip;
-            $params['lang'] = $lang;
-            $response = $this->anbApi->checkAvailabilityRPC($params);
+        $params += $defaults;
 
-			if(empty($response)){
-                $response['available'] = false;
-                $response = json_encode($response);
+        //Expected Params: ?pid=279&prt=internet&lang_mod=nl&zip=3500&action=check_availability
+        $zip      = intval($params['zip']);
+        $pid      = intval($params['pid']);
+        $ptype    = trim(sanitize_text_field($params['prt']));
+        $lang     = trim(sanitize_text_field($params['lang']));
+        $prvname  = trim(sanitize_text_field($params['prvname']));
+        $prvid    = intval($params['prvid']);
+        $sg       = trim(sanitize_text_field($params['sg']));
+        $cats     = array_filter($params['cat']);
+        $response = null;
+
+        if (empty($cats)) {
+            $cats[] = 'packs';
+        }
+
+        if (empty($zip) || empty($pid) || empty($lang) || empty($ptype)) {
+            $response            = new \stdClass();
+            $response->available = false;
+            $response->msg       = pll__('Something is wrong! Make sure to check availability after filling data.');
+        } else {
+            $parentSegment     = getSectorOnCats($cats);
+            $apiParams['pid']  = $pid;
+            $apiParams['prt']  = $ptype;
+            $apiParams['zip']  = $zip;
+            $apiParams['lang'] = $lang;
+            $response          = $this->anbApi->checkAvailabilityRPC($apiParams);
+
+            if (empty($response)) {
+                $response            = new \stdClass();
+                $response->available = false;
+            } else {
+                $response = json_decode($response);
             }
 
-            $jsonDecRes = json_decode($response);
-            if ($jsonDecRes->available === false) {
+            if ($response->available === false) {
                 $catUrlPart = '';
                 foreach ($cats as $cat) {
                     if ($catUrlPart) {
@@ -306,36 +315,33 @@ class abApiCrm {
                     }
                     $catUrlPart .= "cat[]=$cat";
                 }
-                $urlParams = "?$catUrlPart&zip=$zip&searchSubmit=&sg=$sg";
+                $urlParams             = "?$catUrlPart&zip=$zip&searchSubmit=&sg=$sg";
                 $urlParamsWithProvider = "$urlParams&pref_cs[]=$prvid";
-                $jsonDecRes->msg = pll__("Sorry! The product is not available in your area.");
-                $jsonDecRes->html = $this->availabilityErrorHtml($parentSegment, $urlParamsWithProvider, $prvname, $urlParams);
+                $response->msg         = pll__("Sorry! The product is not available in your area.");
+                $response->html        = $this->availabilityErrorHtml($parentSegment, $urlParamsWithProvider, $prvname, $urlParams);
             }
-            if ($jsonDecRes->available === true) {
+            if ($response->available === true) {
                 if ($parentSegment == pll__('energy')) {
-                    $catUrlPart = "cat=$cats[0]";
+                    $catUrlPart     = "cat=$cats[0]";
                     $checkoutParams = "&hidden_prodsel_cmp=yes&product_to_cart=yes&product_id=$pid&provider_id=$prvid&producttype=$ptype&sg=$sg&zip=$zip&$catUrlPart";
-                    $html             = $this->availabilitySuccessHtml( $parentSegment, $checkoutParams );
-                    $jsonDecRes->msg  = pll__('Congratulations! The product is available in your area');//Ignore the API response message
-                    $jsonDecRes->html = $html;
+                    $html           = $this->availabilitySuccessHtml($parentSegment, $checkoutParams);
+                    $response->msg  = pll__('Congratulations! The product is available in your area');//Ignore the API response message
+                    $response->html = $html;
                 } else {
-                    //$this->initSessionForProduct( $zip, $pid, $pslug, $pname, $ptype, $lang, $prvid, $prvslug, $prvname, $cats, $sg, $cproducts );
-                    $checkoutParams   = "product_to_cart&product_id=$pid&provider_id=$prvid&sg=$sg&producttype=$ptype";
-                    $html             = $this->availabilitySuccessHtml( $parentSegment, $checkoutParams );
-                    $jsonDecRes->msg  = pll__('Congratulations! The product is available in your area');//Ignore the API response message
-                    $jsonDecRes->html = $html;
+                    $checkoutParams = "product_to_cart&product_id=$pid&provider_id=$prvid&sg=$sg&producttype=$ptype";
+                    $html           = $this->availabilitySuccessHtml($parentSegment, $checkoutParams);
+                    $response->msg  = pll__('Congratulations! The product is available in your area');//Ignore the API response message
+                    $response->html = $html;
                 }
-			}
-			if ( isset( $_GET['debug'] ) ) {
-				$jsonDecRes->endpointUrl = AB_CHK_AVL_URL . "?pid=$pid&zip=$zip&lang_mod=$lang&action=$action&rand=" . mt_rand();
-			}
+            }
+        }
 
-			$response = json_encode( $jsonDecRes );
-		}
-
-		echo $response;
-		wp_die();
-	}
+        if ($output === true) {
+            echo json_encode($response);
+            wp_die();
+        }
+        return $response;
+    }
 
 	/**
 	 * @param $parentSegment
