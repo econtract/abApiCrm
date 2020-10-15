@@ -17,48 +17,6 @@ class abApiCrmEnergy extends abApiCrm{
 
     public function __construct() {
     	parent::__construct();
-        add_action( 'init', array( $this, 'enqueueScripts' ) );
-        //add_action( 'wp_enqueue_scripts', array( $this, 'enqueueScripts' ) );
-    }
-
-    /**
-     * enqueue ajax scripts
-     */
-    function enqueueScripts() {
-
-        /*wp_enqueue_script( 'crm-script-callMeBack', plugins_url( '/js/callMeBack.js', __FILE__ ), array( 'jquery', 'aanbieder_bootstrap_validate' ), '1.0.3', true );
-        wp_enqueue_script( 'utils');*/
-	    if($this->sector == pll__('energy')) {
-		    wp_enqueue_script( 'crm-script-energy-orders', plugins_url( '/js/energy-orders.js', __FILE__ ), array(
-			    'jquery',
-			    'jquery-bootstrap-typeahead',
-			    'aanbieder_default_script'
-		    ), '1.5.5', true );
-
-		    $moveDate = "";
-
-		    if($_SESSION['order_energy']['wp_order_id']) {
-			    $moveDate = get_metadata('post', $_SESSION['order_energy']['wp_order_id'], 'move_date', true);
-		    }
-
-		    wp_localize_script( 'crm-script-energy-orders', 'orders_obj_energy',
-			    array(
-				    'ajax_url'          => admin_url( 'admin-ajax.php' ),
-				    'contact_uri'       => "/" . pll__( 'contact' ),
-				    'contact_trans'     => pll__( 'Or contact us directly' ),
-				    'change_zip_trans'  => pll__( 'Change zip code' ),
-				    'api_resp_trans'    => pll__( 'Something went wrong as API is not responding!' ),
-				    'req_fields_filled' => pll__( 'Make sure all required fields are filled' ),
-				    'idcard_error'      => pll__('Please enter your ID card number'),
-				    'template_uri'      => get_template_directory_uri(),
-                    'toolkit_api_url'   => TOOLKIT_API_URL,
-                    'toolkit_api_key'   => TOOLKIT_API_KEY,
-                    'change_zip_trans'  => pll__( 'Change zip code' ),
-				    'move_date'         => date("d/m/Y", strtotime($moveDate)),
-				    'server_date'       => date("d/m/Y", strtotime("now"))
-			    )
-		    );
-	    }
     }
 
     public function initSessionForProduct($getParams)
