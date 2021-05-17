@@ -36,16 +36,6 @@ if(!function_exists('getUriSegment')) {
 
 class abApiCrm {
 
-	/**
-	 * @var
-	 */
-	protected $callMeBack;
-
-	/**
-	 * @var
-	 */
-	protected $callMeBackResponse;
-
     /**
      * @var
      */
@@ -69,64 +59,10 @@ class abApiCrm {
 
 	public function __construct() {
 		$this->sector = getUriSegment(1);
-		//enqueue JS scripts
-		add_action( 'init', array( $this, 'enqueueScripts' ) );
 
         $this->anbApi = new Aanbieders ($this->apiConf);
 
 	}
-
-	/**
-	 * enqueue ajax scripts
-	 */
-	function enqueueScripts() {
-
-		wp_enqueue_script( 'crm-script-callMeBack', plugins_url( '/js/callMeBack.js', __FILE__ ), array( 'jquery', 'aanbieder_bootstrap_validate' ), '1.0.9', true );
-		// in JavaScript, object properties are accessed as ajax_object.ajax_url, ajax_object.we_value
-		//The object will be created before including callMeBack.js so its sufficient for orders.js too, there is no need to include it again
-		wp_localize_script( 'crm-script-callMeBack', 'callmeback_obj',
-			array(
-				'ajax_url'          => admin_url( 'admin-ajax.php' ),
-				'contact_uri'       => "/" . pll__( 'contact' ),
-				'contact_trans'     => pll__( 'Or contact us directly' ),
-				'change_zip_trans'  => pll__( 'Change zip code' ),
-				'api_resp_trans'    => pll__( 'Something went wrong as API is not responding!' ),
-				'req_fields_filled' => pll__( 'Make sure all required fields are filled' ),
-				'idcard_error'      => pll__( 'Please enter your ID card number' ),
-				'template_uri'      => get_template_directory_uri()
-			)
-		);
-
-		wp_enqueue_script( 'utils');
-	}
-
-    /**
-     * @return bool
-     */
-    public function callMeBack()
-    {
-        $validCaptacha = isValidCaptcha($_REQUEST[ 'userInput' ][ 'g-recaptcha-response' ]);
-
-        if( $validCaptacha == 1 ) {
-            $params = $this->prepareParametersCallMeBack($_REQUEST[ 'userInput' ]);
-
-            $this->callMeBack = new callMeBackLeadController($params);
-            $this->callMeBack->send();
-            $this->callMeBackResponse = $this->callMeBack->getResponse();
-
-            if( $this->callMeBackResponse->status == 200 ) {
-//                $this->address_id = $this->callMeBackResponse->data;
-                echo 'done';
-                exit();
-            }
-
-            echo 'cmrerror';
-            exit();
-        }
-
-        echo 'error';
-        exit();
-    }
 
     /**
      * @param $data
@@ -210,6 +146,7 @@ class abApiCrm {
         );
     }
 
+
     /**
      * Checks product availability
      *
@@ -224,44 +161,33 @@ class abApiCrm {
         }
 
         $defaults = [
-            'cat'     => [],
-            'sg'      => 'consumer',
-            'zip'     => 0,
-            'pid'     => 0,
-            'prt'     => '',
-            'lang'    => getLanguage(),
-            'prvname' => '',
-            'prvid'   => '',
+            'zip'  => 0,
+            'pid'  => 0,
+            'prt'  => '',
+            'lang' => getLanguage(),
         ];
 
         $params += $defaults;
 
         //Expected Params: ?pid=279&prt=internet&lang_mod=nl&zip=3500&action=check_availability
-        $zip      = intval($params['zip']);
-        $pid      = intval($params['pid']);
-        $ptype    = trim(sanitize_text_field($params['prt']));
-        $lang     = trim(sanitize_text_field($params['lang']));
-        $prvname  = trim(sanitize_text_field($params['prvname']));
-        $prvid    = intval($params['prvid']);
-        $sg       = trim(sanitize_text_field($params['sg']));
-        $cats     = array_filter($params['cat']);
-        $response = null;
+        $params['zip']  = intval($params['zip']);
+        $params['pid']  = intval($params['pid']);
+        $params['prt']  = trim(sanitize_text_field($params['prt']));
+        $params['lang'] = trim(sanitize_text_field($params['lang']));
 
-        if (empty($cats)) {
-            $cats[] = 'packs';
-        }
-
-        if (empty($zip) || empty($pid) || empty($lang) || empty($ptype)) {
-            $response            = new \stdClass();
+        if (empty($params['zip']) || empty($params['pid']) || empty($params['prt']) || empty($params['lang'])) {
+            $response = new \stdClass();
             $response->available = false;
             $response->msg       = pll__('Something is wrong! Make sure to check availability after filling data.');
         } else {
-            $parentSegment     = getSectorOnCats($cats);
-            $apiParams['pid']  = $pid;
-            $apiParams['prt']  = $ptype;
-            $apiParams['zip']  = $zip;
-            $apiParams['lang'] = $lang;
-            $response          = $this->anbApi->checkAvailabilityRPC($apiParams);
+            $apiParams = [
+                'zip'  => $params['zip'],
+                'pid'  => $params['pid'],
+                'prt'  => $params['prt'],
+                'lang' => $params['lang'],
+            ];
+
+            $response = $this->anbApi->checkAvailabilityRPC($apiParams);
 
             if (empty($response)) {
                 $response            = new \stdClass();
@@ -271,31 +197,10 @@ class abApiCrm {
             }
 
             if ($response->available === false) {
-                $catUrlPart = '';
-                foreach ($cats as $cat) {
-                    if ($catUrlPart) {
-                        $catUrlPart .= '&';
-                    }
-                    $catUrlPart .= "cat[]=$cat";
-                }
-                $urlParams             = "?$catUrlPart&zip=$zip&searchSubmit=&sg=$sg";
-                $urlParamsWithProvider = "$urlParams&pref_cs[]=$prvid";
                 $response->msg         = pll__("Sorry! The product is not available in your area.");
-                $response->html        = $this->availabilityErrorHtml($parentSegment, $urlParamsWithProvider, $prvname, $urlParams);
             }
             if ($response->available === true) {
-                if ($parentSegment == pll__('energy')) {
-                    $catUrlPart     = "cat=$cats[0]";
-                    $checkoutParams = "&hidden_prodsel_cmp=yes&product_to_cart=yes&product_id=$pid&provider_id=$prvid&producttype=$ptype&sg=$sg&zip=$zip&$catUrlPart";
-                    $html           = $this->availabilitySuccessHtml($parentSegment, $checkoutParams);
-                    $response->msg  = pll__('Congratulations! The product is available in your area');//Ignore the API response message
-                    $response->html = $html;
-                } else {
-                    $checkoutParams = "product_to_cart&product_id=$pid&provider_id=$prvid&sg=$sg&producttype=$ptype";
-                    $html           = $this->availabilitySuccessHtml($parentSegment, $checkoutParams);
-                    $response->msg  = pll__('Congratulations! The product is available in your area');//Ignore the API response message
-                    $response->html = $html;
-                }
+                $response->msg  = pll__('Congratulations! The product is available in your area');//Ignore the API response message
             }
         }
 
@@ -305,52 +210,6 @@ class abApiCrm {
         }
         return $response;
     }
-
-	/**
-	 * @param $parentSegment
-	 * @param $urlParamsWithProvider
-	 * @param $prvname
-	 * @param $urlParams
-	 *
-	 * @return string
-	 */
-	public function availabilityErrorHtml( $parentSegment, $urlParamsWithProvider, $prvname, $urlParams ) {
-		return '<div class="content-error">
-                        <p>' . pll__( 'We offer very similar deals in your area:' ) . '</p>
-                        <a href="/' . $parentSegment . '/' . pll__( 'results' ) . $urlParamsWithProvider . '" class="btn btn-primary">' . sprintf( pll__( 'Alternative deals from %s' ), $prvname ) . '</a>
-                        <a href="/' . $parentSegment . '/' . pll__( 'results' ) . $urlParams . '" class="btn btn-primary">' . pll__( 'Alternative deals from all providers' ) . '</a>
-                        <a href="/' . pll__( 'contact' ) . '" class="modal-btm-link"><i class="fa fa-angle-right"></i> ' . pll__( 'Or contact us directly' ) . '</a>
-                    </div>';
-	}
-
-	/**
-	 * @param $parentSegment
-	 *
-	 * @return string
-	 */
-    public function availabilitySuccessHtml( $parentSegment, $checkoutParams = "" ) {
-		if(!empty($checkoutParams)) {
-			$checkoutParams = "?$checkoutParams";
-		}
-		return '<div class="modal-list">
-	                        <p>' . pll__( 'Be sure to check your infrastructure:' ) . '</p>
-	                        <ul class="list-unstyled bullet-list">
-	                            <li>' . pll__( 'Check internet cable' ) . ' <span class="infoTip"><a href="#" data-toggle="availability-tooltip" title="<p>' . pll__( 'Lorem ipsum for internet cable' ) . ' </p>">?</a></span>
-	                                <!--div class="tooltip tooltip-info">
-	                                    <span class="tooltiptext"></span>
-	                                    <img src="' . get_bloginfo( 'template_url' ) . '/images/common/icons/question-mark.png" alt="icon">
-	                                </div-->
-	                            </li>
-	                            <li>' . pll__( 'Check phone line' ) . ' <span class="infoTip"><a href="#" data-toggle="availability-tooltip" title="<p>' . pll__( 'Lorem ipsum for phone line' ) . ' </p>">?</a></span>
-	                                <!--div class="tooltip tooltip-info">
-	                                    <span class="tooltiptext"></span>
-	                                    <img src="' . get_bloginfo( 'template_url' ) . '/images/common/icons/question-mark.png" alt="icon">
-	                                </div-->
-	                            </li>
-	                        </ul>
-	                        <a href="/' . $parentSegment . '/' . pll__( 'checkout' ) . $checkoutParams . '" class="btn btn-primary" data-checkout>' . pll__( 'All good! Proceed' ) . '</a>
-	                    </div>';
-	}
 
 	/**
 	 * @param $zip
