@@ -28,9 +28,9 @@ if(!function_exists('getLanguage')) {
 if(!function_exists('getUriSegment')) {
 	function getUriSegment($n)
 	{
-		$segment = explode("/", parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
+		$segments = explode("/", parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
 
-		return count($segment) > 0 && count($segment) >= ($n - 1) ? $segment[$n] : '';
+		return isset($segments[$n]) ? $segments[$n] : '';
 	}
 }
 
