@@ -28,9 +28,9 @@ if(!function_exists('getLanguage')) {
 if(!function_exists('getUriSegment')) {
 	function getUriSegment($n)
 	{
-		$segment = explode("/", parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
+		$segments = explode("/", parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
 
-		return count($segment) > 0 && count($segment) >= ($n - 1) ? $segment[$n] : '';
+		return isset($segments[$n]) ? $segments[$n] : '';
 	}
 }
 
@@ -99,20 +99,22 @@ class abApiCrm {
         $explodeTime = explode(" - ", $time);
 
         $remarksData = '';
-        if( $data[ 'remarks' ] === 'custom' ) {
-            $remarksData .= $data[ 'contact_option' ];
-            if( $data[ 'save_energy_comparison' ] == 1 ) {
+        if (isset($data['remarks']) && $data['remarks'] === 'custom') {
+            $remarksData .= $data['contact_option'];
+            if (isset($data['save_energy_comparison']) && $data['save_energy_comparison'] == 1) {
                 $remarksData .= ', User wants to save his/her energy comparison';
             }
 
-            if( $data[ 'save_personal_data' ] == 1 ) {
+            if (isset($data['save_personal_data']) && $data['save_personal_data'] == 1) {
                 $remarksData .= ', User wants to save his/her personal data';
             }
 
-            if( $data[ 'time_to_remind_me' ] === 'Remind before winter help text' ) {
-                $remarksData .= ', User wants to remind him before winter';
-            } else if( $data[ 'time_to_remind_me' ] === 'Remind specific date help text' ) {
-                $remarksData .= ', User wants to remind him on specific date : ' . $data[ 'remind_me_later_date' ];
+            if (isset($data['time_to_remind_me'])) {
+                if ($data['time_to_remind_me'] === 'Remind before winter help text') {
+                    $remarksData .= ', User wants to remind him before winter';
+                } else if ($data['time_to_remind_me'] === 'Remind specific date help text') {
+                    $remarksData .= ', User wants to remind him on specific date : ' . $data['remind_me_later_date'];
+                }
             }
         }
 
@@ -132,13 +134,13 @@ class abApiCrm {
             'first_name'     => array_shift($explodeName),
             'last_name'      => implode(' ', $explodeName),
             'language'       => $language,
-            'phone'          => '+32'. $phoneNumber,
-            'email'          => $data[ 'email' ],
-            'call_at'        => $date . " " . trim($explodeTime[ 0 ]) . ":00",
-            'call_until'     => $date . " " . trim($explodeTime[ 1 ]) . ":00",
-            'producttype_id' => $data[ 'producttype_id' ],
-            'product_id'     => $data[ 'product_id' ],
-            'supplier_id'    => $data[ 'supplier_id' ],
+            'phone'          => '+32' . $phoneNumber,
+            'email'          => $data['email'],
+            'call_at'        => $date . " " . trim($explodeTime[0]) . ":00",
+            'call_until'     => $date . " " . trim($explodeTime[1]) . ":00",
+            'producttype_id' => isset($data['producttype_id']) ? $data['producttype_id'] : null,
+            'product_id'     => isset($data['product_id']) ? $data['product_id'] : null,
+            'supplier_id'    => isset($data['supplier_id']) ? $data['supplier_id'] : null,
             'affiliate_id'   => $affiliateId,
             'subject'        => 'Call me back lead', // need to change as it is static or custom
             'remarks'        => $remarksData,
@@ -271,17 +273,17 @@ class abApiCrm {
 		unset( $_POST['action'] );
 
 		//separate order related data and loopable meta data
-		$data['order_title']     = $_POST['order_title'];
-		$data['order_slug']      = $_POST['order_slug'];
-		$data['parent_order_id'] = $_POST['parent_order_id'];
-		$data['order_id']        = $_POST['order_id'];
+		$data['order_title']     = isset($_POST['order_title']) ? $_POST['order_title'] : null;
+		$data['order_slug']      = isset($_POST['order_slug']) ? $_POST['order_slug'] : null;
+		$data['parent_order_id'] = isset($_POST['parent_order_id']) ? $_POST['parent_order_id'] : null;
+		$data['order_id']        = isset($_POST['order_id']) ? $_POST['order_id'] : null;
 		if(empty($data['order_id']) && !empty($_SESSION['order']['wp_order_id'])) {
 			$data['order_id'] = $_SESSION['order']['wp_order_id'];
 		}
 
-		$data['order_status']    = $_POST['order_status'];
+		$data['order_status']    = isset($_POST['order_status']) ? $_POST['order_status'] : null;
 
-		$metaData['seq_number'] = $_POST['seq_number'];
+		$metaData['seq_number'] = isset($_POST['seq_number']) ? $_POST['seq_number'] : null;
 
 		//Time to unset these variables from $_POST to keep only loopable data in $_POST
 		unset( $_POST['order_title'] );
